@@ -1,0 +1,34 @@
+{
+  "app": {
+    "name": "WorldForge"
+  },
+
+  "worlds": {
+    "title": "Your Worlds",
+    "subtitle": "Create and manage your worldbuilding projects.",
+    "newWorld": "+ New World",
+
+    "createTitle": "Create New World",
+
+    "name": "World Name",
+    "namePlaceholder": "My Fantasy World",
+
+    "description": "Description",
+    "descriptionPlaceholder": "A short description of your world...",
+
+    "cancel": "Cancel",
+    "create": "Create World",
+
+    "emptyTitle": "No worlds yet",
+    "emptyDescription": "Create your first world to get started.",
+
+    "noDescription": "No description yet.",
+    "updated": "Updated"
+  },
+
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "chineseSimplified": "简体中文"
+  }
+}
