@@ -21,7 +21,6 @@ i18n
     },
 
     lng: savedLanguage,
-
     fallbackLng: "en",
 
     interpolation: {

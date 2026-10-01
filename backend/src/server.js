@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const entityTypeRoutes =
+  require("./routes/entityTypeRoutes");
 
 const worldRoutes = require("./routes/worldRoutes");
 
@@ -14,6 +16,9 @@ app.use(express.json());
 
 // World API
 app.use("/api/worlds", worldRoutes);
+
+// Entity Type API
+app.use("/api/entity-types", entityTypeRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {

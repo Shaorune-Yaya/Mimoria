@@ -5,30 +5,67 @@
 
   "worlds": {
     "title": "Your Worlds",
-    "subtitle": "Create and manage your worldbuilding projects.",
+    "subtitle": "Create and manage your worlds here.",
     "newWorld": "+ New World",
 
-    "createTitle": "Create New World",
+    "createTitle": "Create a New World",
 
     "name": "World Name",
-    "namePlaceholder": "My Fantasy World",
+    "namePlaceholder": "What should this world be called?",
 
-    "description": "Description",
-    "descriptionPlaceholder": "A short description of your world...",
+    "description": "World Description",
+    "descriptionPlaceholder": "What is this world like?",
 
     "cancel": "Cancel",
     "create": "Create World",
 
-    "emptyTitle": "No worlds yet",
+    "emptyTitle": "No Worlds Yet",
     "emptyDescription": "Create your first world to get started.",
 
     "noDescription": "No description yet.",
     "updated": "Updated"
   },
 
-  "language": {
-    "label": "Language",
-    "english": "English",
-    "chineseSimplified": "简体中文"
+  "workspace": {
+  "loading": "Loading world...",
+  "notFound": "World not found.",
+
+  "library": "Library",
+
+  "home": "Home",
+  "entityTypes": "Entity Types",
+  "entities": "Entities",
+  "documents": "Documents",
+
+  "timeline": "Timeline",
+  "graph": "Graph",
+
+  "settings": "Settings",
+
+  "startMessage": "Your world workspace is ready. Start building your lore here."
+},
+
+  "entityTypes": {
+    "title": "Entity Types",
+    "subtitle": "Define the kinds of information that exist in this world.",
+
+    "newType": "+ New Entity Type",
+
+    "createTitle": "Create Entity Type",
+
+    "name": "Name",
+    "namePlaceholder": "Character, Location, Faction...",
+
+    "icon": "Icon",
+
+    "description": "Description",
+    "descriptionPlaceholder": "What kind of information does this type represent?",
+
+    "create": "Create Entity Type",
+
+    "noDescription": "No description yet.",
+
+    "emptyTitle": "No Entity Types Yet",
+    "emptyDescription": "Create an entity type to start organizing your world."
   }
 }

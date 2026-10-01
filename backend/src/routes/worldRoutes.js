@@ -49,5 +49,23 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.get("/:id", async (req, res) => {
+  try {
+    const world = await World.findById(req.params.id);
+
+    if (!world) {
+      return res.status(404).json({
+        message: "World not found",
+      });
+    }
+
+    res.json(world);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to get world",
+      error: error.message,
+    });
+  }
+});
 
 module.exports = router;
