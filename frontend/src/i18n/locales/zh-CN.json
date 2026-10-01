@@ -66,5 +66,77 @@
 
     "emptyTitle": "暂无实体类型",
     "emptyDescription": "创建一个实体类型来开始整理你的世界。"
-  }
+  },
+
+  "schema": {
+  "fields": "字段",
+  "help": "字段决定这种实体中的每条资料可以保存哪些信息。",
+
+  "addField": "+ 添加字段",
+  "createField": "创建字段",
+
+  "fieldName": "字段名称",
+  "fieldNamePlaceholder": "年龄、人口、所属势力……",
+
+  "fieldType": "字段类型",
+
+  "referenceType": "允许引用的实体类型",
+  "anyEntityType": "任意实体类型",
+
+  "requiredField": "这个字段为必填项",
+  "required": "必填",
+
+  "nameField": "名称",
+
+  "empty": "目前还没有自定义字段。添加字段来定义这种实体。",
+  "edit": "修改",
+  "delete": "删除",
+  "editField": "修改字段",
+  "saveChanges": "保存修改",
+  "deleteConfirm": "确定要删除这个字段吗？",
+
+  "options": "下拉选项",
+  "option": "选项",
+  "addOption": "+ 添加选项"
+},
+
+"fieldTypes": {
+  "text": "文本",
+  "long-text": "长文本",
+  "number": "数字",
+  "boolean": "是 / 否",
+  "date": "日期",
+  "select": "下拉选择",
+  "entity-reference": "实体引用"
+},
+
+"entities": {
+  "title": "实体",
+  "subtitle": "创建和管理这个世界中的人物、地点、物品、事件以及其他设定资料。",
+
+  "newEntity": "+ 新建实体",
+  "createTitle": "创建实体",
+
+  "entityType": "实体类型",
+  "selectType": "选择一种实体类型……",
+
+  "create": "创建实体",
+
+  "selectOption": "请选择……",
+  "selectEntity": "请选择实体……",
+
+  "yes": "是",
+
+  "emptyTitle": "暂无实体",
+  "emptyDescription": "创建第一个实体来开始构建这个世界。",
+  "no": "否",
+  "browserTitle": "实体浏览器",
+  "browserDescription": "通过左侧的实体树浏览这个世界。点击一个实体即可查看详细资料。",
+
+  "noCustomFields": "这个实体目前没有自定义字段。",
+
+  "lastUpdated": "最后更新",
+  "createDescription": "选择一种实体类型，并填写它定义的字段。"
+}
+
 }

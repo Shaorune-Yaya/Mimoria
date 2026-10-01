@@ -2,9 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const entityTypeRoutes =
-  require("./routes/entityTypeRoutes");
-
+const entityTypeRoutes = require("./routes/entityTypeRoutes");
+const entityRoutes = require("./routes/entityRoutes");
 const worldRoutes = require("./routes/worldRoutes");
 
 dotenv.config();
@@ -19,6 +18,7 @@ app.use("/api/worlds", worldRoutes);
 
 // Entity Type API
 app.use("/api/entity-types", entityTypeRoutes);
+app.use("/api/entities", entityRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {

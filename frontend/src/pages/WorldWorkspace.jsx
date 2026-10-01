@@ -116,7 +116,13 @@ function WorldWorkspace() {
             {t("workspace.entityTypes")}
           </button>
 
-          <button className="sidebar-item">
+          <button className="sidebar-item"
+            onClick={() =>
+                navigate(
+                `/world/${worldId}/entities`
+                )
+            }
+          >
             {t("workspace.entities")}
           </button>
 

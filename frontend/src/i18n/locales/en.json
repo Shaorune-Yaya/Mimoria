@@ -67,5 +67,81 @@
 
     "emptyTitle": "No Entity Types Yet",
     "emptyDescription": "Create an entity type to start organizing your world."
-  }
+  },
+
+  "schema": {
+  "fields": "Fields",
+  "help": "Fields define the information stored by every entity of this type.",
+
+  "addField": "+ Add Field",
+  "createField": "Create Field",
+
+  "fieldName": "Field Name",
+  "fieldNamePlaceholder": "Age, Population, Faction...",
+
+  "fieldType": "Field Type",
+
+  "referenceType": "Allowed Entity Type",
+  "anyEntityType": "Any Entity Type",
+
+  "requiredField": "This field is required",
+  "required": "Required",
+
+  "nameField": "Name",
+
+  "empty": "No custom fields yet. Add a field to define this entity type.",
+
+  "edit": "Edit",
+  "delete": "Delete",
+  "editField": "Edit Field",
+  "saveChanges": "Save Changes",
+  "deleteConfirm": "Are you sure you want to delete this field?",
+
+  "options": "Dropdown Options",
+  "option": "Option",
+  "addOption": "+ Add Option"
+},
+
+"fieldTypes": {
+  "text": "Text",
+  "long-text": "Long Text",
+  "number": "Number",
+  "boolean": "Boolean",
+  "date": "Date",
+  "select": "Dropdown",
+  "entity-reference": "Entity Reference"
+},
+
+"entities": {
+  "title": "Entities",
+  "subtitle": "Create and manage the people, places, objects, events, and other information in your world.",
+
+  "newEntity": "+ New Entity",
+  "createTitle": "Create Entity",
+
+  "entityType": "Entity Type",
+  "selectType": "Select an entity type...",
+
+  "create": "Create Entity",
+
+  "selectOption": "Select an option...",
+  "selectEntity": "Select an entity...",
+
+  "yes": "Yes",
+
+  "emptyTitle": "No Entities Yet",
+  "emptyDescription": "Create your first entity to start building this world.",
+  "no": "No",
+
+  "noEntitiesInType": "No entities",
+
+  "browserTitle": "Entity Browser",
+  "browserDescription": "Use the entity tree on the left to browse your world. Select an entity to view its details.",
+
+  "noCustomFields": "This entity has no custom fields.",
+
+  "lastUpdated": "Last updated",
+  "createDescription": "Select an entity type and fill in its defined fields."
+}
+
 }

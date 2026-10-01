@@ -224,7 +224,13 @@ function EntityTypesPage() {
           </button>
 
 
-          <button className="sidebar-item">
+          <button className="sidebar-item"
+            onClick={() =>
+                navigate(
+                `/world/${worldId}/entities`
+                )
+            }
+          >
             {t("workspace.entities")}
           </button>
 
@@ -395,6 +401,11 @@ function EntityTypesPage() {
                 <div
                   className="entity-type-card"
                   key={entityType._id}
+                   onClick={() =>
+                        navigate(
+                        `/world/${worldId}/entity-types/${entityType._id}`
+                        )
+                    }
                 >
 
                   <div className="entity-type-icon">

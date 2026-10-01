@@ -7,6 +7,8 @@ import {
 import WorldsPage from "./pages/WorldsPage";
 import WorldWorkspace from "./pages/WorldWorkspace";
 import EntityTypesPage from "./pages/EntityTypesPage";
+import EntityTypeEditor from "./pages/EntityTypeEditor";
+import EntitiesPage from "./pages/EntitiesPage";
 
 import "./App.css";
 
@@ -31,6 +33,16 @@ function App() {
         <Route
           path="/world/:worldId/entity-types"
           element={<EntityTypesPage />}
+        />
+
+        <Route
+          path="/world/:worldId/entity-types/:entityTypeId"
+          element={<EntityTypeEditor />}
+        />
+
+        <Route
+          path="/world/:worldId/entities"
+          element={<EntitiesPage />}
         />
 
       </Routes>
