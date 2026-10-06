@@ -3,7 +3,6 @@ import {
   useNavigate,
 } from "react-router-dom";
 
-<<<<<<< HEAD
 import {
   useTranslation,
 } from "react-i18next";
@@ -23,28 +22,14 @@ function WorldSidebar({
   const {
     t,
   } = useTranslation();
-=======
-import { useTranslation } from "react-i18next";
-
-function WorldSidebar({
-  worldId,
-}) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { t } = useTranslation();
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   const basePath =
     `/world/${worldId}`;
 
   function isExact(path) {
-<<<<<<< HEAD
     return (
       location.pathname === path
     );
-=======
-    return location.pathname === path;
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   }
 
   function isSection(path) {
@@ -56,7 +41,6 @@ function WorldSidebar({
     );
   }
 
-<<<<<<< HEAD
   function go(path) {
     navigate(path);
 
@@ -102,22 +86,12 @@ function WorldSidebar({
 
       <button
         type="button"
-=======
-  return (
-    <aside className="workspace-sidebar">
-      <div className="sidebar-section-title">
-        {t("workspace.library")}
-      </div>
-
-      <button
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
         className={
           isExact(basePath)
             ? "sidebar-item active"
             : "sidebar-item"
         }
         onClick={() =>
-<<<<<<< HEAD
           go(basePath)
         }
       >
@@ -132,20 +106,10 @@ function WorldSidebar({
           variant ===
           "desktop"
         }
-=======
-          navigate(basePath)
-        }
-      >
-        {t("workspace.home")}
-      </button>
-
-      <button
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
         className={
           isSection(
             `${basePath}/entity-types`
           )
-<<<<<<< HEAD
             ? "sidebar-item active dockable-sidebar-item"
             : "sidebar-item dockable-sidebar-item"
         }
@@ -172,21 +136,6 @@ function WorldSidebar({
 
       <button
         type="button"
-=======
-            ? "sidebar-item active"
-            : "sidebar-item"
-        }
-        onClick={() =>
-          navigate(
-            `${basePath}/entity-types`
-          )
-        }
-      >
-        {t("workspace.entityTypes")}
-      </button>
-
-      <button
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
         className={
           isSection(
             `${basePath}/entities`
@@ -195,16 +144,11 @@ function WorldSidebar({
             : "sidebar-item"
         }
         onClick={() =>
-<<<<<<< HEAD
           go(
-=======
-          navigate(
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
             `${basePath}/entities`
           )
         }
       >
-<<<<<<< HEAD
         {t(
           "workspace.entities"
         )}
@@ -231,22 +175,11 @@ function WorldSidebar({
         <span className="sidebar-dock-hint">
           ⋮⋮
         </span>
-=======
-        {t("workspace.entities")}
-      </button>
-
-      <button
-        className="sidebar-item"
-        disabled
-      >
-        {t("workspace.documents")}
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
       </button>
 
       <div className="sidebar-divider" />
 
       <button
-<<<<<<< HEAD
         type="button"
         draggable={
           variant ===
@@ -290,25 +223,11 @@ function WorldSidebar({
         <span className="sidebar-dock-hint">
           ⋮⋮
         </span>
-=======
-        className="sidebar-item"
-        disabled
-      >
-        {t("workspace.timeline")}
-      </button>
-
-      <button
-        className="sidebar-item"
-        disabled
-      >
-        {t("workspace.graph")}
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
       </button>
 
       <div className="sidebar-spacer" />
 
       <button
-<<<<<<< HEAD
         type="button"
         className="sidebar-item"
         disabled
@@ -316,12 +235,6 @@ function WorldSidebar({
         {t(
           "workspace.settings"
         )}
-=======
-        className="sidebar-item"
-        disabled
-      >
-        {t("workspace.settings")}
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
       </button>
     </aside>
   );

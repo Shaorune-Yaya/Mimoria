@@ -14,7 +14,6 @@ import {
 } from "@dnd-kit/core";
 
 import {
-<<<<<<< HEAD
   restrictToParentElement,
   restrictToVerticalAxis,
 } from "@dnd-kit/modifiers";
@@ -25,13 +24,7 @@ import {
 
 import WorldLayout from "../components/WorldLayout";
 import { API_URL } from "../config/api";
-=======
-  useTranslation,
-} from "react-i18next";
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
-import WorldLayout from "../components/WorldLayout";
-import { API_URL } from "../config/api";
 
 // ======================================================
 // Tree Row
@@ -210,6 +203,7 @@ function TreeRow({
   );
 }
 
+
 // ======================================================
 // Root Drop Zone
 // ======================================================
@@ -236,6 +230,7 @@ function RootDropZone() {
   );
 }
 
+
 // ======================================================
 // Entities Page
 // ======================================================
@@ -248,10 +243,7 @@ function EntitiesPage() {
     t,
     i18n,
   } = useTranslation();
-<<<<<<< HEAD
 
-=======
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   // ====================================================
   // Base Data
@@ -271,6 +263,7 @@ function EntitiesPage() {
     entityTypes,
     setEntityTypes,
   ] = useState([]);
+
 
   // ====================================================
   // Create Entity
@@ -301,6 +294,7 @@ function EntitiesPage() {
     setReferenceOptions,
   ] = useState({});
 
+
   // ====================================================
   // Explorer Tree
   // ====================================================
@@ -314,6 +308,7 @@ function EntitiesPage() {
     expandedNodes,
     setExpandedNodes,
   ] = useState({});
+
 
   // ====================================================
   // Folder Creation
@@ -334,6 +329,7 @@ function EntitiesPage() {
     setFolderParentId,
   ] = useState(null);
 
+
   // ====================================================
   // Entity Detail / Edit
   // ====================================================
@@ -343,7 +339,6 @@ function EntitiesPage() {
     setSelectedDetailEntity,
   ] = useState(null);
 
-<<<<<<< HEAD
   const [
     isEditingEntity,
     setIsEditingEntity,
@@ -360,14 +355,13 @@ function EntitiesPage() {
   ] = useState({});
 
 
-=======
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   const selectedEntityType =
     entityTypes.find(
       (type) =>
         type._id ===
         selectedEntityTypeId
     );
+
 
   // ====================================================
   // Data Loading
@@ -398,10 +392,7 @@ function EntitiesPage() {
     }
   }
 
-<<<<<<< HEAD
 
-=======
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   async function fetchEntityTypes() {
     try {
       const response =
@@ -427,10 +418,7 @@ function EntitiesPage() {
     }
   }
 
-<<<<<<< HEAD
 
-=======
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   async function fetchEntities() {
     try {
       const response =
@@ -456,10 +444,7 @@ function EntitiesPage() {
     }
   }
 
-<<<<<<< HEAD
 
-=======
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   async function fetchTree() {
     try {
       const response =
@@ -485,6 +470,7 @@ function EntitiesPage() {
     }
   }
 
+
   // ====================================================
   // Folder Creation
   // ====================================================
@@ -509,11 +495,13 @@ function EntitiesPage() {
     }
   }
 
+
   function closeFolderForm() {
     setShowFolderForm(false);
     setFolderName("");
     setFolderParentId(null);
   }
+
 
   async function createFolder(
     event
@@ -595,6 +583,7 @@ function EntitiesPage() {
     }
   }
 
+
   // ====================================================
   // Tree Movement
   // ====================================================
@@ -654,6 +643,7 @@ function EntitiesPage() {
     }
   }
 
+
   function handleDragEnd(
     event
   ) {
@@ -697,6 +687,7 @@ function EntitiesPage() {
     );
   }
 
+
   // ====================================================
   // Tree Helpers
   // ====================================================
@@ -728,6 +719,7 @@ function EntitiesPage() {
       );
   }
 
+
   function toggleTreeNode(
     nodeId
   ) {
@@ -741,10 +733,7 @@ function EntitiesPage() {
     );
   }
 
-<<<<<<< HEAD
 
-=======
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   function renderTreeNodes(
     parentId = null,
     depth = 0
@@ -801,6 +790,7 @@ function EntitiesPage() {
     );
   }
 
+
   // ====================================================
   // Entity Reference Options
   // ====================================================
@@ -856,6 +846,7 @@ function EntitiesPage() {
     }
   }
 
+
   // ====================================================
   // Entity Type Selection
   // ====================================================
@@ -881,7 +872,6 @@ function EntitiesPage() {
     if (!type) {
       return;
     }
-<<<<<<< HEAD
 
     type.fields.forEach(
       (field) => {
@@ -896,22 +886,7 @@ function EntitiesPage() {
       }
     );
   }
-=======
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
-    type.fields.forEach(
-      (field) => {
-        if (
-          field.type ===
-          "entity-reference"
-        ) {
-          loadReferenceOptions(
-            field
-          );
-        }
-      }
-    );
-  }
 
   // ====================================================
   // Create Entity Values
@@ -930,6 +905,7 @@ function EntitiesPage() {
       })
     );
   }
+
 
   // ====================================================
   // Create Entity
@@ -997,11 +973,7 @@ function EntitiesPage() {
         ]
       );
 
-<<<<<<< HEAD
       // The backend automatically creates the TreeNode.
-=======
-      // The backend automatically creates the corresponding TreeNode.
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
       await fetchTree();
 
       setSelectedDetailEntity(
@@ -1019,10 +991,7 @@ function EntitiesPage() {
     }
   }
 
-<<<<<<< HEAD
 
-=======
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   function openCreateForm() {
     setSelectedDetailEntity(
       null
@@ -1048,6 +1017,7 @@ function EntitiesPage() {
     setReferenceOptions({});
   }
 
+
   function closeCreateForm() {
     setShowCreateForm(
       false
@@ -1061,6 +1031,7 @@ function EntitiesPage() {
     setValues({});
     setReferenceOptions({});
   }
+
 
   // ====================================================
   // Entity Detail
@@ -1097,6 +1068,7 @@ function EntitiesPage() {
     );
   }
 
+
   function getEntityTypeForEntity(
     entity
   ) {
@@ -1117,10 +1089,7 @@ function EntitiesPage() {
     );
   }
 
-<<<<<<< HEAD
 
-=======
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   function getReferencedEntityName(
     entityId
   ) {
@@ -1140,10 +1109,7 @@ function EntitiesPage() {
       : "—";
   }
 
-<<<<<<< HEAD
 
-=======
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   function formatFieldValue(
     field,
     value
@@ -1177,7 +1143,6 @@ function EntitiesPage() {
     return String(value);
   }
 
-<<<<<<< HEAD
 
   // ====================================================
   // Edit Entity
@@ -1345,8 +1310,6 @@ function EntitiesPage() {
   }
 
 
-=======
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   // ====================================================
   // Initial Load
   // ====================================================
@@ -1358,12 +1321,9 @@ function EntitiesPage() {
     fetchTree();
   }, [worldId]);
 
+
   // ====================================================
-<<<<<<< HEAD
   // Create Field Renderer
-=======
-  // Schema-driven Field Rendering
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   // ====================================================
 
   function renderField(
@@ -1471,17 +1431,10 @@ function EntitiesPage() {
                 ]
               )
             }
-<<<<<<< HEAD
             onChange={(event) =>
-=======
-            onChange={(
-              event
-            ) =>
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
               updateValue(
                 field.key,
-                event.target
-                  .checked
+                event.target.checked
               )
             }
           />
@@ -1504,13 +1457,7 @@ function EntitiesPage() {
           required={
             field.required
           }
-<<<<<<< HEAD
           onChange={(event) =>
-=======
-          onChange={(
-            event
-          ) =>
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
             updateValue(
               field.key,
               event.target.value
@@ -1553,13 +1500,7 @@ function EntitiesPage() {
           required={
             field.required
           }
-<<<<<<< HEAD
           onChange={(event) =>
-=======
-          onChange={(
-            event
-          ) =>
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
             updateValue(
               field.key,
               event.target.value
@@ -1590,7 +1531,6 @@ function EntitiesPage() {
       );
     }
 
-<<<<<<< HEAD
     return null;
   }
 
@@ -1805,10 +1745,13 @@ function EntitiesPage() {
       );
     }
 
-=======
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
     return null;
   }
+
+
+  // ====================================================
+  // Loading
+  // ====================================================
 
   if (!world) {
     return (
@@ -1820,123 +1763,14 @@ function EntitiesPage() {
     );
   }
 
+
   const detailEntityType =
     getEntityTypeForEntity(
       selectedDetailEntity
     );
 
-  // ====================================================
-  // Explorer Sidebar
-  // ====================================================
-
-  const explorerSidebar = (
-    <aside className="entity-tree-sidebar">
-      <div className="entity-tree-header">
-        <span>
-          {t(
-            "entities.title"
-          )}
-        </span>
-
-        <div className="tree-header-actions">
-          <button
-            className="tree-add-button"
-            onClick={() =>
-              openFolderForm(
-                null
-              )
-            }
-            title={t(
-              "tree.newFolder"
-            )}
-          >
-            📁+
-          </button>
-
-          <button
-            className="tree-add-button"
-            onClick={
-              openCreateForm
-            }
-            title={t(
-              "entities.newEntity"
-            )}
-          >
-            +
-          </button>
-        </div>
-      </div>
-
-      {showFolderForm && (
-        <form
-          className="folder-create-form"
-          onSubmit={
-            createFolder
-          }
-        >
-          <div className="folder-create-parent">
-            {folderParentId
-              ? t(
-                  "tree.createInside"
-                )
-              : t(
-                  "tree.createAtRoot"
-                )}
-          </div>
-
-          <div className="folder-create-row">
-            <input
-              autoFocus
-              value={
-                folderName
-              }
-              placeholder={t(
-                "tree.folderName"
-              )}
-              onChange={(
-                event
-              ) =>
-                setFolderName(
-                  event.target
-                    .value
-                )
-              }
-            />
-
-            <button
-              type="submit"
-            >
-              ✓
-            </button>
-
-            <button
-              type="button"
-              onClick={
-                closeFolderForm
-              }
-            >
-              ×
-            </button>
-          </div>
-        </form>
-      )}
-
-      <DndContext
-        onDragEnd={
-          handleDragEnd
-        }
-      >
-        <RootDropZone />
-
-        <div className="entity-tree">
-          {renderTreeNodes()}
-        </div>
-      </DndContext>
-    </aside>
-  );
 
   // ====================================================
-<<<<<<< HEAD
   // Explorer Sidebar
   // ====================================================
 
@@ -2066,8 +1900,6 @@ function EntitiesPage() {
 
 
   // ====================================================
-=======
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   // Page
   // ====================================================
 
@@ -2078,10 +1910,7 @@ function EntitiesPage() {
       secondarySidebar={
         explorerSidebar
       }
-<<<<<<< HEAD
       enableUltrawidePane
-=======
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
     >
       <div className="entity-page-header">
         <div>
@@ -2090,7 +1919,6 @@ function EntitiesPage() {
               ? t(
                   "entities.createTitle"
                 )
-<<<<<<< HEAD
               : isEditingEntity
                 ? t(
                     "entities.editTitle"
@@ -2100,13 +1928,6 @@ function EntitiesPage() {
                   : t(
                       "entities.title"
                     )}
-=======
-              : selectedDetailEntity
-                ? selectedDetailEntity.name
-                : t(
-                    "entities.title"
-                  )}
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
           </h1>
 
           <p>
@@ -2123,7 +1944,6 @@ function EntitiesPage() {
           </p>
         </div>
 
-<<<<<<< HEAD
         {!showCreateForm &&
           !isEditingEntity && (
             <button
@@ -2149,90 +1969,8 @@ function EntitiesPage() {
             ×
           </button>
       </div>
-=======
-        {!showCreateForm && (
-          <button
-            className="create-button"
-            onClick={
-              openCreateForm
-            }
-          >
-            {t(
-              "entities.newEntity"
-            )}
-          </button>
-        )}
-      </div>
 
-      {showCreateForm && (
-        <div className="create-panel entity-create-panel">
-          <form
-            onSubmit={
-              createEntity
-            }
-          >
-            <label>
-              {t(
-                "entities.entityType"
-              )}
-            </label>
 
-            <select
-              className="field-select"
-              value={
-                selectedEntityTypeId
-              }
-              onChange={(
-                event
-              ) =>
-                selectEntityType(
-                  event.target.value
-                )
-              }
-            >
-              <option value="">
-                {t(
-                  "entities.selectType"
-                )}
-              </option>
-
-              {entityTypes.map(
-                (type) => (
-                  <option
-                    key={
-                      type._id
-                    }
-                    value={
-                      type._id
-                    }
-                  >
-                    {type.icon}{" "}
-                    {type.name}
-                  </option>
-                )
-              )}
-            </select>
-
-            {selectedEntityType && (
-              <>
-                <div className="entity-form-divider" />
-
-                <div className="selected-type-heading">
-                  <span>
-                    {
-                      selectedEntityType.icon
-                    }
-                  </span>
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
-
-                  <strong>
-                    {
-                      selectedEntityType.name
-                    }
-                  </strong>
-                </div>
-
-<<<<<<< HEAD
       {/* ==================================================
           Create Entity
           ================================================== */}
@@ -2302,8 +2040,6 @@ function EntitiesPage() {
                   </strong>
                 </div>
 
-=======
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
                 <label>
                   {t(
                     "schema.nameField"
@@ -2318,13 +2054,7 @@ function EntitiesPage() {
                   type="text"
                   value={name}
                   required
-<<<<<<< HEAD
                   onChange={(event) =>
-=======
-                  onChange={(
-                    event
-                  ) =>
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
                     setName(
                       event.target.value
                     )
@@ -2386,7 +2116,6 @@ function EntitiesPage() {
           </form>
         </div>
       )}
-<<<<<<< HEAD
 
 
       {/* ==================================================
@@ -2498,10 +2227,6 @@ function EntitiesPage() {
 
       {!showCreateForm &&
         !isEditingEntity &&
-=======
-
-      {!showCreateForm &&
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
         selectedDetailEntity &&
         detailEntityType && (
           <div className="entity-detail-panel">
@@ -2525,7 +2250,6 @@ function EntitiesPage() {
                       detailEntityType.name
                     }
                   </span>
-<<<<<<< HEAD
                 </div>
               </div>
 
@@ -2561,31 +2285,6 @@ function EntitiesPage() {
                         field.key
                       ];
 
-=======
-                </div>
-              </div>
-            </div>
-
-            <div className="entity-detail-panel-body">
-              {detailEntityType
-                .fields.length ===
-                0 && (
-                <div className="detail-empty">
-                  {t(
-                    "entities.noCustomFields"
-                  )}
-                </div>
-              )}
-
-              {detailEntityType.fields.map(
-                (field) => {
-                  const rawValue =
-                    selectedDetailEntity
-                      .values?.[
-                        field.key
-                      ];
-
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
                   return (
                     <div
                       className={
@@ -2633,7 +2332,6 @@ function EntitiesPage() {
           </div>
         )}
 
-<<<<<<< HEAD
 
       {/* ==================================================
           Empty Browser
@@ -2649,17 +2347,6 @@ function EntitiesPage() {
               )}
             </h2>
 
-=======
-      {!showCreateForm &&
-        !selectedDetailEntity && (
-          <div className="entity-browser-message">
-            <h2>
-              {t(
-                "entities.browserTitle"
-              )}
-            </h2>
-
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
             <p>
               {t(
                 "entities.browserDescription"

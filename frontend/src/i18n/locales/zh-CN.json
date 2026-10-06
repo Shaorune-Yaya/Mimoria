@@ -141,14 +141,10 @@
 
     "noCustomFields": "这个实体目前没有自定义字段。",
 
-<<<<<<< HEAD
     "lastUpdated": "最后更新",
     "edit": "修改",
     "editTitle": "修改实体",
     "saveChanges": "保存修改"
-=======
-    "lastUpdated": "最后更新"
->>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   },
 
   "tree": {
