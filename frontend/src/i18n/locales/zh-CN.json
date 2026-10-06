@@ -116,6 +116,7 @@
 
   "newEntity": "+ 新建实体",
   "createTitle": "创建实体",
+  "createDescription": "选择一种实体类型，并填写它定义的字段。",
 
   "entityType": "实体类型",
   "selectType": "选择一种实体类型……",
@@ -126,17 +127,26 @@
   "selectEntity": "请选择实体……",
 
   "yes": "是",
+  "no": "否",
 
   "emptyTitle": "暂无实体",
   "emptyDescription": "创建第一个实体来开始构建这个世界。",
-  "no": "否",
+
+  "noEntitiesInType": "暂无实体",
+
   "browserTitle": "实体浏览器",
-  "browserDescription": "通过左侧的实体树浏览这个世界。点击一个实体即可查看详细资料。",
+  "browserDescription": "通过左侧资源管理器组织和浏览这个世界。点击一个实体即可查看详细资料。",
 
   "noCustomFields": "这个实体目前没有自定义字段。",
 
-  "lastUpdated": "最后更新",
-  "createDescription": "选择一种实体类型，并填写它定义的字段。"
+  "lastUpdated": "最后更新"
+},
+
+"tree": {
+  "newFolder": "新建文件夹",
+  "folderName": "文件夹名称……",
+  "createAtRoot": "在根目录创建",
+  "createInside": "在当前节点内创建"
 }
 
 }

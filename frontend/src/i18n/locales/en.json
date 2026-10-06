@@ -118,6 +118,7 @@
 
   "newEntity": "+ New Entity",
   "createTitle": "Create Entity",
+  "createDescription": "Select an entity type and fill in its defined fields.",
 
   "entityType": "Entity Type",
   "selectType": "Select an entity type...",
@@ -128,20 +129,26 @@
   "selectEntity": "Select an entity...",
 
   "yes": "Yes",
+  "no": "No",
 
   "emptyTitle": "No Entities Yet",
   "emptyDescription": "Create your first entity to start building this world.",
-  "no": "No",
 
   "noEntitiesInType": "No entities",
 
   "browserTitle": "Entity Browser",
-  "browserDescription": "Use the entity tree on the left to browse your world. Select an entity to view its details.",
+  "browserDescription": "Use the explorer on the left to organize and browse your world. Select an entity to view its details.",
 
   "noCustomFields": "This entity has no custom fields.",
 
-  "lastUpdated": "Last updated",
-  "createDescription": "Select an entity type and fill in its defined fields."
+  "lastUpdated": "Last updated"
+},
+
+"tree": {
+  "newFolder": "New Folder",
+  "folderName": "Folder name...",
+  "createAtRoot": "Create at root",
+  "createInside": "Create inside selected node"
 }
 
 }

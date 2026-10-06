@@ -4,17 +4,238 @@ import {
   useParams,
 } from "react-router-dom";
 
+import {
+  DndContext,
+  useDraggable,
+  useDroppable,
+} from "@dnd-kit/core";
+
 import { useTranslation } from "react-i18next";
 
 
-function EntitiesPage() {
-  const { worldId } = useParams();
+// ======================================================
+// Tree Row
+// ======================================================
 
-  const navigate = useNavigate();
+function TreeRow({
+  node,
+  depth,
+  expanded,
+  hasChildren,
+  onToggle,
+  onEntityClick,
+  onCreateFolder,
+  selectedEntityId,
+  renderChildren,
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setDragRef,
+    transform,
+    isDragging,
+  } = useDraggable({
+    id: node._id,
+  });
+
+  const {
+    setNodeRef: setDropRef,
+    isOver,
+  } = useDroppable({
+    id: node._id,
+  });
+
+  function setRefs(element) {
+    setDragRef(element);
+    setDropRef(element);
+  }
+
+  const style = {
+    paddingLeft: `${8 + depth * 16}px`,
+
+    opacity: isDragging
+      ? 0.45
+      : 1,
+
+    transform: transform
+      ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+      : undefined,
+  };
+
+  const isFolder =
+    node.kind === "folder";
+
+  const entity =
+    node.entityId;
+
+  const displayName =
+    isFolder
+      ? node.name
+      : entity?.name ||
+        "Missing Entity";
+
+  const icon =
+    isFolder
+      ? "📁"
+      : entity
+          ?.entityTypeId
+          ?.icon ||
+        "📄";
+
+  const isSelected =
+    !isFolder &&
+    selectedEntityId ===
+      entity?._id;
+
+
+  return (
+    <>
+      <div
+        ref={setRefs}
+        className={
+          isOver
+            ? "explorer-row drop-target"
+            : isSelected
+              ? "explorer-row selected"
+              : "explorer-row"
+        }
+        style={style}
+        {...attributes}
+      >
+
+        {/* 展开按钮 */}
+
+        <button
+          className="explorer-toggle"
+          onClick={(event) => {
+            event.stopPropagation();
+
+            if (hasChildren) {
+              onToggle(node._id);
+            }
+          }}
+        >
+          {hasChildren
+            ? expanded
+              ? "⌄"
+              : "›"
+            : ""}
+        </button>
+
+
+        {/* 主节点 */}
+
+        <button
+          className="explorer-node-main"
+          onClick={() => {
+
+            if (isFolder) {
+              onToggle(node._id);
+            } else {
+              onEntityClick(entity);
+            }
+
+          }}
+        >
+
+          <span className="explorer-icon">
+            {icon}
+          </span>
+
+          <span className="explorer-name">
+            {displayName}
+          </span>
+
+        </button>
+
+
+        {/* 在这个节点下面创建文件夹 */}
+
+        <button
+          className="explorer-add-child"
+          onClick={(event) => {
+            event.stopPropagation();
+
+            onCreateFolder(
+              node._id
+            );
+          }}
+          title="New Folder"
+        >
+          +
+        </button>
+
+
+        {/* 拖动 */}
+
+        <button
+          className="explorer-drag-handle"
+          {...listeners}
+          title="Drag"
+        >
+          ⋮⋮
+        </button>
+
+      </div>
+
+
+      {expanded &&
+        hasChildren &&
+        renderChildren(
+          node._id,
+          depth + 1
+        )}
+
+    </>
+  );
+}
+
+
+// ======================================================
+// Root Drop Zone
+// ======================================================
+
+function RootDropZone() {
+  const {
+    setNodeRef,
+    isOver,
+  } = useDroppable({
+    id: "TREE_ROOT",
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={
+        isOver
+          ? "tree-root-drop-zone active"
+          : "tree-root-drop-zone"
+      }
+    >
+      Root
+    </div>
+  );
+}
+
+
+// ======================================================
+// Entities Page
+// ======================================================
+
+function EntitiesPage() {
+  const { worldId } =
+    useParams();
+
+  const navigate =
+    useNavigate();
 
   const { t, i18n } =
     useTranslation();
 
+
+  // ====================================================
+  // Base Data
+  // ====================================================
 
   const [world, setWorld] =
     useState(null);
@@ -22,13 +243,15 @@ function EntitiesPage() {
   const [entities, setEntities] =
     useState([]);
 
-  const [entityTypes, setEntityTypes] =
-    useState([]);
+  const [
+    entityTypes,
+    setEntityTypes,
+  ] = useState([]);
 
 
-  // ==========================================
-  // 创建 Entity
-  // ==========================================
+  // ====================================================
+  // Create Entity
+  // ====================================================
 
   const [
     showCreateForm,
@@ -52,9 +275,9 @@ function EntitiesPage() {
   ] = useState({});
 
 
-  // ==========================================
-  // 文件夹树
-  // ==========================================
+  // ====================================================
+  // Explorer Tree
+  // ====================================================
 
   const [
     treeNodes,
@@ -65,6 +288,11 @@ function EntitiesPage() {
     expandedNodes,
     setExpandedNodes,
   ] = useState({});
+
+
+  // ====================================================
+  // Folder Creation
+  // ====================================================
 
   const [
     showFolderForm,
@@ -82,19 +310,15 @@ function EntitiesPage() {
   ] = useState(null);
 
 
-  // ==========================================
-  // 当前选中的实体
-  // ==========================================
+  // ====================================================
+  // Detail
+  // ====================================================
 
   const [
     selectedDetailEntity,
     setSelectedDetailEntity,
   ] = useState(null);
 
-
-  // ==========================================
-  // 当前创建用 Entity Type
-  // ==========================================
 
   const selectedEntityType =
     entityTypes.find(
@@ -104,15 +328,16 @@ function EntitiesPage() {
     );
 
 
-  // ==========================================
-  // World
-  // ==========================================
+  // ====================================================
+  // Fetch World
+  // ====================================================
 
   async function fetchWorld() {
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/worlds/${worldId}`
-      );
+      const response =
+        await fetch(
+          `http://localhost:3000/api/worlds/${worldId}`
+        );
 
       if (!response.ok) {
         throw new Error(
@@ -130,15 +355,16 @@ function EntitiesPage() {
   }
 
 
-  // ==========================================
-  // Entity Types
-  // ==========================================
+  // ====================================================
+  // Fetch Entity Types
+  // ====================================================
 
   async function fetchEntityTypes() {
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/entity-types/world/${worldId}`
-      );
+      const response =
+        await fetch(
+          `http://localhost:3000/api/entity-types/world/${worldId}`
+        );
 
       if (!response.ok) {
         throw new Error(
@@ -156,15 +382,16 @@ function EntitiesPage() {
   }
 
 
-  // ==========================================
-  // Entities
-  // ==========================================
+  // ====================================================
+  // Fetch Entities
+  // ====================================================
 
   async function fetchEntities() {
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/entities/world/${worldId}`
-      );
+      const response =
+        await fetch(
+          `http://localhost:3000/api/entities/world/${worldId}`
+        );
 
       if (!response.ok) {
         throw new Error(
@@ -181,9 +408,10 @@ function EntitiesPage() {
     }
   }
 
-  // ==========================================
-  // Entity Tree
-  // ========================================== 
+
+  // ====================================================
+  // Fetch Tree
+  // ====================================================
 
   async function fetchTree() {
     try {
@@ -206,9 +434,44 @@ function EntitiesPage() {
       console.error(error);
     }
   }
-  // ==========================================
-  // Create Folder
-  // ==========================================
+
+
+  // ====================================================
+  // Folder
+  // ====================================================
+
+  function openFolderForm(
+    parentId = null
+  ) {
+    setFolderParentId(
+      parentId
+    );
+
+    setFolderName("");
+
+    setShowFolderForm(true);
+
+    if (parentId) {
+      setExpandedNodes(
+        (current) => ({
+          ...current,
+
+          [parentId]: true,
+        })
+      );
+    }
+  }
+
+
+  function closeFolderForm() {
+    setShowFolderForm(false);
+
+    setFolderName("");
+
+    setFolderParentId(null);
+  }
+
+
   async function createFolder(
     event
   ) {
@@ -255,19 +518,282 @@ function EntitiesPage() {
       }
 
 
-      setFolderName("");
-      setFolderParentId(null);
-      setShowFolderForm(false);
+      const createdFolder =
+        await response.json();
+
+
+      // 如果是在某个节点下面创建，
+      // 自动展开父节点
+      if (folderParentId) {
+        setExpandedNodes(
+          (current) => ({
+            ...current,
+
+            [folderParentId]:
+              true,
+          })
+        );
+      }
+
+
+      // 新 Folder 本身也先展开
+      setExpandedNodes(
+        (current) => ({
+          ...current,
+
+          [createdFolder._id]:
+            true,
+        })
+      );
+
+
+      closeFolderForm();
 
       await fetchTree();
     } catch (error) {
       console.error(error);
+
       alert(error.message);
     }
   }
-  // ==========================================
-  // Entity Reference Options
-  // ==========================================
+
+
+  // ====================================================
+  // Move Tree Node
+  // ====================================================
+
+  async function moveTreeNode(
+    nodeId,
+    parentId
+  ) {
+    try {
+      const response =
+        await fetch(
+          `http://localhost:3000/api/tree/${nodeId}/move`,
+          {
+            method: "PUT",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify({
+                parentId,
+              }),
+          }
+        );
+
+
+      if (!response.ok) {
+        const data =
+          await response.json();
+
+        throw new Error(
+          data.message ||
+            "Failed to move node"
+        );
+      }
+
+
+      if (parentId) {
+        setExpandedNodes(
+          (current) => ({
+            ...current,
+
+            [parentId]:
+              true,
+          })
+        );
+      }
+
+
+      await fetchTree();
+    } catch (error) {
+      console.error(error);
+
+      alert(error.message);
+    }
+  }
+
+
+  function handleDragEnd(
+    event
+  ) {
+    const {
+      active,
+      over,
+    } = event;
+
+    if (!over) {
+      return;
+    }
+
+
+    const draggedId =
+      String(active.id);
+
+    const targetId =
+      String(over.id);
+
+
+    if (
+      draggedId ===
+      targetId
+    ) {
+      return;
+    }
+
+
+    // 拖回 Root
+
+    if (
+      targetId ===
+      "TREE_ROOT"
+    ) {
+      moveTreeNode(
+        draggedId,
+        null
+      );
+
+      return;
+    }
+
+
+    // 拖进另一个 Node
+
+    moveTreeNode(
+      draggedId,
+      targetId
+    );
+  }
+
+
+  // ====================================================
+  // Tree Helper
+  // ====================================================
+
+  function getChildren(
+    parentId
+  ) {
+    return treeNodes
+      .filter((node) => {
+
+        if (!parentId) {
+          return !node.parentId;
+        }
+
+
+        const nodeParentId =
+          typeof node.parentId ===
+          "object"
+            ? node.parentId._id
+            : node.parentId;
+
+
+        return (
+          nodeParentId ===
+          parentId
+        );
+      })
+      .sort(
+        (a, b) =>
+          (a.order || 0) -
+          (b.order || 0)
+      );
+  }
+
+
+  function toggleTreeNode(
+    nodeId
+  ) {
+    setExpandedNodes(
+      (current) => ({
+        ...current,
+
+        [nodeId]:
+          !current[nodeId],
+      })
+    );
+  }
+
+
+  // ====================================================
+  // Recursive Tree Render
+  // ====================================================
+
+  function renderTreeNodes(
+    parentId = null,
+    depth = 0
+  ) {
+    const children =
+      getChildren(parentId);
+
+
+    return children.map(
+      (node) => {
+
+        const nodeChildren =
+          getChildren(
+            node._id
+          );
+
+        const hasChildren =
+          nodeChildren.length > 0;
+
+        const expanded =
+          expandedNodes[
+            node._id
+          ] || false;
+
+
+        return (
+          <TreeRow
+            key={node._id}
+
+            node={node}
+
+            depth={depth}
+
+            expanded={
+              expanded
+            }
+
+            hasChildren={
+              hasChildren
+            }
+
+            onToggle={
+              toggleTreeNode
+            }
+
+            onEntityClick={
+              openEntityDetail
+            }
+
+            onCreateFolder={
+              openFolderForm
+            }
+
+            selectedEntityId={
+              selectedDetailEntity
+                ?._id
+            }
+
+            renderChildren={
+              renderTreeNodes
+            }
+          />
+        );
+      }
+    );
+  }
+
+
+  // ====================================================
+  // Reference Options
+  // ====================================================
 
   async function loadReferenceOptions(
     field
@@ -282,6 +808,7 @@ function EntitiesPage() {
     try {
       let url;
 
+
       if (
         field.referenceEntityTypeId
       ) {
@@ -292,8 +819,10 @@ function EntitiesPage() {
           `http://localhost:3000/api/entities/world/${worldId}`;
       }
 
+
       const response =
         await fetch(url);
+
 
       if (!response.ok) {
         throw new Error(
@@ -301,14 +830,17 @@ function EntitiesPage() {
         );
       }
 
+
       const data =
         await response.json();
+
 
       setReferenceOptions(
         (current) => ({
           ...current,
 
-          [field.key]: data,
+          [field.key]:
+            data,
         })
       );
     } catch (error) {
@@ -317,9 +849,9 @@ function EntitiesPage() {
   }
 
 
-  // ==========================================
-  // 选择 Entity Type
-  // ==========================================
+  // ====================================================
+  // Select Entity Type
+  // ====================================================
 
   function selectEntityType(
     entityTypeId
@@ -332,6 +864,7 @@ function EntitiesPage() {
     setValues({});
     setReferenceOptions({});
 
+
     const type =
       entityTypes.find(
         (item) =>
@@ -339,9 +872,11 @@ function EntitiesPage() {
           entityTypeId
       );
 
+
     if (type) {
       type.fields.forEach(
         (field) => {
+
           if (
             field.type ===
             "entity-reference"
@@ -350,15 +885,16 @@ function EntitiesPage() {
               field
             );
           }
+
         }
       );
     }
   }
 
 
-  // ==========================================
-  // 修改动态字段值
-  // ==========================================
+  // ====================================================
+  // Dynamic Values
+  // ====================================================
 
   function updateValue(
     fieldKey,
@@ -368,52 +904,59 @@ function EntitiesPage() {
       (current) => ({
         ...current,
 
-        [fieldKey]: value,
+        [fieldKey]:
+          value,
       })
     );
   }
 
 
-  // ==========================================
-  // 创建 Entity
-  // ==========================================
+  // ====================================================
+  // Create Entity
+  // ====================================================
 
   async function createEntity(
     event
   ) {
     event.preventDefault();
 
+
     if (!selectedEntityTypeId) {
       return;
     }
+
 
     if (!name.trim()) {
       return;
     }
 
+
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/entities",
-        {
-          method: "POST",
+      const response =
+        await fetch(
+          "http://localhost:3000/api/entities",
+          {
+            method: "POST",
 
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
 
-          body: JSON.stringify({
-            worldId,
+            body:
+              JSON.stringify({
+                worldId,
 
-            entityTypeId:
-              selectedEntityTypeId,
+                entityTypeId:
+                  selectedEntityTypeId,
 
-            name,
+                name,
 
-            values,
-          }),
-        }
-      );
+                values,
+              }),
+          }
+        );
+
 
       if (!response.ok) {
         const errorData =
@@ -425,8 +968,10 @@ function EntitiesPage() {
         );
       }
 
+
       const newEntity =
         await response.json();
+
 
       setEntities(
         (current) => [
@@ -435,20 +980,16 @@ function EntitiesPage() {
         ]
       );
 
-      // 自动展开刚创建实体所属的分类
-      setExpandedTypes(
-        (current) => ({
-          ...current,
 
-          [selectedEntityTypeId]:
-            true,
-        })
-      );
+      // TreeNode 是后端自动建立的，
+      // 所以重新读取 Tree
+      await fetchTree();
 
-      // 创建完成以后直接显示这个实体详情
+
       setSelectedDetailEntity(
         newEntity
       );
+
 
       closeCreateForm();
     } catch (error) {
@@ -459,120 +1000,74 @@ function EntitiesPage() {
   }
 
 
-  // ==========================================
-  // 创建模式
-  // ==========================================
+  // ====================================================
+  // Create Form
+  // ====================================================
 
   function openCreateForm() {
-    // 进入创建模式时，
-    // 取消当前 Detail
-    setSelectedDetailEntity(null);
+    setSelectedDetailEntity(
+      null
+    );
 
-    setShowCreateForm(true);
+    setShowCreateForm(
+      true
+    );
 
-    setSelectedEntityTypeId("");
+    setSelectedEntityTypeId(
+      ""
+    );
+
     setName("");
+
     setValues({});
+
     setReferenceOptions({});
   }
 
 
   function closeCreateForm() {
-    setShowCreateForm(false);
+    setShowCreateForm(
+      false
+    );
 
-    setSelectedEntityTypeId("");
+    setSelectedEntityTypeId(
+      ""
+    );
+
     setName("");
+
     setValues({});
+
     setReferenceOptions({});
   }
 
-  // ==========================================
-  // Entity Tree
-  // ========================================== 
-  
-  function getChildren(
-    parentId
-  ) {
-    return treeNodes
-      .filter((node) => {
-        if (!parentId) {
-          return !node.parentId;
-        }
 
-        const nodeParentId =
-          typeof node.parentId ===
-          "object"
-            ? node.parentId._id
-            : node.parentId;
-
-        return (
-          nodeParentId ===
-          parentId
-        );
-      })
-      .sort(
-        (a, b) =>
-          a.order - b.order
-      );
-  }
-
-  // ==========================================
-  // Entity Tree
-  // ==========================================
-
-  function toggleEntityType(
-    entityTypeId
-  ) {
-    setExpandedTypes(
-      (current) => ({
-        ...current,
-
-        [entityTypeId]:
-          !current[
-            entityTypeId
-          ],
-      })
-    );
-  }
-
-
-  function getEntitiesByType(
-    entityTypeId
-  ) {
-    return entities.filter(
-      (entity) => {
-        const typeId =
-          typeof entity.entityTypeId ===
-          "object"
-            ? entity
-                .entityTypeId
-                ._id
-            : entity.entityTypeId;
-
-        return (
-          typeId ===
-          entityTypeId
-        );
-      }
-    );
-  }
-
-
-  // ==========================================
+  // ====================================================
   // Detail
-  // ==========================================
+  // ====================================================
 
   function openEntityDetail(
     entity
   ) {
-    // 如果正在创建，
-    // 点击左边 Entity 后退出创建模式
-    setShowCreateForm(false);
+    if (!entity) {
+      return;
+    }
 
-    setSelectedEntityTypeId("");
+
+    setShowCreateForm(
+      false
+    );
+
+    setSelectedEntityTypeId(
+      ""
+    );
+
     setName("");
+
     setValues({});
+
     setReferenceOptions({});
+
 
     setSelectedDetailEntity(
       entity
@@ -587,11 +1082,13 @@ function EntitiesPage() {
       return null;
     }
 
+
     const entityTypeId =
       typeof entity.entityTypeId ===
       "object"
         ? entity.entityTypeId._id
         : entity.entityTypeId;
+
 
     return entityTypes.find(
       (type) =>
@@ -601,9 +1098,9 @@ function EntitiesPage() {
   }
 
 
-  // ==========================================
-  // Entity Reference ID → Name
-  // ==========================================
+  // ====================================================
+  // Reference ID -> Name
+  // ====================================================
 
   function getReferencedEntityName(
     entityId
@@ -612,11 +1109,14 @@ function EntitiesPage() {
       return "—";
     }
 
+
     const entity =
       entities.find(
         (item) =>
-          item._id === entityId
+          item._id ===
+          entityId
       );
+
 
     return entity
       ? entity.name
@@ -624,9 +1124,9 @@ function EntitiesPage() {
   }
 
 
-  // ==========================================
-  // 格式化 Detail 字段
-  // ==========================================
+  // ====================================================
+  // Format Detail Value
+  // ====================================================
 
   function formatFieldValue(
     field,
@@ -640,6 +1140,7 @@ function EntitiesPage() {
       return "—";
     }
 
+
     if (
       field.type ===
       "boolean"
@@ -648,6 +1149,7 @@ function EntitiesPage() {
         ? t("entities.yes")
         : t("entities.no");
     }
+
 
     if (
       field.type ===
@@ -658,13 +1160,14 @@ function EntitiesPage() {
       );
     }
 
+
     return String(value);
   }
 
 
-  // ==========================================
+  // ====================================================
   // Language
-  // ==========================================
+  // ====================================================
 
   function changeLanguage(
     event
@@ -672,9 +1175,11 @@ function EntitiesPage() {
     const language =
       event.target.value;
 
+
     i18n.changeLanguage(
       language
     );
+
 
     localStorage.setItem(
       "worldforge-language",
@@ -683,9 +1188,9 @@ function EntitiesPage() {
   }
 
 
-  // ==========================================
+  // ====================================================
   // Initial Load
-  // ==========================================
+  // ====================================================
 
   useEffect(() => {
     fetchWorld();
@@ -695,9 +1200,9 @@ function EntitiesPage() {
   }, [worldId]);
 
 
-  // ==========================================
+  // ====================================================
   // Schema Driven Input
-  // ==========================================
+  // ====================================================
 
   function renderField(
     field
@@ -706,7 +1211,6 @@ function EntitiesPage() {
       values[field.key] ?? "";
 
 
-    // Text
     if (
       field.type === "text"
     ) {
@@ -717,7 +1221,9 @@ function EntitiesPage() {
           required={
             field.required
           }
-          onChange={(event) =>
+          onChange={(
+            event
+          ) =>
             updateValue(
               field.key,
               event.target.value
@@ -728,7 +1234,6 @@ function EntitiesPage() {
     }
 
 
-    // Long Text
     if (
       field.type ===
       "long-text"
@@ -739,7 +1244,9 @@ function EntitiesPage() {
           required={
             field.required
           }
-          onChange={(event) =>
+          onChange={(
+            event
+          ) =>
             updateValue(
               field.key,
               event.target.value
@@ -750,9 +1257,9 @@ function EntitiesPage() {
     }
 
 
-    // Number
     if (
-      field.type === "number"
+      field.type ===
+      "number"
     ) {
       return (
         <input
@@ -761,7 +1268,9 @@ function EntitiesPage() {
           required={
             field.required
           }
-          onChange={(event) =>
+          onChange={(
+            event
+          ) =>
             updateValue(
               field.key,
               event.target.value
@@ -772,9 +1281,9 @@ function EntitiesPage() {
     }
 
 
-    // Date
     if (
-      field.type === "date"
+      field.type ===
+      "date"
     ) {
       return (
         <input
@@ -783,7 +1292,9 @@ function EntitiesPage() {
           required={
             field.required
           }
-          onChange={(event) =>
+          onChange={(
+            event
+          ) =>
             updateValue(
               field.key,
               event.target.value
@@ -794,7 +1305,6 @@ function EntitiesPage() {
     }
 
 
-    // Boolean
     if (
       field.type ===
       "boolean"
@@ -807,18 +1317,19 @@ function EntitiesPage() {
 
           <input
             type="checkbox"
+
             checked={
               values[
                 field.key
               ] || false
             }
+
             onChange={(
               event
             ) =>
               updateValue(
                 field.key,
-                event.target
-                  .checked
+                event.target.checked
               )
             }
           />
@@ -832,19 +1343,24 @@ function EntitiesPage() {
     }
 
 
-    // Dropdown
     if (
-      field.type === "select"
+      field.type ===
+      "select"
     ) {
       return (
         <select
           className=
             "field-select"
+
           value={value}
+
           required={
             field.required
           }
-          onChange={(event) =>
+
+          onChange={(
+            event
+          ) =>
             updateValue(
               field.key,
               event.target.value
@@ -858,14 +1374,17 @@ function EntitiesPage() {
             )}
           </option>
 
+
           {field.options?.map(
             (option) => (
+
               <option
                 key={option}
                 value={option}
               >
                 {option}
               </option>
+
             )
           )}
 
@@ -874,7 +1393,6 @@ function EntitiesPage() {
     }
 
 
-    // Entity Reference
     if (
       field.type ===
       "entity-reference"
@@ -884,15 +1402,21 @@ function EntitiesPage() {
           field.key
         ] || [];
 
+
       return (
         <select
           className=
             "field-select"
+
           value={value}
+
           required={
             field.required
           }
-          onChange={(event) =>
+
+          onChange={(
+            event
+          ) =>
             updateValue(
               field.key,
               event.target.value
@@ -906,8 +1430,10 @@ function EntitiesPage() {
             )}
           </option>
 
+
           {options.map(
             (entity) => (
+
               <option
                 key={
                   entity._id
@@ -920,6 +1446,7 @@ function EntitiesPage() {
                   entity.name
                 }
               </option>
+
             )
           )}
 
@@ -932,16 +1459,13 @@ function EntitiesPage() {
   }
 
 
-  // ==========================================
+  // ====================================================
   // Loading
-  // ==========================================
+  // ====================================================
 
   if (!world) {
     return (
-      <div
-        className=
-          "workspace-loading"
-      >
+      <div className="workspace-loading">
         {t(
           "workspace.loading"
         )}
@@ -950,37 +1474,27 @@ function EntitiesPage() {
   }
 
 
-  // 当前 Detail 的 Schema
   const detailEntityType =
     getEntityTypeForEntity(
       selectedDetailEntity
     );
 
 
-  // ==========================================
+  // ====================================================
   // Render
-  // ==========================================
+  // ====================================================
 
   return (
     <div className="workspace">
 
-      {/* ======================================
-          TOP BAR
-      ====================================== */}
+      {/* TOP BAR */}
 
-      <header
-        className=
-          "workspace-topbar"
-      >
+      <header className="workspace-topbar">
 
-        <div
-          className=
-            "workspace-topbar-left"
-        >
+        <div className="workspace-topbar-left">
 
           <button
-            className=
-              "back-button"
+            className="back-button"
             onClick={() =>
               navigate("/")
             }
@@ -994,28 +1508,19 @@ function EntitiesPage() {
           </div>
 
 
-          <div
-            className=
-              "world-title-divider"
-          >
+          <div className="world-title-divider">
             /
           </div>
 
 
-          <div
-            className=
-              "workspace-world-name"
-          >
+          <div className="workspace-world-name">
             {world.name}
           </div>
 
         </div>
 
 
-        <div
-          className=
-            "language-selector"
-        >
+        <div className="language-selector">
 
           <select
             value={
@@ -1030,9 +1535,7 @@ function EntitiesPage() {
               English
             </option>
 
-            <option
-              value="zh-CN"
-            >
+            <option value="zh-CN">
               简体中文
             </option>
 
@@ -1043,24 +1546,13 @@ function EntitiesPage() {
       </header>
 
 
-      <div
-        className=
-          "workspace-body"
-      >
+      <div className="workspace-body">
 
-        {/* ======================================
-            PRIMARY SIDEBAR
-        ====================================== */}
+        {/* PRIMARY SIDEBAR */}
 
-        <aside
-          className=
-            "workspace-sidebar"
-        >
+        <aside className="workspace-sidebar">
 
-          <div
-            className=
-              "sidebar-section-title"
-          >
+          <div className="sidebar-section-title">
             {t(
               "workspace.library"
             )}
@@ -1068,8 +1560,7 @@ function EntitiesPage() {
 
 
           <button
-            className=
-              "sidebar-item"
+            className="sidebar-item"
             onClick={() =>
               navigate(
                 `/world/${worldId}`
@@ -1083,8 +1574,7 @@ function EntitiesPage() {
 
 
           <button
-            className=
-              "sidebar-item"
+            className="sidebar-item"
             onClick={() =>
               navigate(
                 `/world/${worldId}/entity-types`
@@ -1097,62 +1587,41 @@ function EntitiesPage() {
           </button>
 
 
-          <button
-            className=
-              "sidebar-item active"
-          >
+          <button className="sidebar-item active">
             {t(
               "workspace.entities"
             )}
           </button>
 
 
-          <button
-            className=
-              "sidebar-item"
-          >
+          <button className="sidebar-item">
             {t(
               "workspace.documents"
             )}
           </button>
 
 
-          <div
-            className=
-              "sidebar-divider"
-          />
+          <div className="sidebar-divider" />
 
 
-          <button
-            className=
-              "sidebar-item"
-          >
+          <button className="sidebar-item">
             {t(
               "workspace.timeline"
             )}
           </button>
 
 
-          <button
-            className=
-              "sidebar-item"
-          >
+          <button className="sidebar-item">
             {t(
               "workspace.graph"
             )}
           </button>
 
 
-          <div
-            className=
-              "sidebar-spacer"
-          />
+          <div className="sidebar-spacer" />
 
 
-          <button
-            className=
-              "sidebar-item"
-          >
+          <button className="sidebar-item">
             {t(
               "workspace.settings"
             )}
@@ -1161,19 +1630,11 @@ function EntitiesPage() {
         </aside>
 
 
-        {/* ======================================
-            ENTITY TREE SIDEBAR
-        ====================================== */}
+        {/* EXPLORER */}
 
-        <aside
-          className=
-            "entity-tree-sidebar"
-        >
+        <aside className="entity-tree-sidebar">
 
-          <div
-            className=
-              "entity-tree-header"
-          >
+          <div className="entity-tree-header">
 
             <span>
               {t(
@@ -1182,207 +1643,149 @@ function EntitiesPage() {
             </span>
 
 
-            <button
-              className=
-                "tree-add-button"
-              onClick={
-                openCreateForm
-              }
-              title={t(
-                "entities.newEntity"
-              )}
-            >
-              +
-            </button>
+            <div className="tree-header-actions">
+
+              {/* Root Folder */}
+
+              <button
+                className="tree-add-button"
+
+                onClick={() =>
+                  openFolderForm(
+                    null
+                  )
+                }
+
+                title={t(
+                  "tree.newFolder"
+                )}
+              >
+                📁+
+              </button>
+
+
+              {/* Entity */}
+
+              <button
+                className="tree-add-button"
+
+                onClick={
+                  openCreateForm
+                }
+
+                title={t(
+                  "entities.newEntity"
+                )}
+              >
+                +
+              </button>
+
+            </div>
 
           </div>
 
 
-          <div
-            className=
-              "entity-tree"
-          >
+          {/* Folder Create Form */}
 
-            {entityTypes
-              .filter(
-                (type) =>
-                  getEntitiesByType(type._id).length > 0
-              )
-              .map(
-                (type) => {
+          {showFolderForm && (
 
-                const typeEntities =
-                  getEntitiesByType(
-                    type._id
-                  );
+            <form
+              className="folder-create-form"
 
-                const isExpanded =
-                  expandedTypes[
-                    type._id
-                  ] || false;
+              onSubmit={
+                createFolder
+              }
+            >
 
+              <div className="folder-create-parent">
 
-                return (
-                  <div
-                    className=
-                      "tree-type"
-                    key={
-                      type._id
-                    }
-                  >
-
-                    {/* 分类 */}
-
-                    <button
-                      className=
-                        "tree-type-row"
-                      onClick={() =>
-                        toggleEntityType(
-                          type._id
-                        )
-                      }
-                    >
-
-                      <span
-                        className=
-                          "tree-arrow"
-                      >
-                        {isExpanded
-                          ? "⌄"
-                          : "›"}
-                      </span>
-
-
-                      <span
-                        className=
-                          "tree-type-icon"
-                      >
-                        {type.icon ||
-                          "📄"}
-                      </span>
-
-
-                      <span
-                        className=
-                          "tree-type-name"
-                      >
-                        {
-                          type.name
-                        }
-                      </span>
-
-
-                      <span
-                        className=
-                          "tree-count"
-                      >
-                        {
-                          typeEntities
-                            .length
-                        }
-                      </span>
-
-                    </button>
-
-
-                    {/* 分类下 Entity */}
-
-                    {isExpanded && (
-
-                      <div
-                        className=
-                          "tree-children"
-                      >
-
-                        {typeEntities.map(
-                          (
-                            entity
-                          ) => (
-
-                            <button
-                              className={
-                                selectedDetailEntity
-                                  ?._id ===
-                                entity._id
-                                  ? "tree-entity-row selected"
-                                  : "tree-entity-row"
-                              }
-                              key={
-                                entity._id
-                              }
-                              onClick={() =>
-                                openEntityDetail(
-                                  entity
-                                )
-                              }
-                            >
-
-                              <span
-                                className=
-                                  "tree-file-mark"
-                              >
-                                •
-                              </span>
-
-
-                              <span>
-                                {
-                                  entity.name
-                                }
-                              </span>
-
-                            </button>
-
-                          )
-                        )}
-
-
-                        {typeEntities
-                          .length ===
-                          0 && (
-
-                          <div
-                            className=
-                              "tree-empty"
-                          >
-                            {t(
-                              "entities.noEntitiesInType"
-                            )}
-                          </div>
-
-                        )}
-
-                      </div>
-
+                {folderParentId
+                  ? t(
+                      "tree.createInside"
+                    )
+                  : t(
+                      "tree.createAtRoot"
                     )}
 
-                  </div>
-                );
-              }
-            )}
+              </div>
 
-          </div>
+
+              <div className="folder-create-row">
+
+                <input
+                  autoFocus
+
+                  value={
+                    folderName
+                  }
+
+                  placeholder={t(
+                    "tree.folderName"
+                  )}
+
+                  onChange={(
+                    event
+                  ) =>
+                    setFolderName(
+                      event.target.value
+                    )
+                  }
+                />
+
+
+                <button
+                  type="submit"
+                >
+                  ✓
+                </button>
+
+
+                <button
+                  type="button"
+
+                  onClick={
+                    closeFolderForm
+                  }
+                >
+                  ×
+                </button>
+
+              </div>
+
+            </form>
+
+          )}
+
+
+          {/* Tree */}
+
+          <DndContext
+            onDragEnd={
+              handleDragEnd
+            }
+          >
+
+            <RootDropZone />
+
+
+            <div className="entity-tree">
+
+              {
+                renderTreeNodes()
+              }
+
+            </div>
+
+          </DndContext>
 
         </aside>
 
 
-        {/* ======================================
-            RIGHT WORKSPACE
-        ====================================== */}
+        {/* RIGHT WORKSPACE */}
 
-        <main
-          className=
-            "workspace-main"
-        >
+        <main className="workspace-main">
 
-          {/* ==================================
-              PAGE HEADER
-          ================================== */}
-
-          <div
-            className=
-              "entity-page-header"
-          >
+          <div className="entity-page-header">
 
             <div>
 
@@ -1392,9 +1795,10 @@ function EntitiesPage() {
                   ? t(
                       "entities.createTitle"
                     )
+
                   : selectedDetailEntity
-                    ? selectedDetailEntity
-                        .name
+                    ? selectedDetailEntity.name
+
                     : t(
                         "entities.title"
                       )}
@@ -1408,9 +1812,12 @@ function EntitiesPage() {
                   ? t(
                       "entities.createDescription"
                     )
+
                   : selectedDetailEntity &&
-                      detailEntityType
+                    detailEntityType
+
                     ? `${detailEntityType.icon || ""} ${detailEntityType.name}`
+
                     : t(
                         "entities.subtitle"
                       )}
@@ -1423,8 +1830,8 @@ function EntitiesPage() {
             {!showCreateForm && (
 
               <button
-                className=
-                  "create-button"
+                className="create-button"
+
                 onClick={
                   openCreateForm
                 }
@@ -1439,16 +1846,11 @@ function EntitiesPage() {
           </div>
 
 
-          {/* ==================================
-              CREATE ENTITY
-          ================================== */}
+          {/* CREATE ENTITY */}
 
           {showCreateForm && (
 
-            <div
-              className=
-                "create-panel entity-create-panel"
-            >
+            <div className="create-panel entity-create-panel">
 
               <form
                 onSubmit={
@@ -1464,17 +1866,17 @@ function EntitiesPage() {
 
 
                 <select
-                  className=
-                    "field-select"
+                  className="field-select"
+
                   value={
                     selectedEntityTypeId
                   }
+
                   onChange={(
                     event
                   ) =>
                     selectEntityType(
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                 >
@@ -1493,6 +1895,7 @@ function EntitiesPage() {
                         key={
                           type._id
                         }
+
                         value={
                           type._id
                         }
@@ -1511,35 +1914,25 @@ function EntitiesPage() {
 
                   <>
 
-                    <div
-                      className=
-                        "entity-form-divider"
-                    />
+                    <div className="entity-form-divider" />
 
 
-                    <div
-                      className=
-                        "selected-type-heading"
-                    >
+                    <div className="selected-type-heading">
 
                       <span>
                         {
-                          selectedEntityType
-                            .icon
+                          selectedEntityType.icon
                         }
                       </span>
 
                       <strong>
                         {
-                          selectedEntityType
-                            .name
+                          selectedEntityType.name
                         }
                       </strong>
 
                     </div>
 
-
-                    {/* Name */}
 
                     <label>
 
@@ -1547,10 +1940,7 @@ function EntitiesPage() {
                         "schema.nameField"
                       )}
 
-                      <span
-                        className=
-                          "required-star"
-                      >
+                      <span className="required-star">
                         *
                       </span>
 
@@ -1559,76 +1949,72 @@ function EntitiesPage() {
 
                     <input
                       type="text"
-                      value={name}
+
+                      value={
+                        name
+                      }
+
                       required
+
                       onChange={(
                         event
                       ) =>
                         setName(
-                          event.target
-                            .value
+                          event.target.value
                         )
                       }
                     />
 
 
-                    {/* Dynamic Fields */}
+                    {selectedEntityType.fields.map(
+                      (field) => (
 
-                    {selectedEntityType
-                      .fields.map(
-                        (field) => (
+                        <div
+                          className="dynamic-field"
 
-                          <div
-                            className=
-                              "dynamic-field"
-                            key={
-                              field._id
+                          key={
+                            field._id
+                          }
+                        >
+
+                          <label>
+
+                            {
+                              field.label
                             }
-                          >
 
-                            <label>
+                            {field.required && (
 
-                              {
-                                field.label
-                              }
+                              <span className="required-star">
+                                *
+                              </span>
 
-                              {field.required && (
-
-                                <span
-                                  className=
-                                    "required-star"
-                                >
-                                  *
-                                </span>
-
-                              )}
-
-                            </label>
-
-
-                            {renderField(
-                              field
                             )}
 
-                          </div>
+                          </label>
 
-                        )
-                      )}
+
+                          {renderField(
+                            field
+                          )}
+
+                        </div>
+
+                      )
+                    )}
 
                   </>
 
                 )}
 
 
-                <div
-                  className=
-                    "form-buttons"
-                >
+                <div className="form-buttons">
 
                   <button
                     type="button"
-                    className=
-                      "cancel-button"
+
+                    className="cancel-button"
+
                     onClick={
                       closeCreateForm
                     }
@@ -1641,8 +2027,9 @@ function EntitiesPage() {
 
                   <button
                     type="submit"
-                    className=
-                      "save-button"
+
+                    className="save-button"
+
                     disabled={
                       !selectedEntityTypeId
                     }
@@ -1661,38 +2048,21 @@ function EntitiesPage() {
           )}
 
 
-          {/* ==================================
-              ENTITY DETAIL
-          ================================== */}
+          {/* DETAIL */}
 
           {!showCreateForm &&
             selectedDetailEntity &&
             detailEntityType && (
 
-            <div
-              className=
-                "entity-detail-panel"
-            >
+            <div className="entity-detail-panel">
 
-              {/* Detail Header */}
+              <div className="entity-detail-panel-header">
 
-              <div
-                className=
-                  "entity-detail-panel-header"
-              >
+                <div className="entity-detail-title">
 
-                <div
-                  className=
-                    "entity-detail-title"
-                >
-
-                  <div
-                    className=
-                      "entity-detail-icon"
-                  >
+                  <div className="entity-detail-icon">
                     {
-                      detailEntityType
-                        .icon
+                      detailEntityType.icon
                     }
                   </div>
 
@@ -1701,15 +2071,13 @@ function EntitiesPage() {
 
                     <h2>
                       {
-                        selectedDetailEntity
-                          .name
+                        selectedDetailEntity.name
                       }
                     </h2>
 
                     <span>
                       {
-                        detailEntityType
-                          .name
+                        detailEntityType.name
                       }
                     </span>
 
@@ -1720,21 +2088,12 @@ function EntitiesPage() {
               </div>
 
 
-              {/* Detail Fields */}
+              <div className="entity-detail-panel-body">
 
-              <div
-                className=
-                  "entity-detail-panel-body"
-              >
-
-                {detailEntityType
-                  .fields.length ===
+                {detailEntityType.fields.length ===
                   0 && (
 
-                  <div
-                    className=
-                      "detail-empty"
-                  >
+                  <div className="detail-empty">
                     {t(
                       "entities.noCustomFields"
                     )}
@@ -1743,78 +2102,73 @@ function EntitiesPage() {
                 )}
 
 
-                {detailEntityType
-                  .fields.map(
-                    (field) => {
+                {detailEntityType.fields.map(
+                  (field) => {
 
-                      const rawValue =
-                        selectedDetailEntity
-                          .values?.[
-                            field.key
-                          ];
+                    const rawValue =
+                      selectedDetailEntity
+                        .values?.[
+                          field.key
+                        ];
 
 
-                      return (
+                    return (
 
-                        <div
-                          className={
-                            field.type ===
-                            "long-text"
-                              ? "detail-field detail-field-long"
-                              : "detail-field"
+                      <div
+                        className={
+                          field.type ===
+                          "long-text"
+
+                            ? "detail-field detail-field-long"
+
+                            : "detail-field"
+                        }
+
+                        key={
+                          field._id
+                        }
+                      >
+
+                        <div className="detail-field-label">
+                          {
+                            field.label
                           }
-                          key={
-                            field._id
-                          }
-                        >
-
-                          <div
-                            className=
-                              "detail-field-label"
-                          >
-                            {
-                              field.label
-                            }
-                          </div>
+                        </div>
 
 
-                          <div
-                            className=
-                              "detail-field-value"
-                          >
-                            {formatFieldValue(
-                              field,
-                              rawValue
-                            )}
-                          </div>
+                        <div className="detail-field-value">
+
+                          {formatFieldValue(
+                            field,
+                            rawValue
+                          )}
 
                         </div>
 
-                      );
-                    }
-                  )}
+                      </div>
+
+                    );
+                  }
+                )}
 
               </div>
 
 
-              {/* Detail Footer */}
-
-              <div
-                className=
-                  "entity-detail-panel-footer"
-              >
+              <div className="entity-detail-panel-footer">
 
                 {t(
                   "entities.lastUpdated"
                 )}{" "}
 
+
                 {new Date(
-                  selectedDetailEntity
-                    .updatedAt
+                  selectedDetailEntity.updatedAt
                 ).toLocaleString(
                   i18n.language ===
                     "zh-CN"
+
                     ? "zh-CN"
+
                     : "en-US"
                 )}
 
@@ -1825,24 +2179,18 @@ function EntitiesPage() {
           )}
 
 
-          {/* ==================================
-              NOTHING SELECTED
-          ================================== */}
+          {/* EMPTY */}
 
           {!showCreateForm &&
             !selectedDetailEntity && (
 
-            <div
-              className=
-                "entity-browser-message"
-            >
+            <div className="entity-browser-message">
 
               <h2>
                 {t(
                   "entities.browserTitle"
                 )}
               </h2>
-
 
               <p>
                 {t(
