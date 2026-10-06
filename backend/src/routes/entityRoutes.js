@@ -4,62 +4,48 @@ const Entity = require("../models/Entity");
 const EntityType = require("../models/EntityType");
 const TreeNode = require("../models/TreeNode");
 
+const {
+  getDevUser,
+  getOwnedWorld,
+} = require("../utils/devUser");
+
 const router = express.Router();
 
-
-// ======================================================
-// 获取某个 World 的所有实体
-// GET /api/entities/world/:worldId
-// ======================================================
-
-router.get("/world/:worldId", async (req, res) => {
-  try {
-    const entities = await Entity.find({
-      worldId: req.params.worldId,
-    })
-      .populate(
-        "entityTypeId",
-        "name icon"
-      )
-      .sort({
-        updatedAt: -1,
-      });
-
-    res.json(entities);
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Failed to get entities",
-      error: error.message,
-    });
-  }
-});
-
-
-// ======================================================
-// 获取某种 Entity Type 下的实体
-// Entity Reference 字段以后会用到
-//
-// GET /api/entities/world/:worldId/type/:entityTypeId
-// ======================================================
-
+// Get every Entity belonging to a World.
 router.get(
-  "/world/:worldId/type/:entityTypeId",
+  "/world/:worldId",
   async (req, res) => {
     try {
+      const user = await getDevUser();
+
+      const world = await getOwnedWorld(
+        req.params.worldId,
+        user._id
+      );
+
+      if (!world) {
+        return res.status(404).json({
+          message: "World not found",
+        });
+      }
+
       const entities = await Entity.find({
-        worldId: req.params.worldId,
-        entityTypeId: req.params.entityTypeId,
+        worldId: world._id,
       })
-        .select("name entityTypeId")
+        .populate(
+          "entityTypeId",
+          "name icon"
+        )
         .sort({
-          name: 1,
+          updatedAt: -1,
         });
 
       res.json(entities);
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Failed to get entities:",
+        error
+      );
 
       res.status(500).json({
         message: "Failed to get entities",
@@ -69,14 +55,65 @@ router.get(
   }
 );
 
+// Get Entities belonging to a specific Entity Type.
+router.get(
+  "/world/:worldId/type/:entityTypeId",
+  async (req, res) => {
+    try {
+      const user = await getDevUser();
 
-// ======================================================
-// 创建实体
-// POST /api/entities
-// ======================================================
+      const world = await getOwnedWorld(
+        req.params.worldId,
+        user._id
+      );
 
+      if (!world) {
+        return res.status(404).json({
+          message: "World not found",
+        });
+      }
+
+      const entityType =
+        await EntityType.findOne({
+          _id: req.params.entityTypeId,
+          worldId: world._id,
+        });
+
+      if (!entityType) {
+        return res.status(404).json({
+          message: "Entity type not found",
+        });
+      }
+
+      const entities = await Entity.find({
+        worldId: world._id,
+        entityTypeId: entityType._id,
+      })
+        .select("name entityTypeId")
+        .sort({
+          name: 1,
+        });
+
+      res.json(entities);
+    } catch (error) {
+      console.error(
+        "Failed to get entities:",
+        error
+      );
+
+      res.status(500).json({
+        message: "Failed to get entities",
+        error: error.message,
+      });
+    }
+  }
+);
+
+// Create an Entity.
 router.post("/", async (req, res) => {
   try {
+    const user = await getDevUser();
+
     const {
       worldId,
       entityTypeId,
@@ -84,13 +121,11 @@ router.post("/", async (req, res) => {
       values,
     } = req.body;
 
-
     if (!worldId) {
       return res.status(400).json({
         message: "worldId is required",
       });
     }
-
 
     if (!entityTypeId) {
       return res.status(400).json({
@@ -98,18 +133,28 @@ router.post("/", async (req, res) => {
       });
     }
 
-
     if (!name || !name.trim()) {
       return res.status(400).json({
         message: "Entity name is required",
       });
     }
 
+    const world = await getOwnedWorld(
+      worldId,
+      user._id
+    );
 
-    // 读取 Schema
+    if (!world) {
+      return res.status(404).json({
+        message: "World not found",
+      });
+    }
+
+    // Load the schema used by this Entity.
     const entityType =
-      await EntityType.findById(entityTypeId);
-
+      await EntityType.findById(
+        entityTypeId
+      );
 
     if (!entityType) {
       return res.status(404).json({
@@ -117,10 +162,10 @@ router.post("/", async (req, res) => {
       });
     }
 
-
-    // 防止拿其他 World 的 Schema 创建实体
+    // Prevent using an Entity Type from another World.
     if (
-      entityType.worldId.toString() !== worldId
+      entityType.worldId.toString() !==
+      world._id.toString()
     ) {
       return res.status(400).json({
         message:
@@ -128,22 +173,16 @@ router.post("/", async (req, res) => {
       });
     }
 
-
-    const submittedValues = values || {};
+    const submittedValues =
+      values || {};
 
     const cleanedValues = {};
 
-
-    // ==================================================
-    // 按照 Schema 检查并整理用户输入
-    // ==================================================
-
+    // Validate submitted values using the Entity Type schema.
     for (const field of entityType.fields) {
       const value =
         submittedValues[field.key];
 
-
-      // Required 检查
       if (field.required) {
         const isEmpty =
           value === undefined ||
@@ -157,8 +196,7 @@ router.post("/", async (req, res) => {
         }
       }
 
-
-      // 没填写的非必填字段可以跳过
+      // Ignore empty optional fields.
       if (
         value === undefined ||
         value === null ||
@@ -167,12 +205,14 @@ router.post("/", async (req, res) => {
         continue;
       }
 
-
-      // Number
+      // Number field.
       if (field.type === "number") {
-        const numberValue = Number(value);
+        const numberValue =
+          Number(value);
 
-        if (Number.isNaN(numberValue)) {
+        if (
+          Number.isNaN(numberValue)
+        ) {
           return res.status(400).json({
             message: `${field.label} must be a number`,
           });
@@ -184,8 +224,7 @@ router.post("/", async (req, res) => {
         continue;
       }
 
-
-      // Boolean
+      // Boolean field.
       if (field.type === "boolean") {
         cleanedValues[field.key] =
           Boolean(value);
@@ -193,8 +232,7 @@ router.post("/", async (req, res) => {
         continue;
       }
 
-
-      // Dropdown
+      // Dropdown field.
       if (field.type === "select") {
         if (
           !field.options.includes(value)
@@ -204,41 +242,40 @@ router.post("/", async (req, res) => {
           });
         }
 
-        cleanedValues[field.key] = value;
+        cleanedValues[field.key] =
+          value;
 
         continue;
       }
 
-
-      // 其他类型目前直接保存
-      cleanedValues[field.key] = value;
+      // Other field types are currently stored directly.
+      cleanedValues[field.key] =
+        value;
     }
 
-
     const entity = new Entity({
-      worldId,
+      worldId: world._id,
       entityTypeId,
       name: name.trim(),
       values: cleanedValues,
     });
 
-
     const savedEntity =
       await entity.save();
 
+    // Automatically create a root TreeNode for the Entity.
     const rootCount =
       await TreeNode.countDocuments({
-        worldId,
+        worldId: world._id,
         parentId: null,
       });
 
     await TreeNode.create({
-      worldId,
+      worldId: world._id,
 
       kind: "entity",
 
-      entityId:
-        savedEntity._id,
+      entityId: savedEntity._id,
 
       parentId: null,
 
@@ -253,10 +290,9 @@ router.post("/", async (req, res) => {
         "name icon"
       );
 
-
-    res.status(201).json(
-      populatedEntity
-    );
+    res
+      .status(201)
+      .json(populatedEntity);
   } catch (error) {
     console.error(
       "Failed to create entity:",
@@ -270,5 +306,176 @@ router.post("/", async (req, res) => {
   }
 });
 
+// Update an Entity.
+router.put("/:id", async (req, res) => {
+  try {
+    const user = await getDevUser();
 
+    const {
+      name,
+      values,
+    } = req.body;
+
+    const entity =
+      await Entity.findById(
+        req.params.id
+      );
+
+    if (!entity) {
+      return res.status(404).json({
+        message: "Entity not found",
+      });
+    }
+
+    const world =
+      await getOwnedWorld(
+        entity.worldId,
+        user._id
+      );
+
+    if (!world) {
+      return res.status(404).json({
+        message: "Entity not found",
+      });
+    }
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({
+        message:
+          "Entity name is required",
+      });
+    }
+
+    const entityType =
+      await EntityType.findById(
+        entity.entityTypeId
+      );
+
+    if (!entityType) {
+      return res.status(404).json({
+        message:
+          "Entity type not found",
+      });
+    }
+
+    const submittedValues =
+      values || {};
+
+    const cleanedValues = {};
+
+    // Validate values using the Entity Type schema.
+    for (const field of entityType.fields) {
+      const value =
+        submittedValues[field.key];
+
+      if (field.required) {
+        const isEmpty =
+          value === undefined ||
+          value === null ||
+          value === "";
+
+        if (isEmpty) {
+          return res.status(400).json({
+            message:
+              `${field.label} is required`,
+          });
+        }
+      }
+
+      if (
+        value === undefined ||
+        value === null ||
+        value === ""
+      ) {
+        continue;
+      }
+
+      if (field.type === "number") {
+        const numberValue =
+          Number(value);
+
+        if (
+          Number.isNaN(
+            numberValue
+          )
+        ) {
+          return res.status(400).json({
+            message:
+              `${field.label} must be a number`,
+          });
+        }
+
+        cleanedValues[field.key] =
+          numberValue;
+
+        continue;
+      }
+
+      if (
+        field.type ===
+        "boolean"
+      ) {
+        cleanedValues[field.key] =
+          Boolean(value);
+
+        continue;
+      }
+
+      if (
+        field.type ===
+        "select"
+      ) {
+        if (
+          !field.options.includes(
+            value
+          )
+        ) {
+          return res.status(400).json({
+            message:
+              `Invalid option for ${field.label}`,
+          });
+        }
+
+        cleanedValues[field.key] =
+          value;
+
+        continue;
+      }
+
+      cleanedValues[field.key] =
+        value;
+    }
+
+    entity.name =
+      name.trim();
+
+    entity.values =
+      cleanedValues;
+
+    await entity.save();
+
+    const updatedEntity =
+      await Entity.findById(
+        entity._id
+      ).populate(
+        "entityTypeId",
+        "name icon"
+      );
+
+    res.json(
+      updatedEntity
+    );
+  } catch (error) {
+    console.error(
+      "Failed to update entity:",
+      error
+    );
+
+    res.status(500).json({
+      message:
+        "Failed to update entity",
+      error: error.message,
+    });
+  }
+});
 module.exports = router;

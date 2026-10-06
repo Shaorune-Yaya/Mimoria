@@ -1,0 +1,595 @@
+/* ======================================================
+   Explorer Sidebar
+   ====================================================== */
+
+.entity-tree-sidebar {
+  width: var(--explorer-width);
+  min-width: var(--explorer-width);
+  max-width: var(--explorer-width);
+
+  min-height: 0;
+
+  background: #111419;
+
+  border-right:
+    1px solid
+    var(--color-border);
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  overscroll-behavior:
+    contain;
+}
+
+.entity-tree-header {
+  position: sticky;
+  top: 0;
+
+  z-index: 10;
+
+  min-height: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 12px;
+
+  background: #111419;
+
+  border-bottom:
+    1px solid
+    var(--color-border);
+
+  color: #9da4af;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tree-header-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+}
+
+.tree-add-button {
+  min-width: 32px;
+  height: 30px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 2px;
+
+  padding: 0 7px;
+
+  border:
+    1px solid transparent;
+
+  border-radius: 5px;
+
+  background: transparent;
+
+  color:
+    var(--color-text-secondary);
+
+  cursor: pointer;
+
+  font-size: 16px;
+  line-height: 1;
+}
+
+.tree-add-button:hover {
+  background:
+    var(--color-bg-hover);
+
+  border-color:
+    var(--color-border-light);
+
+  color: #ffffff;
+}
+
+.tree-add-symbol {
+  position: relative;
+
+  top: -1px;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.entity-tree {
+  width: 100%;
+
+  padding: 6px 0;
+
+  overflow-x: hidden;
+}
+
+
+/* ======================================================
+   Folder Creation
+   ====================================================== */
+
+.folder-create-form {
+  padding: 7px;
+
+  border-bottom:
+    1px solid
+    var(--color-border);
+}
+
+.folder-create-parent {
+  margin-bottom: 5px;
+
+  color: #68717e;
+
+  font-size: 10px;
+}
+
+.folder-create-row {
+  display: flex;
+  align-items: center;
+
+  gap: 4px;
+}
+
+.folder-create-form input {
+  min-width: 0;
+
+  flex: 1;
+
+  padding: 6px 7px;
+
+  background: #101319;
+  color: #e4e7eb;
+
+  border:
+    1px solid #3b424e;
+
+  border-radius: 4px;
+
+  outline: none;
+}
+
+.folder-create-form input:focus {
+  border-color: #687483;
+}
+
+.folder-create-form button {
+  width: 28px;
+  height: 28px;
+
+  flex-shrink: 0;
+
+  border: none;
+  border-radius: 4px;
+
+  background:
+    transparent;
+
+  color: #aab1bc;
+
+  cursor: pointer;
+}
+
+.folder-create-form button:hover {
+  background: #272c35;
+
+  color: #ffffff;
+}
+
+
+/* ======================================================
+   Root Drop Zone
+   ====================================================== */
+
+.tree-root-drop-zone {
+  margin: 5px 7px;
+
+  padding: 4px 7px;
+
+  border:
+    1px dashed
+    transparent;
+
+  border-radius: 4px;
+
+  color: #535b67;
+
+  font-size: 10px;
+
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.tree-root-drop-zone.active {
+  background: #222832;
+
+  border-color: #657082;
+
+  color: #bcc3cc;
+}
+
+
+/* ======================================================
+   Explorer Nodes
+   ====================================================== */
+
+.explorer-row {
+  width: 100%;
+  max-width: 100%;
+
+  min-height: 30px;
+
+  display: flex;
+  align-items: center;
+
+  padding-right: 5px;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    transparent;
+
+  color: #bec4cd;
+
+  user-select: none;
+}
+
+.explorer-row:hover {
+  background:
+    var(--color-bg-hover-soft);
+}
+
+.explorer-row.selected {
+  background:
+    var(--color-bg-selected);
+
+  color: #ffffff;
+}
+
+.explorer-row.drop-target {
+  background: #25303c;
+
+  border-color: #566577;
+}
+
+.explorer-toggle {
+  width: 17px;
+  height: 28px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+  color: #747d89;
+
+  cursor: pointer;
+}
+
+.explorer-node-main {
+  min-width: 0;
+  max-width: 100%;
+
+  height: 28px;
+
+  flex: 1;
+
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  padding: 0;
+
+  overflow: hidden;
+
+  border: none;
+
+  background: transparent;
+  color: inherit;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.explorer-icon {
+  width: 20px;
+
+  flex-shrink: 0;
+
+  font-size: 14px;
+
+  text-align: center;
+}
+
+.explorer-name {
+  min-width: 0;
+
+  overflow: hidden;
+
+  font-size: 13px;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
+/* ======================================================
+   Explorer Row Actions
+   ====================================================== */
+
+.explorer-add-child,
+.explorer-drag-handle {
+  flex-shrink: 0;
+
+  border: none;
+  border-radius: 4px;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.explorer-add-child {
+  width: 22px;
+  height: 24px;
+
+  color: transparent;
+
+  font-size: 15px;
+}
+
+.explorer-drag-handle {
+  width: 22px;
+
+  color: transparent;
+
+  font-size: 12px;
+
+  cursor: grab;
+}
+
+.explorer-row:hover
+.explorer-add-child {
+  color: #747d89;
+}
+
+.explorer-row:hover
+.explorer-drag-handle {
+  color: #67707d;
+}
+
+.explorer-add-child:hover {
+  background: #303640;
+
+  color:
+    #ffffff !important;
+}
+
+.explorer-drag-handle:active {
+  cursor: grabbing;
+}
+
+
+/* ======================================================
+   Legacy Tree Styles
+   ====================================================== */
+
+.tree-type {
+  width: 100%;
+}
+
+.tree-type-row {
+  width: 100%;
+  height: 31px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 8px;
+
+  border: none;
+
+  background: transparent;
+  color: #c1c6cf;
+
+  cursor: pointer;
+
+  text-align: left;
+}
+
+.tree-type-row:hover {
+  background:
+    var(--color-bg-hover-soft);
+}
+
+.tree-arrow {
+  width: 16px;
+
+  color: #7f8794;
+
+  font-size: 17px;
+
+  text-align: center;
+}
+
+.tree-type-icon {
+  width: 24px;
+
+  font-size: 15px;
+
+  text-align: center;
+}
+
+.tree-type-name {
+  flex: 1;
+
+  overflow: hidden;
+
+  font-size: 13px;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tree-count {
+  margin-left: 8px;
+
+  color: #626a76;
+
+  font-size: 11px;
+}
+
+.tree-children {
+  margin-left: 16px;
+
+  padding-left: 12px;
+
+  border-left:
+    1px solid #343942;
+}
+
+.tree-entity-row {
+  width: 100%;
+  height: 29px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  padding: 0 8px;
+
+  border: none;
+
+  background: transparent;
+
+  color:
+    var(--color-text-secondary);
+
+  cursor: pointer;
+
+  font-size: 13px;
+
+  text-align: left;
+}
+
+.tree-entity-row:hover {
+  background:
+    var(--color-bg-hover-soft);
+
+  color: #ffffff;
+}
+
+.tree-entity-row.selected {
+  background:
+    var(--color-bg-selected);
+
+  color: #ffffff;
+}
+
+.tree-file-mark {
+  width: 10px;
+
+  color: #59616d;
+}
+
+.tree-empty {
+  padding: 6px 10px 8px;
+
+  color: #5f6772;
+
+  font-size: 11px;
+  font-style: italic;
+}
+
+
+/* ======================================================
+   Mobile Explorer
+   ====================================================== */
+
+@media (max-width: 760px) {
+  .entity-tree-sidebar {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+
+    height: 100%;
+
+    border-right: none;
+  }
+
+  .entity-tree-header {
+    min-height: 50px;
+
+    padding:
+      0 14px;
+  }
+
+  .explorer-row {
+    min-height: 42px;
+
+    padding-right: 8px;
+  }
+
+  .explorer-toggle {
+    width: 24px;
+    height: 40px;
+
+    font-size: 17px;
+  }
+
+  .explorer-node-main {
+    height: 40px;
+  }
+
+  .explorer-icon {
+    width: 24px;
+
+    font-size: 17px;
+  }
+
+  .explorer-name {
+    font-size: 14px;
+  }
+
+  .explorer-add-child {
+    width: 32px;
+    height: 34px;
+
+    color: #737c89;
+  }
+
+  /*
+   * Dragging tree nodes with touch gestures conflicts
+   * with scrolling, so the drag handle is hidden in
+   * mobile mode for now.
+   */
+
+  .explorer-drag-handle {
+    display: none;
+  }
+
+  .tree-root-drop-zone {
+    display: none;
+  }
+}

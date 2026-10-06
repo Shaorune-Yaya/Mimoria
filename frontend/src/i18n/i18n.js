@@ -1,11 +1,16 @@
 import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
+
+import {
+  initReactI18next,
+} from "react-i18next";
 
 import en from "./locales/en.json";
 import zhCN from "./locales/zh-CN.json";
 
 const savedLanguage =
-  localStorage.getItem("worldforge-language") || "en";
+  localStorage.getItem(
+    "mimoria-language"
+  );
 
 i18n
   .use(initReactI18next)
@@ -20,7 +25,10 @@ i18n
       },
     },
 
-    lng: savedLanguage,
+    lng:
+      savedLanguage ||
+      "en",
+
     fallbackLng: "en",
 
     interpolation: {

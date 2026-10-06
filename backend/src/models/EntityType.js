@@ -32,14 +32,14 @@ const fieldSchema = new mongoose.Schema(
       default: false,
     },
 
-    // Entity Reference 使用
+    // Used by Entity Reference fields.
     referenceEntityTypeId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "EntityType",
       default: null,
     },
 
-    // Dropdown / Select 使用
+    // Used by Dropdown / Select fields.
     options: {
       type: [String],
       default: [],
@@ -61,6 +61,7 @@ const entityTypeSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "World",
       required: true,
+      index: true,
     },
 
     name: {

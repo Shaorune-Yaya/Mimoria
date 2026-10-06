@@ -3,14 +3,14 @@ const express = require("express");
 const TreeNode = require("../models/TreeNode");
 const Entity = require("../models/Entity");
 
+const {
+  getDevUser,
+  getOwnedWorld,
+} = require("../utils/devUser");
+
 const router = express.Router();
 
-
-// ======================================================
-// Helper
-// 为旧 Entity 自动补 TreeNode
-// ======================================================
-
+// Create TreeNodes for Entities created before the tree system existed.
 async function syncMissingEntityNodes(worldId) {
   const entities = await Entity.find({
     worldId,
@@ -19,6 +19,10 @@ async function syncMissingEntityNodes(worldId) {
   const entityIds = entities.map(
     (entity) => entity._id
   );
+
+  if (entityIds.length === 0) {
+    return;
+  }
 
   const existingNodes =
     await TreeNode.find({
@@ -31,9 +35,8 @@ async function syncMissingEntityNodes(worldId) {
 
   const existingEntityIds =
     new Set(
-      existingNodes.map(
-        (node) =>
-          node.entityId.toString()
+      existingNodes.map((node) =>
+        node.entityId.toString()
       )
     );
 
@@ -59,56 +62,61 @@ async function syncMissingEntityNodes(worldId) {
     missingEntities.map(
       (entity, index) => ({
         worldId,
-
         kind: "entity",
-
         entityId: entity._id,
-
         parentId: null,
-
-        order:
-          rootCount + index,
+        order: rootCount + index,
       })
     );
 
-  await TreeNode.insertMany(
-    newNodes,
-    {
-      ordered: false,
+  try {
+    await TreeNode.insertMany(
+      newNodes,
+      {
+        ordered: false,
+      }
+    );
+  } catch (error) {
+    // Duplicate nodes may occur if simultaneous requests
+    // try to synchronize the tree at the same time.
+    if (error.code !== 11000) {
+      throw error;
     }
-  );
+  }
 }
 
-
-// ======================================================
-// GET Tree
-// 同时自动补齐旧 Entity
-//
-// GET /api/tree/world/:worldId
-// ======================================================
-
+// Get the complete tree for a World.
 router.get(
   "/world/:worldId",
   async (req, res) => {
     try {
-      const { worldId } =
-        req.params;
+      const user = await getDevUser();
+
+      const world = await getOwnedWorld(
+        req.params.worldId,
+        user._id
+      );
+
+      if (!world) {
+        return res.status(404).json({
+          message: "World not found",
+        });
+      }
 
       await syncMissingEntityNodes(
-        worldId
+        world._id
       );
 
       const nodes =
         await TreeNode.find({
-          worldId,
+          worldId: world._id,
         })
           .populate({
             path: "entityId",
 
             populate: {
               path: "entityTypeId",
-              select:
-                "name icon",
+              select: "name icon",
             },
           })
           .sort({
@@ -132,17 +140,13 @@ router.get(
   }
 );
 
-
-// ======================================================
-// CREATE Folder
-//
-// POST /api/tree/folders
-// ======================================================
-
+// Create a folder.
 router.post(
   "/folders",
   async (req, res) => {
     try {
+      const user = await getDevUser();
+
       const {
         worldId,
         name,
@@ -156,18 +160,25 @@ router.post(
         });
       }
 
-      if (
-        !name ||
-        !name.trim()
-      ) {
+      if (!name || !name.trim()) {
         return res.status(400).json({
           message:
             "Folder name is required",
         });
       }
 
+      const world = await getOwnedWorld(
+        worldId,
+        user._id
+      );
 
-      // 如果指定父节点，确认属于同一个 World
+      if (!world) {
+        return res.status(404).json({
+          message: "World not found",
+        });
+      }
+
+      // If a parent is provided, verify that it belongs to this World.
       if (parentId) {
         const parent =
           await TreeNode.findById(
@@ -175,39 +186,33 @@ router.post(
           );
 
         if (!parent) {
-          return res
-            .status(404)
-            .json({
-              message:
-                "Parent node not found",
-            });
+          return res.status(404).json({
+            message:
+              "Parent node not found",
+          });
         }
 
         if (
           parent.worldId.toString() !==
-          worldId
+          world._id.toString()
         ) {
-          return res
-            .status(400)
-            .json({
-              message:
-                "Parent node belongs to another world",
-            });
+          return res.status(400).json({
+            message:
+              "Parent node belongs to another world",
+          });
         }
       }
 
-
       const siblingCount =
         await TreeNode.countDocuments({
-          worldId,
+          worldId: world._id,
           parentId:
             parentId || null,
         });
 
-
       const folder =
         new TreeNode({
-          worldId,
+          worldId: world._id,
 
           kind: "folder",
 
@@ -219,10 +224,8 @@ router.post(
           order: siblingCount,
         });
 
-
       const savedFolder =
         await folder.save();
-
 
       res
         .status(201)
@@ -242,16 +245,7 @@ router.post(
   }
 );
 
-
-// ======================================================
-// 检查 target 是否在 dragged node 的后代里
-// 防止：
-// A
-// └ B
-//
-// 然后把 A 拖进 B
-// ======================================================
-
+// Check whether a target node is inside another node's descendants.
 async function isDescendant(
   nodeId,
   possibleDescendantId
@@ -283,31 +277,21 @@ async function isDescendant(
   return false;
 }
 
-
-// ======================================================
-// MOVE Node
-//
-// PUT /api/tree/:nodeId/move
-//
-// body:
-// {
-//   parentId: "..."
-// }
-//
-// parentId null = Root
-// ======================================================
-
+// Move a node.
+// parentId = null moves it to the tree root.
 router.put(
   "/:nodeId/move",
   async (req, res) => {
     try {
-      const { nodeId } =
-        req.params;
+      const user = await getDevUser();
+
+      const {
+        nodeId,
+      } = req.params;
 
       const {
         parentId,
       } = req.body;
-
 
       const node =
         await TreeNode.findById(
@@ -315,106 +299,100 @@ router.put(
         );
 
       if (!node) {
-        return res
-          .status(404)
-          .json({
-            message:
-              "Tree node not found",
-          });
+        return res.status(404).json({
+          message:
+            "Tree node not found",
+        });
       }
 
+      const world = await getOwnedWorld(
+        node.worldId,
+        user._id
+      );
 
-      // 移回 Root
+      if (!world) {
+        return res.status(404).json({
+          message:
+            "Tree node not found",
+        });
+      }
+
+      // Move the node back to the root.
       if (!parentId) {
         const rootCount =
           await TreeNode.countDocuments({
-            worldId:
-              node.worldId,
+            worldId: world._id,
             parentId: null,
+            _id: {
+              $ne: node._id,
+            },
           });
 
-
         node.parentId = null;
-
-        node.order =
-          rootCount;
+        node.order = rootCount;
 
         await node.save();
-
 
         return res.json(node);
       }
 
-
-      // 不能拖到自己下面
+      // A node cannot be placed inside itself.
       if (
-        nodeId === parentId
+        nodeId.toString() ===
+        parentId.toString()
       ) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "A node cannot be its own parent",
-          });
+        return res.status(400).json({
+          message:
+            "A node cannot be its own parent",
+        });
       }
-
 
       const parent =
         await TreeNode.findById(
           parentId
         );
 
-
       if (!parent) {
-        return res
-          .status(404)
-          .json({
-            message:
-              "Target node not found",
-          });
+        return res.status(404).json({
+          message:
+            "Target node not found",
+        });
       }
-
 
       if (
         parent.worldId.toString() !==
-        node.worldId.toString()
+        world._id.toString()
       ) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Cannot move between different worlds",
-          });
+        return res.status(400).json({
+          message:
+            "Cannot move between different worlds",
+        });
       }
 
-
-      // 防止循环
+      // Prevent circular tree structures.
       const createsCycle =
         await isDescendant(
           nodeId,
           parentId
         );
 
-
       if (createsCycle) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Cannot move a node inside its own descendant",
-          });
+        return res.status(400).json({
+          message:
+            "Cannot move a node inside its own descendant",
+        });
       }
-
 
       const siblingCount =
         await TreeNode.countDocuments({
-          worldId:
-            node.worldId,
+          worldId: world._id,
 
-          parentId:
-            parent._id,
+          parentId: parent._id,
+
+          _id: {
+            $ne: node._id,
+          },
         });
-
 
       node.parentId =
         parent._id;
@@ -423,7 +401,6 @@ router.put(
         siblingCount;
 
       await node.save();
-
 
       res.json(node);
     } catch (error) {
@@ -441,72 +418,68 @@ router.put(
   }
 );
 
-
-// ======================================================
-// RENAME Folder
-//
-// PUT /api/tree/:nodeId
-// ======================================================
-
+// Rename a folder.
 router.put(
   "/:nodeId",
   async (req, res) => {
     try {
+      const user = await getDevUser();
+
       const {
         name,
       } = req.body;
-
 
       const node =
         await TreeNode.findById(
           req.params.nodeId
         );
 
-
       if (!node) {
-        return res
-          .status(404)
-          .json({
-            message:
-              "Tree node not found",
-          });
+        return res.status(404).json({
+          message:
+            "Tree node not found",
+        });
       }
 
+      const world = await getOwnedWorld(
+        node.worldId,
+        user._id
+      );
+
+      if (!world) {
+        return res.status(404).json({
+          message:
+            "Tree node not found",
+        });
+      }
 
       if (
         node.kind !== "folder"
       ) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Only folders can be renamed from the tree",
-          });
+        return res.status(400).json({
+          message:
+            "Only folders can be renamed from the tree",
+        });
       }
 
-
-      if (
-        !name ||
-        !name.trim()
-      ) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Folder name is required",
-          });
+      if (!name || !name.trim()) {
+        return res.status(400).json({
+          message:
+            "Folder name is required",
+        });
       }
-
 
       node.name =
         name.trim();
 
       await node.save();
 
-
       res.json(node);
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Failed to rename folder:",
+        error
+      );
 
       res.status(500).json({
         message:
@@ -517,53 +490,52 @@ router.put(
   }
 );
 
-
-// ======================================================
-// DELETE Folder
-//
-// DELETE /api/tree/:nodeId
-//
-// 默认：删除文件夹，但把里面东西提到上一级
-// 不会删除 Entity
-// ======================================================
-
+// Delete a folder.
+// Child nodes are moved one level up instead of being deleted.
 router.delete(
   "/:nodeId",
   async (req, res) => {
     try {
+      const user = await getDevUser();
+
       const node =
         await TreeNode.findById(
           req.params.nodeId
         );
 
-
       if (!node) {
-        return res
-          .status(404)
-          .json({
-            message:
-              "Tree node not found",
-          });
+        return res.status(404).json({
+          message:
+            "Tree node not found",
+        });
       }
 
+      const world = await getOwnedWorld(
+        node.worldId,
+        user._id
+      );
+
+      if (!world) {
+        return res.status(404).json({
+          message:
+            "Tree node not found",
+        });
+      }
 
       if (
         node.kind !== "folder"
       ) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Entity nodes cannot be deleted from this endpoint",
-          });
+        return res.status(400).json({
+          message:
+            "Entity nodes cannot be deleted from this endpoint",
+        });
       }
 
-
-      // 子节点提升到当前 Folder 的父级
+      // Move all children to the deleted folder's parent.
       await TreeNode.updateMany(
         {
-          parentId:
-            node._id,
+          worldId: world._id,
+          parentId: node._id,
         },
         {
           $set: {
@@ -573,16 +545,17 @@ router.delete(
         }
       );
 
-
       await node.deleteOne();
-
 
       res.json({
         message:
           "Folder deleted",
       });
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Failed to delete folder:",
+        error
+      );
 
       res.status(500).json({
         message:
@@ -592,6 +565,5 @@ router.delete(
     }
   }
 );
-
 
 module.exports = router;

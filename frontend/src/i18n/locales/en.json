@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "WorldForge"
+    "name": "Mimoria"
   },
 
   "worlds": {
@@ -27,23 +27,23 @@
   },
 
   "workspace": {
-  "loading": "Loading world...",
-  "notFound": "World not found.",
+    "loading": "Loading world...",
+    "notFound": "World not found.",
 
-  "library": "Library",
+    "library": "Library",
 
-  "home": "Home",
-  "entityTypes": "Entity Types",
-  "entities": "Entities",
-  "documents": "Documents",
+    "home": "Home",
+    "entityTypes": "Entity Types",
+    "entities": "Entities",
+    "documents": "Documents",
 
-  "timeline": "Timeline",
-  "graph": "Graph",
+    "timeline": "Timeline",
+    "graph": "Graph",
 
-  "settings": "Settings",
+    "settings": "Settings",
 
-  "startMessage": "Your world workspace is ready. Start building your lore here."
-},
+    "startMessage": "Your world workspace is ready. Start building your lore here."
+  },
 
   "entityTypes": {
     "title": "Entity Types",
@@ -70,85 +70,87 @@
   },
 
   "schema": {
-  "fields": "Fields",
-  "help": "Fields define the information stored by every entity of this type.",
+    "fields": "Fields",
+    "help": "Fields define the information stored by every entity of this type.",
 
-  "addField": "+ Add Field",
-  "createField": "Create Field",
+    "addField": "+ Add Field",
+    "createField": "Create Field",
 
-  "fieldName": "Field Name",
-  "fieldNamePlaceholder": "Age, Population, Faction...",
+    "fieldName": "Field Name",
+    "fieldNamePlaceholder": "Age, Population, Faction...",
 
-  "fieldType": "Field Type",
+    "fieldType": "Field Type",
 
-  "referenceType": "Allowed Entity Type",
-  "anyEntityType": "Any Entity Type",
+    "referenceType": "Allowed Entity Type",
+    "anyEntityType": "Any Entity Type",
 
-  "requiredField": "This field is required",
-  "required": "Required",
+    "requiredField": "This field is required",
+    "required": "Required",
 
-  "nameField": "Name",
+    "nameField": "Name",
 
-  "empty": "No custom fields yet. Add a field to define this entity type.",
+    "empty": "No custom fields yet. Add a field to define this entity type.",
 
-  "edit": "Edit",
-  "delete": "Delete",
-  "editField": "Edit Field",
-  "saveChanges": "Save Changes",
-  "deleteConfirm": "Are you sure you want to delete this field?",
+    "edit": "Edit",
+    "delete": "Delete",
+    "editField": "Edit Field",
+    "saveChanges": "Save Changes",
+    "deleteConfirm": "Are you sure you want to delete this field?",
 
-  "options": "Dropdown Options",
-  "option": "Option",
-  "addOption": "+ Add Option"
-},
+    "options": "Dropdown Options",
+    "option": "Option",
+    "addOption": "+ Add Option"
+  },
 
-"fieldTypes": {
-  "text": "Text",
-  "long-text": "Long Text",
-  "number": "Number",
-  "boolean": "Boolean",
-  "date": "Date",
-  "select": "Dropdown",
-  "entity-reference": "Entity Reference"
-},
+  "fieldTypes": {
+    "text": "Text",
+    "long-text": "Long Text",
+    "number": "Number",
+    "boolean": "Boolean",
+    "date": "Date",
+    "select": "Dropdown",
+    "entity-reference": "Entity Reference"
+  },
 
-"entities": {
-  "title": "Entities",
-  "subtitle": "Create and manage the people, places, objects, events, and other information in your world.",
+  "entities": {
+    "title": "Entities",
+    "subtitle": "Create and manage the people, places, objects, events, and other information in your world.",
 
-  "newEntity": "+ New Entity",
-  "createTitle": "Create Entity",
-  "createDescription": "Select an entity type and fill in its defined fields.",
+    "newEntity": "+ New Entity",
+    "createTitle": "Create Entity",
+    "createDescription": "Select an entity type and fill in its defined fields.",
 
-  "entityType": "Entity Type",
-  "selectType": "Select an entity type...",
+    "entityType": "Entity Type",
+    "selectType": "Select an entity type...",
 
-  "create": "Create Entity",
+    "create": "Create Entity",
 
-  "selectOption": "Select an option...",
-  "selectEntity": "Select an entity...",
+    "selectOption": "Select an option...",
+    "selectEntity": "Select an entity...",
 
-  "yes": "Yes",
-  "no": "No",
+    "yes": "Yes",
+    "no": "No",
 
-  "emptyTitle": "No Entities Yet",
-  "emptyDescription": "Create your first entity to start building this world.",
+    "emptyTitle": "No Entities Yet",
+    "emptyDescription": "Create your first entity to start building this world.",
 
-  "noEntitiesInType": "No entities",
+    "noEntitiesInType": "No entities",
 
-  "browserTitle": "Entity Browser",
-  "browserDescription": "Use the explorer on the left to organize and browse your world. Select an entity to view its details.",
+    "browserTitle": "Entity Browser",
+    "browserDescription": "Use the explorer on the left to organize and browse your world. Select an entity to view its details.",
 
-  "noCustomFields": "This entity has no custom fields.",
+    "noCustomFields": "This entity has no custom fields.",
 
-  "lastUpdated": "Last updated"
-},
+    "lastUpdated": "Last updated",
+    "edit": "Edit",
+    "editTitle": "Edit Entity",
+    "saveChanges": "Save Changes"
+  },
 
-"tree": {
-  "newFolder": "New Folder",
-  "folderName": "Folder name...",
-  "createAtRoot": "Create at root",
-  "createInside": "Create inside selected node"
-}
-
+  "tree": {
+    "newFolder": "New Folder",
+    "folderName": "Folder name...",
+    "createAtRoot": "Create at root",
+    "createInside": "Create inside selected node"
+  }
 }

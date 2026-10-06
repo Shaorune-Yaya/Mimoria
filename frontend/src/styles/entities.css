@@ -1,0 +1,442 @@
+/* ======================================================
+   Entity Creation / Editing
+   ====================================================== */
+
+.entity-create-panel,
+.entity-edit-panel {
+  width: min(
+    100%,
+    var(--content-width)
+  );
+
+  max-width: none;
+}
+
+.entity-form-divider {
+  height: 1px;
+
+  margin: 20px 0;
+
+  background: #303640;
+}
+
+.selected-type-heading {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  margin-bottom: 18px;
+
+  font-size: 18px;
+}
+
+.dynamic-field {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  margin-top: 10px;
+}
+
+.required-star {
+  margin-left: 4px;
+
+  color: #d98585;
+}
+
+.entity-checkbox {
+  margin-top: 2px;
+}
+
+
+/* ======================================================
+   Entity Cards
+   ====================================================== */
+
+.entity-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(
+        240px,
+        320px
+      )
+    );
+
+  gap: 16px;
+}
+
+.entity-card {
+  min-height: 100px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 15px;
+
+  padding: 18px;
+
+  background:
+    var(--color-bg-panel);
+
+  border:
+    1px solid
+    var(--color-border-panel);
+
+  border-radius: 9px;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.entity-card:hover {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    var(--color-border-hover);
+}
+
+.entity-card-icon {
+  width: 46px;
+  height: 46px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    var(--color-bg-hover);
+
+  border-radius:
+    var(--radius-md);
+
+  font-size: 23px;
+}
+
+.entity-card h2 {
+  margin: 0 0 6px;
+
+  font-size: 17px;
+}
+
+.entity-card p {
+  margin: 0;
+
+  color: #7f8794;
+
+  font-size: 13px;
+}
+
+
+/* ======================================================
+   Entity Browser
+   ====================================================== */
+
+.entity-browser-message {
+  max-width: 650px;
+
+  margin-top: 80px;
+
+  color:
+    var(--color-text-dim);
+}
+
+.entity-browser-message h2 {
+  margin-bottom: 8px;
+
+  color: #a6adb8;
+
+  font-size: 20px;
+}
+
+.entity-browser-message p {
+  line-height: 1.6;
+}
+
+
+/* ======================================================
+   Entity Detail
+   ====================================================== */
+
+.entity-detail-panel {
+  width: min(
+    100%,
+    var(--content-wide-width)
+  );
+
+  min-width: 0;
+
+  margin-top: 10px;
+
+  background:
+    var(--color-bg-panel-alt);
+
+  border:
+    1px solid #303640;
+
+  border-radius:
+    var(--radius-lg);
+
+  overflow: hidden;
+}
+
+.entity-detail-panel-header {
+  padding: 22px 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  border-bottom:
+    1px solid
+    var(--color-border-panel);
+}
+
+.entity-detail-title {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+}
+
+.entity-detail-title > div:last-child {
+  min-width: 0;
+}
+
+.entity-detail-icon {
+  width: 48px;
+  height: 48px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    var(--color-bg-hover);
+
+  border-radius:
+    var(--radius-md);
+
+  font-size: 25px;
+}
+
+.entity-detail-title h2 {
+  margin: 0 0 4px;
+
+  overflow: hidden;
+
+  font-size: 22px;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.entity-detail-title span {
+  color: #777f8d;
+
+  font-size: 13px;
+}
+
+.entity-detail-panel-body {
+  padding:
+    10px 24px 22px;
+}
+
+.detail-field {
+  min-height: 62px;
+
+  display: grid;
+
+  grid-template-columns:
+    clamp(
+      150px,
+      18%,
+      240px
+    )
+    minmax(0, 1fr);
+
+  align-items: start;
+
+  gap:
+    clamp(
+      20px,
+      3vw,
+      42px
+    );
+
+  padding: 16px 0;
+
+  border-bottom:
+    1px solid #292e37;
+}
+
+.detail-field:last-child {
+  border-bottom: none;
+}
+
+.detail-field-long {
+  display: block;
+}
+
+.detail-field-long
+.detail-field-label {
+  margin-bottom: 10px;
+}
+
+.detail-field-label {
+  color: #838b98;
+
+  font-size: 13px;
+}
+
+.detail-field-value {
+  max-width: 900px;
+
+  color: #e2e5e9;
+
+  font-size: 14px;
+  line-height: 1.65;
+
+  white-space: pre-wrap;
+
+  word-break: break-word;
+}
+
+.detail-empty {
+  padding: 35px;
+
+  color: #727a87;
+
+  text-align: center;
+}
+
+.entity-detail-panel-footer {
+  padding: 12px 24px;
+
+  border-top:
+    1px solid
+    var(--color-border-panel);
+
+  color: #656d79;
+
+  font-size: 11px;
+}
+
+
+/* ======================================================
+   Mobile Bottom Sheet
+   ====================================================== */
+
+.mobile-sheet-close {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .entity-page-header {
+    position: relative;
+
+    margin-bottom: 18px;
+
+    padding-right: 38px;
+  }
+
+  .entity-page-header h1 {
+    font-size: 22px;
+  }
+
+  .entity-page-header p {
+    font-size: 13px;
+  }
+
+  .mobile-sheet-close {
+    position: absolute;
+
+    top: 0;
+    right: 0;
+
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border:
+      1px solid
+      var(--color-border-light);
+
+    border-radius: 6px;
+
+    background:
+      var(--color-bg-panel);
+
+    color:
+      var(--color-text-secondary);
+
+    cursor: pointer;
+
+    font-size: 20px;
+  }
+
+  .entity-detail-panel,
+  .entity-create-panel,
+  .entity-edit-panel {
+    width: 100%;
+
+    margin-top: 0;
+  }
+
+  .entity-detail-panel {
+    border-radius: 8px;
+  }
+
+  .entity-detail-panel-header {
+    padding: 16px;
+  }
+
+  .entity-detail-panel-body {
+    padding:
+      6px 16px 16px;
+  }
+
+  .detail-field {
+    display: block;
+
+    padding: 13px 0;
+  }
+
+  .detail-field-label {
+    margin-bottom: 7px;
+  }
+
+  .entity-detail-panel-footer {
+    padding: 11px 16px;
+  }
+
+  .entity-create-panel,
+  .entity-edit-panel {
+    padding: 18px;
+  }
+
+  .entity-browser-message {
+    display: none;
+  }
+}
