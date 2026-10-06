@@ -2,6 +2,7 @@ const express = require("express");
 
 const Entity = require("../models/Entity");
 const EntityType = require("../models/EntityType");
+const TreeNode = require("../models/TreeNode");
 
 const router = express.Router();
 
@@ -225,6 +226,24 @@ router.post("/", async (req, res) => {
     const savedEntity =
       await entity.save();
 
+    const rootCount =
+      await TreeNode.countDocuments({
+        worldId,
+        parentId: null,
+      });
+
+    await TreeNode.create({
+      worldId,
+
+      kind: "entity",
+
+      entityId:
+        savedEntity._id,
+
+      parentId: null,
+
+      order: rootCount,
+    });
 
     const populatedEntity =
       await Entity.findById(

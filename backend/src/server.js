@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 const entityTypeRoutes = require("./routes/entityTypeRoutes");
 const entityRoutes = require("./routes/entityRoutes");
 const worldRoutes = require("./routes/worldRoutes");
-
+const treeRoutes = require("./routes/treeRoutes");
 dotenv.config();
 
 const app = express();
@@ -19,6 +19,9 @@ app.use("/api/worlds", worldRoutes);
 // Entity Type API
 app.use("/api/entity-types", entityTypeRoutes);
 app.use("/api/entities", entityRoutes);
+
+//Entity Tree API
+app.use("/api/tree", treeRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {

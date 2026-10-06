@@ -57,9 +57,29 @@ function EntitiesPage() {
   // ==========================================
 
   const [
-    expandedTypes,
-    setExpandedTypes,
+    treeNodes,
+    setTreeNodes,
+  ] = useState([]);
+
+  const [
+    expandedNodes,
+    setExpandedNodes,
   ] = useState({});
+
+  const [
+    showFolderForm,
+    setShowFolderForm,
+  ] = useState(false);
+
+  const [
+    folderName,
+    setFolderName,
+  ] = useState("");
+
+  const [
+    folderParentId,
+    setFolderParentId,
+  ] = useState(null);
 
 
   // ==========================================
@@ -161,7 +181,90 @@ function EntitiesPage() {
     }
   }
 
+  // ==========================================
+  // Entity Tree
+  // ========================================== 
 
+  async function fetchTree() {
+    try {
+      const response =
+        await fetch(
+          `http://localhost:3000/api/tree/world/${worldId}`
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          "Failed to fetch tree"
+        );
+      }
+
+      const data =
+        await response.json();
+
+      setTreeNodes(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  // ==========================================
+  // Create Folder
+  // ==========================================
+  async function createFolder(
+    event
+  ) {
+    event.preventDefault();
+
+    if (!folderName.trim()) {
+      return;
+    }
+
+    try {
+      const response =
+        await fetch(
+          "http://localhost:3000/api/tree/folders",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify({
+                worldId,
+
+                name:
+                  folderName,
+
+                parentId:
+                  folderParentId,
+              }),
+          }
+        );
+
+
+      if (!response.ok) {
+        const data =
+          await response.json();
+
+        throw new Error(
+          data.message ||
+            "Failed to create folder"
+        );
+      }
+
+
+      setFolderName("");
+      setFolderParentId(null);
+      setShowFolderForm(false);
+
+      await fetchTree();
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
+  }
   // ==========================================
   // Entity Reference Options
   // ==========================================
@@ -383,6 +486,35 @@ function EntitiesPage() {
     setReferenceOptions({});
   }
 
+  // ==========================================
+  // Entity Tree
+  // ========================================== 
+  
+  function getChildren(
+    parentId
+  ) {
+    return treeNodes
+      .filter((node) => {
+        if (!parentId) {
+          return !node.parentId;
+        }
+
+        const nodeParentId =
+          typeof node.parentId ===
+          "object"
+            ? node.parentId._id
+            : node.parentId;
+
+        return (
+          nodeParentId ===
+          parentId
+        );
+      })
+      .sort(
+        (a, b) =>
+          a.order - b.order
+      );
+  }
 
   // ==========================================
   // Entity Tree
@@ -559,6 +691,7 @@ function EntitiesPage() {
     fetchWorld();
     fetchEntityTypes();
     fetchEntities();
+    fetchTree();
   }, [worldId]);
 
 
@@ -1070,8 +1203,13 @@ function EntitiesPage() {
               "entity-tree"
           >
 
-            {entityTypes.map(
-              (type) => {
+            {entityTypes
+              .filter(
+                (type) =>
+                  getEntitiesByType(type._id).length > 0
+              )
+              .map(
+                (type) => {
 
                 const typeEntities =
                   getEntitiesByType(
