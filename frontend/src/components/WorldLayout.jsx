@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import {
   useEffect,
   useRef,
@@ -10,12 +11,17 @@ import SecondaryWorkspacePane from "./SecondaryWorkspacePane";
 
 const MIN_SPLIT_PERCENT = 25;
 const MAX_SPLIT_PERCENT = 75;
+=======
+import AppHeader from "./AppHeader";
+import WorldSidebar from "./WorldSidebar";
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
 function WorldLayout({
   worldId,
   worldName,
   backTo = "/",
   secondarySidebar = null,
+<<<<<<< HEAD
   enableUltrawidePane = false,
   children,
 }) {
@@ -279,10 +285,15 @@ function WorldLayout({
     );
   }
 
+=======
+  children,
+}) {
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   return (
     <div className="workspace">
       <AppHeader
         showBackButton
+<<<<<<< HEAD
         showMenuButton
         backTo={backTo}
         worldName={
@@ -330,10 +341,20 @@ function WorldLayout({
           worldId={
             worldId
           }
+=======
+        backTo={backTo}
+        worldName={worldName}
+      />
+
+      <div className="workspace-body">
+        <WorldSidebar
+          worldId={worldId}
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
         />
 
         {secondarySidebar}
 
+<<<<<<< HEAD
         <div
           className={
             secondaryPaneOpen
@@ -433,6 +454,11 @@ function WorldLayout({
             </>
           )}
         </div>
+=======
+        <main className="workspace-main">
+          {children}
+        </main>
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
       </div>
     </div>
   );

@@ -11,6 +11,7 @@
 
   padding: 0 40px;
 
+<<<<<<< HEAD
   background:
     var(--color-bg-topbar);
 
@@ -29,6 +30,14 @@
     var(--topbar-height);
 
   flex-shrink: 0;
+=======
+  background: var(--color-bg-topbar);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.workspace-topbar {
+  height: var(--topbar-height);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   display: flex;
   align-items: center;
@@ -36,12 +45,17 @@
 
   padding: 0 18px;
 
+<<<<<<< HEAD
   background:
     var(--color-bg-topbar);
 
   border-bottom:
     1px solid
     var(--color-border);
+=======
+  background: var(--color-bg-topbar);
+  border-bottom: 1px solid var(--color-border);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 .workspace-topbar-left {
@@ -53,6 +67,7 @@
   gap: 12px;
 }
 
+<<<<<<< HEAD
 .workspace-topbar-right {
   flex-shrink: 0;
 
@@ -76,12 +91,20 @@
 
   cursor: pointer;
 
+=======
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+
+  cursor: pointer;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   user-select: none;
 }
 
 .language-selector select {
   padding: 7px 10px;
 
+<<<<<<< HEAD
   background:
     var(--color-bg-panel);
 
@@ -94,17 +117,29 @@
 
   border-radius:
     var(--radius-sm);
+=======
+  background: var(--color-bg-panel);
+  color: var(--color-text);
+
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   cursor: pointer;
 }
 
+<<<<<<< HEAD
 .back-button,
 .mobile-menu-button {
+=======
+.back-button {
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   width: 34px;
   height: 34px;
 
   flex-shrink: 0;
 
+<<<<<<< HEAD
   display: flex;
   align-items: center;
   justify-content: center;
@@ -123,10 +158,18 @@
 
   color:
     var(--color-text);
+=======
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
+
+  background: var(--color-bg-panel);
+  color: var(--color-text);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   cursor: pointer;
 }
 
+<<<<<<< HEAD
 .back-button:hover,
 .mobile-menu-button:hover {
   background:
@@ -137,6 +180,10 @@
   display: none;
 
   font-size: 18px;
+=======
+.back-button:hover {
+  background: var(--color-bg-hover);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 .world-title-divider {
@@ -144,8 +191,11 @@
 }
 
 .workspace-world-name {
+<<<<<<< HEAD
   min-width: 0;
 
+=======
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   overflow: hidden;
 
   color: #b9bec7;
@@ -162,6 +212,7 @@
    ====================================================== */
 
 .workspace {
+<<<<<<< HEAD
   width: 100vw;
   height: 100vh;
 
@@ -202,10 +253,26 @@
     var(--sidebar-width)
     var(--explorer-width)
     minmax(0, 1fr);
+=======
+  min-height: 100vh;
+
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.workspace-body {
+  display: flex;
+
+  min-height:
+    calc(
+      100vh - var(--topbar-height)
+    );
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 
 /* ======================================================
+<<<<<<< HEAD
    Primary Navigation
    ====================================================== */
 
@@ -220,12 +287,21 @@
     var(--sidebar-width);
 
   min-height: 0;
+=======
+   Primary Sidebar
+   ====================================================== */
+
+.workspace-sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   display: flex;
   flex-direction: column;
 
   padding: 18px 12px;
 
+<<<<<<< HEAD
   background:
     var(--color-bg-sidebar);
 
@@ -239,6 +315,10 @@
 
 .workspace-sidebar--desktop {
   grid-column: 1;
+=======
+  background: var(--color-bg-sidebar);
+  border-right: 1px solid var(--color-border);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 .sidebar-section-title {
@@ -254,6 +334,7 @@
 }
 
 .sidebar-item {
+<<<<<<< HEAD
   position: relative;
 
   width: 100%;
@@ -277,6 +358,18 @@
 
   color:
     var(--color-text-secondary);
+=======
+  width: 100%;
+
+  padding: 9px 10px;
+  margin-bottom: 3px;
+
+  border: none;
+  border-radius: var(--radius-sm);
+
+  background: transparent;
+  color: var(--color-text-secondary);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   text-align: left;
 
@@ -285,19 +378,27 @@
 
 .sidebar-item:hover:not(:disabled) {
   background: #1e222a;
+<<<<<<< HEAD
 
+=======
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   color: #ffffff;
 }
 
 .sidebar-item.active {
+<<<<<<< HEAD
   background:
     var(--color-bg-hover);
 
+=======
+  background: var(--color-bg-hover);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   color: #ffffff;
 }
 
 .sidebar-item:disabled {
   opacity: 0.42;
+<<<<<<< HEAD
 
   cursor: default;
 }
@@ -327,6 +428,11 @@
   cursor: grabbing;
 }
 
+=======
+  cursor: default;
+}
+
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 .sidebar-divider {
   height: 1px;
 
@@ -341,6 +447,7 @@
 
 
 /* ======================================================
+<<<<<<< HEAD
    Split Workspace
    ====================================================== */
 
@@ -380,10 +487,14 @@
 
 /* ======================================================
    Primary Workspace Pane
+=======
+   Workspace Main Content
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
    ====================================================== */
 
 .workspace-main {
   min-width: 0;
+<<<<<<< HEAD
   min-height: 0;
 
   width: 100%;
@@ -613,10 +724,16 @@
   flex: 1;
 
   padding: 14px;
+=======
+  flex: 1;
+
+  padding: 50px;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   overflow: auto;
 }
 
+<<<<<<< HEAD
 
 /* ======================================================
    Dock Overlay
@@ -874,6 +991,10 @@
     100%,
     900px
   );
+=======
+.workspace-welcome {
+  max-width: 760px;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   margin: 40px auto;
 }
@@ -887,19 +1008,27 @@
 .workspace-welcome h1 {
   margin: 0 0 12px;
 
+<<<<<<< HEAD
   font-size:
     clamp(
       30px,
       2vw,
       40px
     );
+=======
+  font-size: 36px;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 .workspace-welcome p {
   margin: 0;
 
+<<<<<<< HEAD
   color:
     var(--color-text-muted);
+=======
+  color: var(--color-text-muted);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   font-size: 16px;
   line-height: 1.7;
@@ -910,6 +1039,7 @@
 
   padding: 28px;
 
+<<<<<<< HEAD
   background:
     var(--color-bg-panel);
 
@@ -919,6 +1049,12 @@
 
   border-radius:
     var(--radius-lg);
+=======
+  background: var(--color-bg-panel);
+
+  border: 1px dashed var(--color-border-light);
+  border-radius: var(--radius-lg);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   color: #777f8d;
 }
@@ -930,15 +1066,21 @@
   align-items: center;
   justify-content: center;
 
+<<<<<<< HEAD
   background:
     var(--color-bg);
 
   color:
     var(--color-text-secondary);
+=======
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 
 /* ======================================================
+<<<<<<< HEAD
    Mobile Drawer
    ====================================================== */
 
@@ -1212,5 +1354,17 @@
   .workspace-main {
     padding:
       24px 14px 24px;
+=======
+   Responsive Layout
+   ====================================================== */
+
+@media (max-width: 900px) {
+  .workspace-sidebar {
+    width: 190px;
+  }
+
+  .workspace-main {
+    padding: 30px;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   }
 }

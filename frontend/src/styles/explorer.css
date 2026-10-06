@@ -4,6 +4,7 @@
 
 .entity-tree-sidebar {
   width: var(--explorer-width);
+<<<<<<< HEAD
   min-width: var(--explorer-width);
   max-width: var(--explorer-width);
 
@@ -29,6 +30,19 @@
   z-index: 10;
 
   min-height: 46px;
+=======
+  flex-shrink: 0;
+
+  background: #111419;
+
+  border-right: 1px solid var(--color-border);
+
+  overflow-y: auto;
+}
+
+.entity-tree-header {
+  height: 44px;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   display: flex;
   align-items: center;
@@ -36,11 +50,15 @@
 
   padding: 0 12px;
 
+<<<<<<< HEAD
   background: #111419;
 
   border-bottom:
     1px solid
     var(--color-border);
+=======
+  border-bottom: 1px solid var(--color-border);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   color: #9da4af;
 
@@ -55,6 +73,7 @@
   display: flex;
   align-items: center;
 
+<<<<<<< HEAD
   gap: 7px;
 }
 
@@ -111,6 +130,33 @@
   padding: 6px 0;
 
   overflow-x: hidden;
+=======
+  gap: 2px;
+}
+
+.tree-add-button {
+  width: 26px;
+  height: 26px;
+
+  border: none;
+  border-radius: 5px;
+
+  background: transparent;
+  color: var(--color-text-secondary);
+
+  cursor: pointer;
+
+  font-size: 18px;
+}
+
+.tree-add-button:hover {
+  background: var(--color-bg-hover);
+  color: #ffffff;
+}
+
+.entity-tree {
+  padding: 6px 0;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 
@@ -121,9 +167,13 @@
 .folder-create-form {
   padding: 7px;
 
+<<<<<<< HEAD
   border-bottom:
     1px solid
     var(--color-border);
+=======
+  border-bottom: 1px solid var(--color-border);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 .folder-create-parent {
@@ -143,7 +193,10 @@
 
 .folder-create-form input {
   min-width: 0;
+<<<<<<< HEAD
 
+=======
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   flex: 1;
 
   padding: 6px 7px;
@@ -151,9 +204,13 @@
   background: #101319;
   color: #e4e7eb;
 
+<<<<<<< HEAD
   border:
     1px solid #3b424e;
 
+=======
+  border: 1px solid #3b424e;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   border-radius: 4px;
 
   outline: none;
@@ -172,9 +229,13 @@
   border: none;
   border-radius: 4px;
 
+<<<<<<< HEAD
   background:
     transparent;
 
+=======
+  background: transparent;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   color: #aab1bc;
 
   cursor: pointer;
@@ -182,7 +243,10 @@
 
 .folder-create-form button:hover {
   background: #272c35;
+<<<<<<< HEAD
 
+=======
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   color: #ffffff;
 }
 
@@ -196,10 +260,14 @@
 
   padding: 4px 7px;
 
+<<<<<<< HEAD
   border:
     1px dashed
     transparent;
 
+=======
+  border: 1px dashed transparent;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   border-radius: 4px;
 
   color: #535b67;
@@ -225,9 +293,12 @@
    ====================================================== */
 
 .explorer-row {
+<<<<<<< HEAD
   width: 100%;
   max-width: 100%;
 
+=======
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   min-height: 30px;
 
   display: flex;
@@ -235,11 +306,15 @@
 
   padding-right: 5px;
 
+<<<<<<< HEAD
   overflow: hidden;
 
   border:
     1px solid
     transparent;
+=======
+  border: 1px solid transparent;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   color: #bec4cd;
 
@@ -247,6 +322,7 @@
 }
 
 .explorer-row:hover {
+<<<<<<< HEAD
   background:
     var(--color-bg-hover-soft);
 }
@@ -254,6 +330,13 @@
 .explorer-row.selected {
   background:
     var(--color-bg-selected);
+=======
+  background: var(--color-bg-hover-soft);
+}
+
+.explorer-row.selected {
+  background: var(--color-bg-selected);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   color: #ffffff;
 }
@@ -286,8 +369,11 @@
 
 .explorer-node-main {
   min-width: 0;
+<<<<<<< HEAD
   max-width: 100%;
 
+=======
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   height: 28px;
 
   flex: 1;
@@ -299,8 +385,11 @@
 
   padding: 0;
 
+<<<<<<< HEAD
   overflow: hidden;
 
+=======
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   border: none;
 
   background: transparent;
@@ -381,8 +470,12 @@
 .explorer-add-child:hover {
   background: #303640;
 
+<<<<<<< HEAD
   color:
     #ffffff !important;
+=======
+  color: #ffffff !important;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 .explorer-drag-handle:active {
@@ -418,8 +511,12 @@
 }
 
 .tree-type-row:hover {
+<<<<<<< HEAD
   background:
     var(--color-bg-hover-soft);
+=======
+  background: var(--color-bg-hover-soft);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 .tree-arrow {
@@ -464,8 +561,12 @@
 
   padding-left: 12px;
 
+<<<<<<< HEAD
   border-left:
     1px solid #343942;
+=======
+  border-left: 1px solid #343942;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 .tree-entity-row {
@@ -482,9 +583,13 @@
   border: none;
 
   background: transparent;
+<<<<<<< HEAD
 
   color:
     var(--color-text-secondary);
+=======
+  color: var(--color-text-secondary);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   cursor: pointer;
 
@@ -494,15 +599,23 @@
 }
 
 .tree-entity-row:hover {
+<<<<<<< HEAD
   background:
     var(--color-bg-hover-soft);
+=======
+  background: var(--color-bg-hover-soft);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   color: #ffffff;
 }
 
 .tree-entity-row.selected {
+<<<<<<< HEAD
   background:
     var(--color-bg-selected);
+=======
+  background: var(--color-bg-selected);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   color: #ffffff;
 }
@@ -524,6 +637,7 @@
 
 
 /* ======================================================
+<<<<<<< HEAD
    Mobile Explorer
    ====================================================== */
 
@@ -591,5 +705,13 @@
 
   .tree-root-drop-zone {
     display: none;
+=======
+   Responsive Explorer
+   ====================================================== */
+
+@media (max-width: 1050px) {
+  .entity-tree-sidebar {
+    width: 220px;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   }
 }

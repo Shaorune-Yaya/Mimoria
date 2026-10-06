@@ -23,6 +23,7 @@
   --radius-lg: 10px;
 
   --topbar-height: 58px;
+<<<<<<< HEAD
 
   --sidebar-width: 220px;
   --explorer-width: 260px;
@@ -34,6 +35,10 @@
   --content-wide-width: 1360px;
 
   --mobile-breakpoint: 760px;
+=======
+  --sidebar-width: 240px;
+  --explorer-width: 250px;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 * {
@@ -43,7 +48,10 @@
 html,
 body,
 #root {
+<<<<<<< HEAD
   width: 100%;
+=======
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   min-height: 100%;
 }
 

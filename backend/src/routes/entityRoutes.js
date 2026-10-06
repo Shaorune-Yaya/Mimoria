@@ -306,6 +306,7 @@ router.post("/", async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 // Update an Entity.
 router.put("/:id", async (req, res) => {
   try {
@@ -478,4 +479,6 @@ router.put("/:id", async (req, res) => {
     });
   }
 });
+=======
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 module.exports = router;

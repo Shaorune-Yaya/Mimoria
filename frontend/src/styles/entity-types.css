@@ -3,11 +3,14 @@
    ====================================================== */
 
 .entity-page-header {
+<<<<<<< HEAD
   width: min(
     100%,
     1600px
   );
 
+=======
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -20,12 +23,16 @@
 .entity-page-header h1 {
   margin: 0 0 8px;
 
+<<<<<<< HEAD
   font-size:
     clamp(
       26px,
       1.5vw,
       34px
     );
+=======
+  font-size: 30px;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 .entity-page-header p {
@@ -35,12 +42,16 @@
 }
 
 .entity-type-grid {
+<<<<<<< HEAD
   width: 100%;
 
+=======
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   display: grid;
 
   grid-template-columns:
     repeat(
+<<<<<<< HEAD
       auto-fit,
       minmax(
         260px,
@@ -54,6 +65,13 @@
       1.2vw,
       22px
     );
+=======
+      auto-fill,
+      minmax(260px, 1fr)
+    );
+
+  gap: 16px;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 .entity-type-card {
@@ -65,6 +83,7 @@
 
   padding: 20px;
 
+<<<<<<< HEAD
   background:
     var(--color-bg-panel);
 
@@ -72,6 +91,11 @@
     1px solid
     var(--color-border-panel);
 
+=======
+  background: var(--color-bg-panel);
+
+  border: 1px solid var(--color-border-panel);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   border-radius: 9px;
 
   cursor: pointer;
@@ -82,11 +106,17 @@
 }
 
 .entity-type-card:hover {
+<<<<<<< HEAD
   transform:
     translateY(-2px);
 
   border-color:
     var(--color-border-hover);
+=======
+  transform: translateY(-2px);
+
+  border-color: var(--color-border-hover);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 .entity-type-icon {
@@ -99,11 +129,17 @@
   align-items: center;
   justify-content: center;
 
+<<<<<<< HEAD
   background:
     var(--color-bg-hover);
 
   border-radius:
     var(--radius-md);
+=======
+  background: var(--color-bg-hover);
+
+  border-radius: var(--radius-md);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   font-size: 24px;
 }
@@ -129,11 +165,14 @@
    ====================================================== */
 
 .schema-header {
+<<<<<<< HEAD
   width: min(
     100%,
     1200px
   );
 
+=======
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -165,10 +204,14 @@
 }
 
 .schema-section {
+<<<<<<< HEAD
   width: min(
     100%,
     1200px
   );
+=======
+  max-width: 900px;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 .schema-section h2 {
@@ -203,6 +246,7 @@
 
   padding: 16px 18px;
 
+<<<<<<< HEAD
   background:
     var(--color-bg-panel);
 
@@ -212,6 +256,12 @@
 
   border-radius:
     var(--radius-md);
+=======
+  background: var(--color-bg-panel);
+
+  border: 1px solid var(--color-border-panel);
+  border-radius: var(--radius-md);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }
 
 .schema-field strong {
@@ -236,10 +286,14 @@
 
   background: #252a33;
 
+<<<<<<< HEAD
   border:
     1px solid
     var(--color-border-light);
 
+=======
+  border: 1px solid var(--color-border-light);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   border-radius: 5px;
 
   color: #abb2bd;
@@ -260,8 +314,12 @@
 .field-options-preview {
   margin-top: 6px;
 
+<<<<<<< HEAD
   color:
     var(--color-text-dim);
+=======
+  color: var(--color-text-dim);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   font-size: 12px;
 }
@@ -271,12 +329,17 @@
 
   padding: 24px;
 
+<<<<<<< HEAD
   border:
     1px dashed
     var(--color-border-light);
 
   border-radius:
     var(--radius-md);
+=======
+  border: 1px dashed var(--color-border-light);
+  border-radius: var(--radius-md);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   color: #757d8a;
 
@@ -284,19 +347,27 @@
 }
 
 .schema-create-panel {
+<<<<<<< HEAD
   width: min(
     100%,
     1200px
   );
 
   max-width: none;
+=======
+  max-width: 900px;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   margin-top: 30px;
 }
 
 
 /* ======================================================
+<<<<<<< HEAD
    Select Options
+=======
+   Select Options Editor
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
    ====================================================== */
 
 .select-options-editor {
@@ -326,6 +397,7 @@
   flex-shrink: 0;
 
   background: transparent;
+<<<<<<< HEAD
 
   color: #b6bcc7;
 
@@ -334,13 +406,22 @@
 
   border-radius:
     var(--radius-sm);
+=======
+  color: #b6bcc7;
+
+  border: 1px solid #3a404b;
+  border-radius: var(--radius-sm);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   cursor: pointer;
 }
 
 .option-remove-button:hover {
   background: #3a2020;
+<<<<<<< HEAD
 
+=======
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   color: #ffffff;
 }
 
@@ -350,6 +431,7 @@
   padding: 8px 12px;
 
   background: transparent;
+<<<<<<< HEAD
 
   color:
     var(--color-text-secondary);
@@ -359,18 +441,29 @@
 
   border-radius:
     var(--radius-sm);
+=======
+  color: var(--color-text-secondary);
+
+  border: 1px solid #3a404b;
+  border-radius: var(--radius-sm);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
   cursor: pointer;
 }
 
 .add-option-button:hover {
+<<<<<<< HEAD
   background:
     var(--color-bg-hover);
 
+=======
+  background: var(--color-bg-hover);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
   color: #ffffff;
 }
 
 
+<<<<<<< HEAD
 /* ======================================================
    Mobile
    ====================================================== */
@@ -391,6 +484,16 @@
   .schema-field {
     align-items: flex-start;
 
+=======
+@media (max-width: 700px) {
+  .entity-page-header,
+  .schema-header {
+    flex-direction: column;
+  }
+
+  .schema-field {
+    align-items: flex-start;
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
     flex-direction: column;
   }
 

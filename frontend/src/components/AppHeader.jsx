@@ -9,9 +9,12 @@ import {
 function AppHeader({
   worldName = null,
   showBackButton = false,
+<<<<<<< HEAD
   backTo = "/",
   showMenuButton = false,
   onMenuClick = null,
+=======
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 }) {
   const navigate =
     useNavigate();
@@ -25,9 +28,13 @@ function AppHeader({
     const language =
       event.target.value;
 
+<<<<<<< HEAD
     i18n.changeLanguage(
       language
     );
+=======
+    i18n.changeLanguage(language);
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
 
     localStorage.setItem(
       "mimoria-language",
@@ -38,6 +45,7 @@ function AppHeader({
   return (
     <header className="workspace-topbar">
       <div className="workspace-topbar-left">
+<<<<<<< HEAD
         {showMenuButton && (
           <button
             type="button"
@@ -59,6 +67,15 @@ function AppHeader({
               navigate(backTo)
             }
             aria-label="Back"
+=======
+        {showBackButton && (
+          <button
+            className="back-button"
+            onClick={() =>
+              navigate("/")
+            }
+            aria-label="Back to worlds"
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
           >
             ←
           </button>
@@ -88,6 +105,7 @@ function AppHeader({
         )}
       </div>
 
+<<<<<<< HEAD
       <div className="workspace-topbar-right">
         <div className="language-selector">
           <select
@@ -108,6 +126,24 @@ function AppHeader({
             </option>
           </select>
         </div>
+=======
+      <div className="language-selector">
+        <select
+          value={i18n.language}
+          onChange={
+            changeLanguage
+          }
+          aria-label="Language"
+        >
+          <option value="en">
+            English
+          </option>
+
+          <option value="zh-CN">
+            简体中文
+          </option>
+        </select>
+>>>>>>> fa2ef0a5320c91de7599683e93ad00e0e3b5342d
       </div>
     </header>
   );
