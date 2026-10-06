@@ -1,0 +1,184 @@
+/* ======================================================
+   Primary Actions
+   ====================================================== */
+
+.create-button {
+  padding: 11px 18px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: #e8e8e8;
+  color: var(--color-bg);
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.create-button:hover {
+  background: #ffffff;
+}
+
+
+/* ======================================================
+   Create Panels
+   ====================================================== */
+
+.create-panel {
+  margin-bottom: 30px;
+
+  padding: 25px;
+
+  background: var(--color-bg-panel);
+
+  border: 1px solid #303640;
+  border-radius: var(--radius-lg);
+}
+
+.create-panel h2 {
+  margin-top: 0;
+}
+
+.create-panel form {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.create-panel label {
+  margin-top: 8px;
+
+  color: #c5c9d1;
+
+  font-size: 14px;
+}
+
+.create-panel input,
+.create-panel textarea,
+.field-select {
+  width: 100%;
+
+  padding: 11px 12px;
+
+  background: var(--color-bg);
+  color: #ffffff;
+
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
+
+  outline: none;
+}
+
+.create-panel textarea {
+  min-height: 90px;
+
+  resize: vertical;
+}
+
+.create-panel input:focus,
+.create-panel textarea:focus,
+.field-select:focus {
+  border-color: #767e8d;
+}
+
+
+/* ======================================================
+   Form Buttons
+   ====================================================== */
+
+.form-buttons {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  margin-top: 15px;
+}
+
+.form-buttons button {
+  padding: 9px 16px;
+
+  border-radius: var(--radius-sm);
+
+  cursor: pointer;
+}
+
+.cancel-button {
+  background: transparent;
+  color: #b7bcc6;
+
+  border: 1px solid #3a404b;
+}
+
+.cancel-button:hover {
+  background: var(--color-bg-hover);
+}
+
+.save-button {
+  border: none;
+
+  background: #e8e8e8;
+  color: var(--color-bg);
+
+  font-weight: 600;
+}
+
+.save-button:hover:not(:disabled) {
+  background: #ffffff;
+}
+
+.save-button:disabled {
+  opacity: 0.45;
+
+  cursor: not-allowed;
+}
+
+
+/* ======================================================
+   Checkboxes
+   ====================================================== */
+
+.checkbox-row {
+  display: flex !important;
+  align-items: center;
+
+  gap: 8px;
+
+  margin-top: 12px;
+
+  cursor: pointer;
+}
+
+.checkbox-row input {
+  width: auto;
+}
+
+
+/* ======================================================
+   Small Buttons
+   ====================================================== */
+
+.small-action-button {
+  padding: 5px 9px;
+
+  background: transparent;
+  color: var(--color-text-secondary);
+
+  border: 1px solid #3a404b;
+  border-radius: 5px;
+
+  cursor: pointer;
+}
+
+.small-action-button:hover {
+  background: #272c35;
+  color: #ffffff;
+}
+
+.small-action-button.danger:hover {
+  background: #3a2020;
+
+  border-color: #6c3434;
+}

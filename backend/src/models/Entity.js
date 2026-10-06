@@ -6,22 +6,24 @@ const entitySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "World",
       required: true,
+      index: true,
     },
 
     entityTypeId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "EntityType",
       required: true,
+      index: true,
     },
 
-    // 每一个实体都必定有名称
+    // Every entity must have a name.
     name: {
       type: String,
       required: true,
       trim: true,
     },
 
-    // 自定义 Schema 字段的数据
+    // Stores values for user-defined schema fields.
     values: {
       type: Map,
       of: mongoose.Schema.Types.Mixed,

@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "WorldForge"
+    "name": "Mimoria"
   },
 
   "worlds": {
@@ -25,7 +25,8 @@
     "noDescription": "暂无描述。",
     "updated": "更新于"
   },
-    "workspace": {
+
+  "workspace": {
     "loading": "正在加载世界...",
     "notFound": "找不到这个世界。",
 
@@ -44,7 +45,7 @@
     "startMessage": "你的世界工作区已经准备好了，可以开始创建世界设定。"
   },
 
-    "entityTypes": {
+  "entityTypes": {
     "title": "实体类型",
     "subtitle": "定义这个世界中可以存在的资料类型。",
 
@@ -69,84 +70,84 @@
   },
 
   "schema": {
-  "fields": "字段",
-  "help": "字段决定这种实体中的每条资料可以保存哪些信息。",
+    "fields": "字段",
+    "help": "字段决定这种实体中的每条资料可以保存哪些信息。",
 
-  "addField": "+ 添加字段",
-  "createField": "创建字段",
+    "addField": "+ 添加字段",
+    "createField": "创建字段",
 
-  "fieldName": "字段名称",
-  "fieldNamePlaceholder": "年龄、人口、所属势力……",
+    "fieldName": "字段名称",
+    "fieldNamePlaceholder": "年龄、人口、所属势力……",
 
-  "fieldType": "字段类型",
+    "fieldType": "字段类型",
 
-  "referenceType": "允许引用的实体类型",
-  "anyEntityType": "任意实体类型",
+    "referenceType": "允许引用的实体类型",
+    "anyEntityType": "任意实体类型",
 
-  "requiredField": "这个字段为必填项",
-  "required": "必填",
+    "requiredField": "这个字段为必填项",
+    "required": "必填",
 
-  "nameField": "名称",
+    "nameField": "名称",
 
-  "empty": "目前还没有自定义字段。添加字段来定义这种实体。",
-  "edit": "修改",
-  "delete": "删除",
-  "editField": "修改字段",
-  "saveChanges": "保存修改",
-  "deleteConfirm": "确定要删除这个字段吗？",
+    "empty": "目前还没有自定义字段。添加字段来定义这种实体。",
 
-  "options": "下拉选项",
-  "option": "选项",
-  "addOption": "+ 添加选项"
-},
+    "edit": "修改",
+    "delete": "删除",
+    "editField": "修改字段",
+    "saveChanges": "保存修改",
+    "deleteConfirm": "确定要删除这个字段吗？",
 
-"fieldTypes": {
-  "text": "文本",
-  "long-text": "长文本",
-  "number": "数字",
-  "boolean": "是 / 否",
-  "date": "日期",
-  "select": "下拉选择",
-  "entity-reference": "实体引用"
-},
+    "options": "下拉选项",
+    "option": "选项",
+    "addOption": "+ 添加选项"
+  },
 
-"entities": {
-  "title": "实体",
-  "subtitle": "创建和管理这个世界中的人物、地点、物品、事件以及其他设定资料。",
+  "fieldTypes": {
+    "text": "文本",
+    "long-text": "长文本",
+    "number": "数字",
+    "boolean": "是 / 否",
+    "date": "日期",
+    "select": "下拉选择",
+    "entity-reference": "实体引用"
+  },
 
-  "newEntity": "+ 新建实体",
-  "createTitle": "创建实体",
-  "createDescription": "选择一种实体类型，并填写它定义的字段。",
+  "entities": {
+    "title": "实体",
+    "subtitle": "创建和管理这个世界中的人物、地点、物品、事件以及其他设定资料。",
 
-  "entityType": "实体类型",
-  "selectType": "选择一种实体类型……",
+    "newEntity": "+ 新建实体",
+    "createTitle": "创建实体",
+    "createDescription": "选择一种实体类型，并填写它定义的字段。",
 
-  "create": "创建实体",
+    "entityType": "实体类型",
+    "selectType": "选择一种实体类型……",
 
-  "selectOption": "请选择……",
-  "selectEntity": "请选择实体……",
+    "create": "创建实体",
 
-  "yes": "是",
-  "no": "否",
+    "selectOption": "请选择……",
+    "selectEntity": "请选择实体……",
 
-  "emptyTitle": "暂无实体",
-  "emptyDescription": "创建第一个实体来开始构建这个世界。",
+    "yes": "是",
+    "no": "否",
 
-  "noEntitiesInType": "暂无实体",
+    "emptyTitle": "暂无实体",
+    "emptyDescription": "创建第一个实体来开始构建这个世界。",
 
-  "browserTitle": "实体浏览器",
-  "browserDescription": "通过左侧资源管理器组织和浏览这个世界。点击一个实体即可查看详细资料。",
+    "noEntitiesInType": "暂无实体",
 
-  "noCustomFields": "这个实体目前没有自定义字段。",
+    "browserTitle": "实体浏览器",
+    "browserDescription": "通过左侧资源管理器组织和浏览这个世界。点击一个实体即可查看详细资料。",
 
-  "lastUpdated": "最后更新"
-},
+    "noCustomFields": "这个实体目前没有自定义字段。",
 
-"tree": {
-  "newFolder": "新建文件夹",
-  "folderName": "文件夹名称……",
-  "createAtRoot": "在根目录创建",
-  "createInside": "在当前节点内创建"
-}
+    "lastUpdated": "最后更新"
+  },
 
+  "tree": {
+    "newFolder": "新建文件夹",
+    "folderName": "文件夹名称……",
+    "createAtRoot": "在根目录创建",
+    "createInside": "在当前节点内创建"
+  }
 }

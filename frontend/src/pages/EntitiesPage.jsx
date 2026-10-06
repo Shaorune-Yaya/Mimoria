@@ -1,6 +1,9 @@
-import { useEffect, useState } from "react";
 import {
-  useNavigate,
+  useEffect,
+  useState,
+} from "react";
+
+import {
   useParams,
 } from "react-router-dom";
 
@@ -10,8 +13,12 @@ import {
   useDroppable,
 } from "@dnd-kit/core";
 
-import { useTranslation } from "react-i18next";
+import {
+  useTranslation,
+} from "react-i18next";
 
+import WorldLayout from "../components/WorldLayout";
+import { API_URL } from "../config/api";
 
 // ======================================================
 // Tree Row
@@ -51,15 +58,18 @@ function TreeRow({
   }
 
   const style = {
-    paddingLeft: `${8 + depth * 16}px`,
+    paddingLeft:
+      `${8 + depth * 16}px`,
 
-    opacity: isDragging
-      ? 0.45
-      : 1,
+    opacity:
+      isDragging
+        ? 0.45
+        : 1,
 
-    transform: transform
-      ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
-      : undefined,
+    transform:
+      transform
+        ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+        : undefined,
   };
 
   const isFolder =
@@ -87,7 +97,6 @@ function TreeRow({
     selectedEntityId ===
       entity?._id;
 
-
   return (
     <>
       <div
@@ -102,16 +111,15 @@ function TreeRow({
         style={style}
         {...attributes}
       >
-
-        {/* 展开按钮 */}
-
         <button
           className="explorer-toggle"
           onClick={(event) => {
             event.stopPropagation();
 
             if (hasChildren) {
-              onToggle(node._id);
+              onToggle(
+                node._id
+              );
             }
           }}
         >
@@ -122,22 +130,20 @@ function TreeRow({
             : ""}
         </button>
 
-
-        {/* 主节点 */}
-
         <button
           className="explorer-node-main"
           onClick={() => {
-
             if (isFolder) {
-              onToggle(node._id);
+              onToggle(
+                node._id
+              );
             } else {
-              onEntityClick(entity);
+              onEntityClick(
+                entity
+              );
             }
-
           }}
         >
-
           <span className="explorer-icon">
             {icon}
           </span>
@@ -145,11 +151,7 @@ function TreeRow({
           <span className="explorer-name">
             {displayName}
           </span>
-
         </button>
-
-
-        {/* 在这个节点下面创建文件夹 */}
 
         <button
           className="explorer-add-child"
@@ -165,9 +167,6 @@ function TreeRow({
           +
         </button>
 
-
-        {/* 拖动 */}
-
         <button
           className="explorer-drag-handle"
           {...listeners}
@@ -175,9 +174,7 @@ function TreeRow({
         >
           ⋮⋮
         </button>
-
       </div>
-
 
       {expanded &&
         hasChildren &&
@@ -185,11 +182,9 @@ function TreeRow({
           node._id,
           depth + 1
         )}
-
     </>
   );
 }
-
 
 // ======================================================
 // Root Drop Zone
@@ -217,7 +212,6 @@ function RootDropZone() {
   );
 }
 
-
 // ======================================================
 // Entities Page
 // ======================================================
@@ -226,28 +220,29 @@ function EntitiesPage() {
   const { worldId } =
     useParams();
 
-  const navigate =
-    useNavigate();
-
-  const { t, i18n } =
-    useTranslation();
-
+  const {
+    t,
+    i18n,
+  } = useTranslation();
 
   // ====================================================
   // Base Data
   // ====================================================
 
-  const [world, setWorld] =
-    useState(null);
+  const [
+    world,
+    setWorld,
+  ] = useState(null);
 
-  const [entities, setEntities] =
-    useState([]);
+  const [
+    entities,
+    setEntities,
+  ] = useState([]);
 
   const [
     entityTypes,
     setEntityTypes,
   ] = useState([]);
-
 
   // ====================================================
   // Create Entity
@@ -263,17 +258,20 @@ function EntitiesPage() {
     setSelectedEntityTypeId,
   ] = useState("");
 
-  const [name, setName] =
-    useState("");
+  const [
+    name,
+    setName,
+  ] = useState("");
 
-  const [values, setValues] =
-    useState({});
+  const [
+    values,
+    setValues,
+  ] = useState({});
 
   const [
     referenceOptions,
     setReferenceOptions,
   ] = useState({});
-
 
   // ====================================================
   // Explorer Tree
@@ -288,7 +286,6 @@ function EntitiesPage() {
     expandedNodes,
     setExpandedNodes,
   ] = useState({});
-
 
   // ====================================================
   // Folder Creation
@@ -309,7 +306,6 @@ function EntitiesPage() {
     setFolderParentId,
   ] = useState(null);
 
-
   // ====================================================
   // Detail
   // ====================================================
@@ -319,7 +315,6 @@ function EntitiesPage() {
     setSelectedDetailEntity,
   ] = useState(null);
 
-
   const selectedEntityType =
     entityTypes.find(
       (type) =>
@@ -327,16 +322,15 @@ function EntitiesPage() {
         selectedEntityTypeId
     );
 
-
   // ====================================================
-  // Fetch World
+  // Data Loading
   // ====================================================
 
   async function fetchWorld() {
     try {
       const response =
         await fetch(
-          `http://localhost:3000/api/worlds/${worldId}`
+          `${API_URL.worlds}/${worldId}`
         );
 
       if (!response.ok) {
@@ -350,20 +344,18 @@ function EntitiesPage() {
 
       setWorld(data);
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Failed to fetch world:",
+        error
+      );
     }
   }
-
-
-  // ====================================================
-  // Fetch Entity Types
-  // ====================================================
 
   async function fetchEntityTypes() {
     try {
       const response =
         await fetch(
-          `http://localhost:3000/api/entity-types/world/${worldId}`
+          `${API_URL.entityTypes}/world/${worldId}`
         );
 
       if (!response.ok) {
@@ -377,20 +369,18 @@ function EntitiesPage() {
 
       setEntityTypes(data);
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Failed to fetch entity types:",
+        error
+      );
     }
   }
-
-
-  // ====================================================
-  // Fetch Entities
-  // ====================================================
 
   async function fetchEntities() {
     try {
       const response =
         await fetch(
-          `http://localhost:3000/api/entities/world/${worldId}`
+          `${API_URL.entities}/world/${worldId}`
         );
 
       if (!response.ok) {
@@ -404,20 +394,18 @@ function EntitiesPage() {
 
       setEntities(data);
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Failed to fetch entities:",
+        error
+      );
     }
   }
-
-
-  // ====================================================
-  // Fetch Tree
-  // ====================================================
 
   async function fetchTree() {
     try {
       const response =
         await fetch(
-          `http://localhost:3000/api/tree/world/${worldId}`
+          `${API_URL.tree}/world/${worldId}`
         );
 
       if (!response.ok) {
@@ -431,13 +419,15 @@ function EntitiesPage() {
 
       setTreeNodes(data);
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Failed to fetch tree:",
+        error
+      );
     }
   }
 
-
   // ====================================================
-  // Folder
+  // Folder Creation
   // ====================================================
 
   function openFolderForm(
@@ -448,29 +438,23 @@ function EntitiesPage() {
     );
 
     setFolderName("");
-
     setShowFolderForm(true);
 
     if (parentId) {
       setExpandedNodes(
         (current) => ({
           ...current,
-
           [parentId]: true,
         })
       );
     }
   }
 
-
   function closeFolderForm() {
     setShowFolderForm(false);
-
     setFolderName("");
-
     setFolderParentId(null);
   }
-
 
   async function createFolder(
     event
@@ -484,7 +468,7 @@ function EntitiesPage() {
     try {
       const response =
         await fetch(
-          "http://localhost:3000/api/tree/folders",
+          `${API_URL.tree}/folders`,
           {
             method: "POST",
 
@@ -498,14 +482,13 @@ function EntitiesPage() {
                 worldId,
 
                 name:
-                  folderName,
+                  folderName.trim(),
 
                 parentId:
                   folderParentId,
               }),
           }
         );
-
 
       if (!response.ok) {
         const data =
@@ -517,13 +500,9 @@ function EntitiesPage() {
         );
       }
 
-
       const createdFolder =
         await response.json();
 
-
-      // 如果是在某个节点下面创建，
-      // 自动展开父节点
       if (folderParentId) {
         setExpandedNodes(
           (current) => ({
@@ -535,8 +514,6 @@ function EntitiesPage() {
         );
       }
 
-
-      // 新 Folder 本身也先展开
       setExpandedNodes(
         (current) => ({
           ...current,
@@ -546,20 +523,21 @@ function EntitiesPage() {
         })
       );
 
-
       closeFolderForm();
 
       await fetchTree();
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Failed to create folder:",
+        error
+      );
 
       alert(error.message);
     }
   }
 
-
   // ====================================================
-  // Move Tree Node
+  // Tree Movement
   // ====================================================
 
   async function moveTreeNode(
@@ -569,7 +547,7 @@ function EntitiesPage() {
     try {
       const response =
         await fetch(
-          `http://localhost:3000/api/tree/${nodeId}/move`,
+          `${API_URL.tree}/${nodeId}/move`,
           {
             method: "PUT",
 
@@ -585,7 +563,6 @@ function EntitiesPage() {
           }
         );
 
-
       if (!response.ok) {
         const data =
           await response.json();
@@ -595,7 +572,6 @@ function EntitiesPage() {
             "Failed to move node"
         );
       }
-
 
       if (parentId) {
         setExpandedNodes(
@@ -608,15 +584,16 @@ function EntitiesPage() {
         );
       }
 
-
       await fetchTree();
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Failed to move tree node:",
+        error
+      );
 
       alert(error.message);
     }
   }
-
 
   function handleDragEnd(
     event
@@ -630,13 +607,11 @@ function EntitiesPage() {
       return;
     }
 
-
     const draggedId =
       String(active.id);
 
     const targetId =
       String(over.id);
-
 
     if (
       draggedId ===
@@ -644,9 +619,6 @@ function EntitiesPage() {
     ) {
       return;
     }
-
-
-    // 拖回 Root
 
     if (
       targetId ===
@@ -660,18 +632,14 @@ function EntitiesPage() {
       return;
     }
 
-
-    // 拖进另一个 Node
-
     moveTreeNode(
       draggedId,
       targetId
     );
   }
 
-
   // ====================================================
-  // Tree Helper
+  // Tree Helpers
   // ====================================================
 
   function getChildren(
@@ -679,18 +647,15 @@ function EntitiesPage() {
   ) {
     return treeNodes
       .filter((node) => {
-
         if (!parentId) {
           return !node.parentId;
         }
 
-
         const nodeParentId =
           typeof node.parentId ===
           "object"
-            ? node.parentId._id
+            ? node.parentId?._id
             : node.parentId;
-
 
         return (
           nodeParentId ===
@@ -703,7 +668,6 @@ function EntitiesPage() {
           (b.order || 0)
       );
   }
-
 
   function toggleTreeNode(
     nodeId
@@ -718,11 +682,6 @@ function EntitiesPage() {
     );
   }
 
-
-  // ====================================================
-  // Recursive Tree Render
-  // ====================================================
-
   function renderTreeNodes(
     parentId = null,
     depth = 0
@@ -730,57 +689,46 @@ function EntitiesPage() {
     const children =
       getChildren(parentId);
 
-
     return children.map(
       (node) => {
-
         const nodeChildren =
           getChildren(
             node._id
           );
 
         const hasChildren =
-          nodeChildren.length > 0;
+          nodeChildren.length >
+          0;
 
         const expanded =
           expandedNodes[
             node._id
           ] || false;
 
-
         return (
           <TreeRow
             key={node._id}
-
             node={node}
-
             depth={depth}
-
             expanded={
               expanded
             }
-
             hasChildren={
               hasChildren
             }
-
             onToggle={
               toggleTreeNode
             }
-
             onEntityClick={
               openEntityDetail
             }
-
             onCreateFolder={
               openFolderForm
             }
-
             selectedEntityId={
               selectedDetailEntity
                 ?._id
             }
-
             renderChildren={
               renderTreeNodes
             }
@@ -790,9 +738,8 @@ function EntitiesPage() {
     );
   }
 
-
   // ====================================================
-  // Reference Options
+  // Entity Reference Options
   // ====================================================
 
   async function loadReferenceOptions(
@@ -808,21 +755,18 @@ function EntitiesPage() {
     try {
       let url;
 
-
       if (
         field.referenceEntityTypeId
       ) {
         url =
-          `http://localhost:3000/api/entities/world/${worldId}/type/${field.referenceEntityTypeId}`;
+          `${API_URL.entities}/world/${worldId}/type/${field.referenceEntityTypeId}`;
       } else {
         url =
-          `http://localhost:3000/api/entities/world/${worldId}`;
+          `${API_URL.entities}/world/${worldId}`;
       }
-
 
       const response =
         await fetch(url);
-
 
       if (!response.ok) {
         throw new Error(
@@ -830,10 +774,8 @@ function EntitiesPage() {
         );
       }
 
-
       const data =
         await response.json();
-
 
       setReferenceOptions(
         (current) => ({
@@ -844,13 +786,15 @@ function EntitiesPage() {
         })
       );
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Failed to load reference options:",
+        error
+      );
     }
   }
 
-
   // ====================================================
-  // Select Entity Type
+  // Entity Type Selection
   // ====================================================
 
   function selectEntityType(
@@ -864,7 +808,6 @@ function EntitiesPage() {
     setValues({});
     setReferenceOptions({});
 
-
     const type =
       entityTypes.find(
         (item) =>
@@ -872,25 +815,23 @@ function EntitiesPage() {
           entityTypeId
       );
 
-
-    if (type) {
-      type.fields.forEach(
-        (field) => {
-
-          if (
-            field.type ===
-            "entity-reference"
-          ) {
-            loadReferenceOptions(
-              field
-            );
-          }
-
-        }
-      );
+    if (!type) {
+      return;
     }
-  }
 
+    type.fields.forEach(
+      (field) => {
+        if (
+          field.type ===
+          "entity-reference"
+        ) {
+          loadReferenceOptions(
+            field
+          );
+        }
+      }
+    );
+  }
 
   // ====================================================
   // Dynamic Values
@@ -910,7 +851,6 @@ function EntitiesPage() {
     );
   }
 
-
   // ====================================================
   // Create Entity
   // ====================================================
@@ -920,21 +860,20 @@ function EntitiesPage() {
   ) {
     event.preventDefault();
 
-
-    if (!selectedEntityTypeId) {
+    if (
+      !selectedEntityTypeId
+    ) {
       return;
     }
-
 
     if (!name.trim()) {
       return;
     }
 
-
     try {
       const response =
         await fetch(
-          "http://localhost:3000/api/entities",
+          API_URL.entities,
           {
             method: "POST",
 
@@ -950,13 +889,13 @@ function EntitiesPage() {
                 entityTypeId:
                   selectedEntityTypeId,
 
-                name,
+                name:
+                  name.trim(),
 
                 values,
               }),
           }
         );
-
 
       if (!response.ok) {
         const errorData =
@@ -968,10 +907,8 @@ function EntitiesPage() {
         );
       }
 
-
       const newEntity =
         await response.json();
-
 
       setEntities(
         (current) => [
@@ -980,29 +917,23 @@ function EntitiesPage() {
         ]
       );
 
-
-      // TreeNode 是后端自动建立的，
-      // 所以重新读取 Tree
+      // The backend automatically creates the corresponding TreeNode.
       await fetchTree();
-
 
       setSelectedDetailEntity(
         newEntity
       );
 
-
       closeCreateForm();
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Failed to create entity:",
+        error
+      );
 
       alert(error.message);
     }
   }
-
-
-  // ====================================================
-  // Create Form
-  // ====================================================
 
   function openCreateForm() {
     setSelectedDetailEntity(
@@ -1018,12 +949,9 @@ function EntitiesPage() {
     );
 
     setName("");
-
     setValues({});
-
     setReferenceOptions({});
   }
-
 
   function closeCreateForm() {
     setShowCreateForm(
@@ -1035,15 +963,12 @@ function EntitiesPage() {
     );
 
     setName("");
-
     setValues({});
-
     setReferenceOptions({});
   }
 
-
   // ====================================================
-  // Detail
+  // Entity Detail
   // ====================================================
 
   function openEntityDetail(
@@ -1052,7 +977,6 @@ function EntitiesPage() {
     if (!entity) {
       return;
     }
-
 
     setShowCreateForm(
       false
@@ -1063,17 +987,13 @@ function EntitiesPage() {
     );
 
     setName("");
-
     setValues({});
-
     setReferenceOptions({});
-
 
     setSelectedDetailEntity(
       entity
     );
   }
-
 
   function getEntityTypeForEntity(
     entity
@@ -1082,13 +1002,11 @@ function EntitiesPage() {
       return null;
     }
 
-
     const entityTypeId =
       typeof entity.entityTypeId ===
       "object"
-        ? entity.entityTypeId._id
+        ? entity.entityTypeId?._id
         : entity.entityTypeId;
-
 
     return entityTypes.find(
       (type) =>
@@ -1097,18 +1015,12 @@ function EntitiesPage() {
     );
   }
 
-
-  // ====================================================
-  // Reference ID -> Name
-  // ====================================================
-
   function getReferencedEntityName(
     entityId
   ) {
     if (!entityId) {
       return "—";
     }
-
 
     const entity =
       entities.find(
@@ -1117,16 +1029,10 @@ function EntitiesPage() {
           entityId
       );
 
-
     return entity
       ? entity.name
       : "—";
   }
-
-
-  // ====================================================
-  // Format Detail Value
-  // ====================================================
 
   function formatFieldValue(
     field,
@@ -1140,7 +1046,6 @@ function EntitiesPage() {
       return "—";
     }
 
-
     if (
       field.type ===
       "boolean"
@@ -1149,7 +1054,6 @@ function EntitiesPage() {
         ? t("entities.yes")
         : t("entities.no");
     }
-
 
     if (
       field.type ===
@@ -1160,33 +1064,8 @@ function EntitiesPage() {
       );
     }
 
-
     return String(value);
   }
-
-
-  // ====================================================
-  // Language
-  // ====================================================
-
-  function changeLanguage(
-    event
-  ) {
-    const language =
-      event.target.value;
-
-
-    i18n.changeLanguage(
-      language
-    );
-
-
-    localStorage.setItem(
-      "worldforge-language",
-      language
-    );
-  }
-
 
   // ====================================================
   // Initial Load
@@ -1199,20 +1078,20 @@ function EntitiesPage() {
     fetchTree();
   }, [worldId]);
 
-
   // ====================================================
-  // Schema Driven Input
+  // Schema-driven Field Rendering
   // ====================================================
 
   function renderField(
     field
   ) {
     const value =
-      values[field.key] ?? "";
-
+      values[field.key] ??
+      "";
 
     if (
-      field.type === "text"
+      field.type ===
+      "text"
     ) {
       return (
         <input
@@ -1232,7 +1111,6 @@ function EntitiesPage() {
         />
       );
     }
-
 
     if (
       field.type ===
@@ -1255,7 +1133,6 @@ function EntitiesPage() {
         />
       );
     }
-
 
     if (
       field.type ===
@@ -1280,7 +1157,6 @@ function EntitiesPage() {
       );
     }
 
-
     if (
       field.type ===
       "date"
@@ -1304,32 +1180,26 @@ function EntitiesPage() {
       );
     }
 
-
     if (
       field.type ===
       "boolean"
     ) {
       return (
-        <label
-          className=
-            "checkbox-row entity-checkbox"
-        >
-
+        <label className="checkbox-row entity-checkbox">
           <input
             type="checkbox"
-
             checked={
               values[
                 field.key
               ] || false
             }
-
             onChange={(
               event
             ) =>
               updateValue(
                 field.key,
-                event.target.checked
+                event.target
+                  .checked
               )
             }
           />
@@ -1337,11 +1207,9 @@ function EntitiesPage() {
           {t(
             "entities.yes"
           )}
-
         </label>
       );
     }
-
 
     if (
       field.type ===
@@ -1349,15 +1217,11 @@ function EntitiesPage() {
     ) {
       return (
         <select
-          className=
-            "field-select"
-
+          className="field-select"
           value={value}
-
           required={
             field.required
           }
-
           onChange={(
             event
           ) =>
@@ -1367,31 +1231,25 @@ function EntitiesPage() {
             )
           }
         >
-
           <option value="">
             {t(
               "entities.selectOption"
             )}
           </option>
 
-
           {field.options?.map(
             (option) => (
-
               <option
                 key={option}
                 value={option}
               >
                 {option}
               </option>
-
             )
           )}
-
         </select>
       );
     }
-
 
     if (
       field.type ===
@@ -1402,18 +1260,13 @@ function EntitiesPage() {
           field.key
         ] || [];
 
-
       return (
         <select
-          className=
-            "field-select"
-
+          className="field-select"
           value={value}
-
           required={
             field.required
           }
-
           onChange={(
             event
           ) =>
@@ -1423,17 +1276,14 @@ function EntitiesPage() {
             )
           }
         >
-
           <option value="">
             {t(
               "entities.selectEntity"
             )}
           </option>
 
-
           {options.map(
             (entity) => (
-
               <option
                 key={
                   entity._id
@@ -1442,26 +1292,16 @@ function EntitiesPage() {
                   entity._id
                 }
               >
-                {
-                  entity.name
-                }
+                {entity.name}
               </option>
-
             )
           )}
-
         </select>
       );
     }
 
-
     return null;
   }
-
-
-  // ====================================================
-  // Loading
-  // ====================================================
 
   if (!world) {
     return (
@@ -1473,742 +1313,433 @@ function EntitiesPage() {
     );
   }
 
-
   const detailEntityType =
     getEntityTypeForEntity(
       selectedDetailEntity
     );
 
+  // ====================================================
+  // Explorer Sidebar
+  // ====================================================
+
+  const explorerSidebar = (
+    <aside className="entity-tree-sidebar">
+      <div className="entity-tree-header">
+        <span>
+          {t(
+            "entities.title"
+          )}
+        </span>
+
+        <div className="tree-header-actions">
+          <button
+            className="tree-add-button"
+            onClick={() =>
+              openFolderForm(
+                null
+              )
+            }
+            title={t(
+              "tree.newFolder"
+            )}
+          >
+            📁+
+          </button>
+
+          <button
+            className="tree-add-button"
+            onClick={
+              openCreateForm
+            }
+            title={t(
+              "entities.newEntity"
+            )}
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      {showFolderForm && (
+        <form
+          className="folder-create-form"
+          onSubmit={
+            createFolder
+          }
+        >
+          <div className="folder-create-parent">
+            {folderParentId
+              ? t(
+                  "tree.createInside"
+                )
+              : t(
+                  "tree.createAtRoot"
+                )}
+          </div>
+
+          <div className="folder-create-row">
+            <input
+              autoFocus
+              value={
+                folderName
+              }
+              placeholder={t(
+                "tree.folderName"
+              )}
+              onChange={(
+                event
+              ) =>
+                setFolderName(
+                  event.target
+                    .value
+                )
+              }
+            />
+
+            <button
+              type="submit"
+            >
+              ✓
+            </button>
+
+            <button
+              type="button"
+              onClick={
+                closeFolderForm
+              }
+            >
+              ×
+            </button>
+          </div>
+        </form>
+      )}
+
+      <DndContext
+        onDragEnd={
+          handleDragEnd
+        }
+      >
+        <RootDropZone />
+
+        <div className="entity-tree">
+          {renderTreeNodes()}
+        </div>
+      </DndContext>
+    </aside>
+  );
 
   // ====================================================
-  // Render
+  // Page
   // ====================================================
 
   return (
-    <div className="workspace">
+    <WorldLayout
+      worldId={worldId}
+      worldName={world.name}
+      secondarySidebar={
+        explorerSidebar
+      }
+    >
+      <div className="entity-page-header">
+        <div>
+          <h1>
+            {showCreateForm
+              ? t(
+                  "entities.createTitle"
+                )
+              : selectedDetailEntity
+                ? selectedDetailEntity.name
+                : t(
+                    "entities.title"
+                  )}
+          </h1>
 
-      {/* TOP BAR */}
-
-      <header className="workspace-topbar">
-
-        <div className="workspace-topbar-left">
-
-          <button
-            className="back-button"
-            onClick={() =>
-              navigate("/")
-            }
-          >
-            ←
-          </button>
-
-
-          <div className="logo">
-            {t("app.name")}
-          </div>
-
-
-          <div className="world-title-divider">
-            /
-          </div>
-
-
-          <div className="workspace-world-name">
-            {world.name}
-          </div>
-
+          <p>
+            {showCreateForm
+              ? t(
+                  "entities.createDescription"
+                )
+              : selectedDetailEntity &&
+                  detailEntityType
+                ? `${detailEntityType.icon || ""} ${detailEntityType.name}`
+                : t(
+                    "entities.subtitle"
+                  )}
+          </p>
         </div>
 
-
-        <div className="language-selector">
-
-          <select
-            value={
-              i18n.language
-            }
-            onChange={
-              changeLanguage
-            }
-          >
-
-            <option value="en">
-              English
-            </option>
-
-            <option value="zh-CN">
-              简体中文
-            </option>
-
-          </select>
-
-        </div>
-
-      </header>
-
-
-      <div className="workspace-body">
-
-        {/* PRIMARY SIDEBAR */}
-
-        <aside className="workspace-sidebar">
-
-          <div className="sidebar-section-title">
-            {t(
-              "workspace.library"
-            )}
-          </div>
-
-
+        {!showCreateForm && (
           <button
-            className="sidebar-item"
-            onClick={() =>
-              navigate(
-                `/world/${worldId}`
-              )
+            className="create-button"
+            onClick={
+              openCreateForm
             }
           >
             {t(
-              "workspace.home"
+              "entities.newEntity"
             )}
           </button>
+        )}
+      </div>
 
-
-          <button
-            className="sidebar-item"
-            onClick={() =>
-              navigate(
-                `/world/${worldId}/entity-types`
-              )
+      {showCreateForm && (
+        <div className="create-panel entity-create-panel">
+          <form
+            onSubmit={
+              createEntity
             }
           >
-            {t(
-              "workspace.entityTypes"
-            )}
-          </button>
-
-
-          <button className="sidebar-item active">
-            {t(
-              "workspace.entities"
-            )}
-          </button>
-
-
-          <button className="sidebar-item">
-            {t(
-              "workspace.documents"
-            )}
-          </button>
-
-
-          <div className="sidebar-divider" />
-
-
-          <button className="sidebar-item">
-            {t(
-              "workspace.timeline"
-            )}
-          </button>
-
-
-          <button className="sidebar-item">
-            {t(
-              "workspace.graph"
-            )}
-          </button>
-
-
-          <div className="sidebar-spacer" />
-
-
-          <button className="sidebar-item">
-            {t(
-              "workspace.settings"
-            )}
-          </button>
-
-        </aside>
-
-
-        {/* EXPLORER */}
-
-        <aside className="entity-tree-sidebar">
-
-          <div className="entity-tree-header">
-
-            <span>
+            <label>
               {t(
-                "entities.title"
+                "entities.entityType"
               )}
-            </span>
+            </label>
 
-
-            <div className="tree-header-actions">
-
-              {/* Root Folder */}
-
-              <button
-                className="tree-add-button"
-
-                onClick={() =>
-                  openFolderForm(
-                    null
-                  )
-                }
-
-                title={t(
-                  "tree.newFolder"
-                )}
-              >
-                📁+
-              </button>
-
-
-              {/* Entity */}
-
-              <button
-                className="tree-add-button"
-
-                onClick={
-                  openCreateForm
-                }
-
-                title={t(
-                  "entities.newEntity"
-                )}
-              >
-                +
-              </button>
-
-            </div>
-
-          </div>
-
-
-          {/* Folder Create Form */}
-
-          {showFolderForm && (
-
-            <form
-              className="folder-create-form"
-
-              onSubmit={
-                createFolder
+            <select
+              className="field-select"
+              value={
+                selectedEntityTypeId
+              }
+              onChange={(
+                event
+              ) =>
+                selectEntityType(
+                  event.target.value
+                )
               }
             >
+              <option value="">
+                {t(
+                  "entities.selectType"
+                )}
+              </option>
 
-              <div className="folder-create-parent">
+              {entityTypes.map(
+                (type) => (
+                  <option
+                    key={
+                      type._id
+                    }
+                    value={
+                      type._id
+                    }
+                  >
+                    {type.icon}{" "}
+                    {type.name}
+                  </option>
+                )
+              )}
+            </select>
 
-                {folderParentId
-                  ? t(
-                      "tree.createInside"
-                    )
-                  : t(
-                      "tree.createAtRoot"
-                    )}
+            {selectedEntityType && (
+              <>
+                <div className="entity-form-divider" />
 
-              </div>
+                <div className="selected-type-heading">
+                  <span>
+                    {
+                      selectedEntityType.icon
+                    }
+                  </span>
 
+                  <strong>
+                    {
+                      selectedEntityType.name
+                    }
+                  </strong>
+                </div>
 
-              <div className="folder-create-row">
-
-                <input
-                  autoFocus
-
-                  value={
-                    folderName
-                  }
-
-                  placeholder={t(
-                    "tree.folderName"
+                <label>
+                  {t(
+                    "schema.nameField"
                   )}
 
+                  <span className="required-star">
+                    *
+                  </span>
+                </label>
+
+                <input
+                  type="text"
+                  value={name}
+                  required
                   onChange={(
                     event
                   ) =>
-                    setFolderName(
+                    setName(
                       event.target.value
                     )
                   }
                 />
 
+                {selectedEntityType.fields.map(
+                  (field) => (
+                    <div
+                      className="dynamic-field"
+                      key={
+                        field._id
+                      }
+                    >
+                      <label>
+                        {field.label}
 
-                <button
-                  type="submit"
-                >
-                  ✓
-                </button>
+                        {field.required && (
+                          <span className="required-star">
+                            *
+                          </span>
+                        )}
+                      </label>
 
-
-                <button
-                  type="button"
-
-                  onClick={
-                    closeFolderForm
-                  }
-                >
-                  ×
-                </button>
-
-              </div>
-
-            </form>
-
-          )}
-
-
-          {/* Tree */}
-
-          <DndContext
-            onDragEnd={
-              handleDragEnd
-            }
-          >
-
-            <RootDropZone />
-
-
-            <div className="entity-tree">
-
-              {
-                renderTreeNodes()
-              }
-
-            </div>
-
-          </DndContext>
-
-        </aside>
-
-
-        {/* RIGHT WORKSPACE */}
-
-        <main className="workspace-main">
-
-          <div className="entity-page-header">
-
-            <div>
-
-              <h1>
-
-                {showCreateForm
-                  ? t(
-                      "entities.createTitle"
-                    )
-
-                  : selectedDetailEntity
-                    ? selectedDetailEntity.name
-
-                    : t(
-                        "entities.title"
+                      {renderField(
+                        field
                       )}
+                    </div>
+                  )
+                )}
+              </>
+            )}
 
-              </h1>
-
-
-              <p>
-
-                {showCreateForm
-                  ? t(
-                      "entities.createDescription"
-                    )
-
-                  : selectedDetailEntity &&
-                    detailEntityType
-
-                    ? `${detailEntityType.icon || ""} ${detailEntityType.name}`
-
-                    : t(
-                        "entities.subtitle"
-                      )}
-
-              </p>
-
-            </div>
-
-
-            {!showCreateForm && (
-
+            <div className="form-buttons">
               <button
-                className="create-button"
-
+                type="button"
+                className="cancel-button"
                 onClick={
-                  openCreateForm
+                  closeCreateForm
                 }
               >
                 {t(
-                  "entities.newEntity"
+                  "worlds.cancel"
                 )}
               </button>
 
-            )}
-
-          </div>
-
-
-          {/* CREATE ENTITY */}
-
-          {showCreateForm && (
-
-            <div className="create-panel entity-create-panel">
-
-              <form
-                onSubmit={
-                  createEntity
+              <button
+                type="submit"
+                className="save-button"
+                disabled={
+                  !selectedEntityTypeId
                 }
               >
-
-                <label>
-                  {t(
-                    "entities.entityType"
-                  )}
-                </label>
-
-
-                <select
-                  className="field-select"
-
-                  value={
-                    selectedEntityTypeId
-                  }
-
-                  onChange={(
-                    event
-                  ) =>
-                    selectEntityType(
-                      event.target.value
-                    )
-                  }
-                >
-
-                  <option value="">
-                    {t(
-                      "entities.selectType"
-                    )}
-                  </option>
-
-
-                  {entityTypes.map(
-                    (type) => (
-
-                      <option
-                        key={
-                          type._id
-                        }
-
-                        value={
-                          type._id
-                        }
-                      >
-                        {type.icon}{" "}
-                        {type.name}
-                      </option>
-
-                    )
-                  )}
-
-                </select>
-
-
-                {selectedEntityType && (
-
-                  <>
-
-                    <div className="entity-form-divider" />
-
-
-                    <div className="selected-type-heading">
-
-                      <span>
-                        {
-                          selectedEntityType.icon
-                        }
-                      </span>
-
-                      <strong>
-                        {
-                          selectedEntityType.name
-                        }
-                      </strong>
-
-                    </div>
-
-
-                    <label>
-
-                      {t(
-                        "schema.nameField"
-                      )}
-
-                      <span className="required-star">
-                        *
-                      </span>
-
-                    </label>
-
-
-                    <input
-                      type="text"
-
-                      value={
-                        name
-                      }
-
-                      required
-
-                      onChange={(
-                        event
-                      ) =>
-                        setName(
-                          event.target.value
-                        )
-                      }
-                    />
-
-
-                    {selectedEntityType.fields.map(
-                      (field) => (
-
-                        <div
-                          className="dynamic-field"
-
-                          key={
-                            field._id
-                          }
-                        >
-
-                          <label>
-
-                            {
-                              field.label
-                            }
-
-                            {field.required && (
-
-                              <span className="required-star">
-                                *
-                              </span>
-
-                            )}
-
-                          </label>
-
-
-                          {renderField(
-                            field
-                          )}
-
-                        </div>
-
-                      )
-                    )}
-
-                  </>
-
+                {t(
+                  "entities.create"
                 )}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
-
-                <div className="form-buttons">
-
-                  <button
-                    type="button"
-
-                    className="cancel-button"
-
-                    onClick={
-                      closeCreateForm
-                    }
-                  >
-                    {t(
-                      "worlds.cancel"
-                    )}
-                  </button>
-
-
-                  <button
-                    type="submit"
-
-                    className="save-button"
-
-                    disabled={
-                      !selectedEntityTypeId
-                    }
-                  >
-                    {t(
-                      "entities.create"
-                    )}
-                  </button>
-
+      {!showCreateForm &&
+        selectedDetailEntity &&
+        detailEntityType && (
+          <div className="entity-detail-panel">
+            <div className="entity-detail-panel-header">
+              <div className="entity-detail-title">
+                <div className="entity-detail-icon">
+                  {
+                    detailEntityType.icon
+                  }
                 </div>
 
-              </form>
+                <div>
+                  <h2>
+                    {
+                      selectedDetailEntity.name
+                    }
+                  </h2>
 
+                  <span>
+                    {
+                      detailEntityType.name
+                    }
+                  </span>
+                </div>
+              </div>
             </div>
 
-          )}
-
-
-          {/* DETAIL */}
-
-          {!showCreateForm &&
-            selectedDetailEntity &&
-            detailEntityType && (
-
-            <div className="entity-detail-panel">
-
-              <div className="entity-detail-panel-header">
-
-                <div className="entity-detail-title">
-
-                  <div className="entity-detail-icon">
-                    {
-                      detailEntityType.icon
-                    }
-                  </div>
-
-
-                  <div>
-
-                    <h2>
-                      {
-                        selectedDetailEntity.name
-                      }
-                    </h2>
-
-                    <span>
-                      {
-                        detailEntityType.name
-                      }
-                    </span>
-
-                  </div>
-
+            <div className="entity-detail-panel-body">
+              {detailEntityType
+                .fields.length ===
+                0 && (
+                <div className="detail-empty">
+                  {t(
+                    "entities.noCustomFields"
+                  )}
                 </div>
+              )}
 
-              </div>
+              {detailEntityType.fields.map(
+                (field) => {
+                  const rawValue =
+                    selectedDetailEntity
+                      .values?.[
+                        field.key
+                      ];
 
-
-              <div className="entity-detail-panel-body">
-
-                {detailEntityType.fields.length ===
-                  0 && (
-
-                  <div className="detail-empty">
-                    {t(
-                      "entities.noCustomFields"
-                    )}
-                  </div>
-
-                )}
-
-
-                {detailEntityType.fields.map(
-                  (field) => {
-
-                    const rawValue =
-                      selectedDetailEntity
-                        .values?.[
-                          field.key
-                        ];
-
-
-                    return (
-
-                      <div
-                        className={
-                          field.type ===
-                          "long-text"
-
-                            ? "detail-field detail-field-long"
-
-                            : "detail-field"
+                  return (
+                    <div
+                      className={
+                        field.type ===
+                        "long-text"
+                          ? "detail-field detail-field-long"
+                          : "detail-field"
+                      }
+                      key={
+                        field._id
+                      }
+                    >
+                      <div className="detail-field-label">
+                        {
+                          field.label
                         }
-
-                        key={
-                          field._id
-                        }
-                      >
-
-                        <div className="detail-field-label">
-                          {
-                            field.label
-                          }
-                        </div>
-
-
-                        <div className="detail-field-value">
-
-                          {formatFieldValue(
-                            field,
-                            rawValue
-                          )}
-
-                        </div>
-
                       </div>
 
-                    );
-                  }
-                )}
-
-              </div>
-
-
-              <div className="entity-detail-panel-footer">
-
-                {t(
-                  "entities.lastUpdated"
-                )}{" "}
-
-
-                {new Date(
-                  selectedDetailEntity.updatedAt
-                ).toLocaleString(
-                  i18n.language ===
-                    "zh-CN"
-
-                    ? "zh-CN"
-
-                    : "en-US"
-                )}
-
-              </div>
-
+                      <div className="detail-field-value">
+                        {formatFieldValue(
+                          field,
+                          rawValue
+                        )}
+                      </div>
+                    </div>
+                  );
+                }
+              )}
             </div>
 
-          )}
+            <div className="entity-detail-panel-footer">
+              {t(
+                "entities.lastUpdated"
+              )}{" "}
 
-
-          {/* EMPTY */}
-
-          {!showCreateForm &&
-            !selectedDetailEntity && (
-
-            <div className="entity-browser-message">
-
-              <h2>
-                {t(
-                  "entities.browserTitle"
-                )}
-              </h2>
-
-              <p>
-                {t(
-                  "entities.browserDescription"
-                )}
-              </p>
-
+              {new Date(
+                selectedDetailEntity.updatedAt
+              ).toLocaleString(
+                i18n.language ===
+                  "zh-CN"
+                  ? "zh-CN"
+                  : "en-US"
+              )}
             </div>
+          </div>
+        )}
 
-          )}
+      {!showCreateForm &&
+        !selectedDetailEntity && (
+          <div className="entity-browser-message">
+            <h2>
+              {t(
+                "entities.browserTitle"
+              )}
+            </h2>
 
-        </main>
-
-      </div>
-
-    </div>
+            <p>
+              {t(
+                "entities.browserDescription"
+              )}
+            </p>
+          </div>
+        )}
+    </WorldLayout>
   );
 }
-
 
 export default EntitiesPage;

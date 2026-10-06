@@ -1,0 +1,287 @@
+/* ======================================================
+   Entity Creation
+   ====================================================== */
+
+.entity-create-panel {
+  max-width: 900px;
+}
+
+.entity-form-divider {
+  height: 1px;
+
+  margin: 20px 0;
+
+  background: #303640;
+}
+
+.selected-type-heading {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  margin-bottom: 18px;
+
+  font-size: 18px;
+}
+
+.dynamic-field {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  margin-top: 10px;
+}
+
+.required-star {
+  margin-left: 4px;
+
+  color: #d98585;
+}
+
+.entity-checkbox {
+  margin-top: 2px;
+}
+
+
+/* ======================================================
+   Legacy Entity Cards
+   ====================================================== */
+
+.entity-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(240px, 1fr)
+    );
+
+  gap: 16px;
+}
+
+.entity-card {
+  min-height: 100px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 15px;
+
+  padding: 18px;
+
+  background: var(--color-bg-panel);
+
+  border: 1px solid var(--color-border-panel);
+  border-radius: 9px;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.entity-card:hover {
+  transform: translateY(-2px);
+
+  border-color: var(--color-border-hover);
+}
+
+.entity-card-icon {
+  width: 46px;
+  height: 46px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--color-bg-hover);
+
+  border-radius: var(--radius-md);
+
+  font-size: 23px;
+}
+
+.entity-card h2 {
+  margin: 0 0 6px;
+
+  font-size: 17px;
+}
+
+.entity-card p {
+  margin: 0;
+
+  color: #7f8794;
+
+  font-size: 13px;
+}
+
+
+/* ======================================================
+   Entity Browser
+   ====================================================== */
+
+.entity-browser-message {
+  max-width: 650px;
+
+  margin-top: 80px;
+
+  color: var(--color-text-dim);
+}
+
+.entity-browser-message h2 {
+  margin-bottom: 8px;
+
+  color: #a6adb8;
+
+  font-size: 20px;
+}
+
+.entity-browser-message p {
+  line-height: 1.6;
+}
+
+
+/* ======================================================
+   Entity Detail Panel
+   ====================================================== */
+
+.entity-detail-panel {
+  width: 100%;
+  max-width: 900px;
+
+  margin-top: 10px;
+
+  background: var(--color-bg-panel-alt);
+
+  border: 1px solid #303640;
+  border-radius: var(--radius-lg);
+
+  overflow: hidden;
+}
+
+.entity-detail-panel-header {
+  padding: 22px 24px;
+
+  border-bottom: 1px solid var(--color-border-panel);
+}
+
+.entity-detail-title {
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+}
+
+.entity-detail-icon {
+  width: 48px;
+  height: 48px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--color-bg-hover);
+
+  border-radius: var(--radius-md);
+
+  font-size: 25px;
+}
+
+.entity-detail-title h2 {
+  margin: 0 0 4px;
+
+  font-size: 22px;
+}
+
+.entity-detail-title span {
+  color: #777f8d;
+
+  font-size: 13px;
+}
+
+.entity-detail-panel-body {
+  padding: 10px 24px 22px;
+}
+
+.detail-field {
+  min-height: 58px;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(140px, 180px)
+    1fr;
+
+  align-items: center;
+
+  gap: 20px;
+
+  padding: 14px 0;
+
+  border-bottom: 1px solid #292e37;
+}
+
+.detail-field:last-child {
+  border-bottom: none;
+}
+
+.detail-field-long {
+  display: block;
+}
+
+.detail-field-long
+.detail-field-label {
+  margin-bottom: 10px;
+}
+
+.detail-field-label {
+  color: #838b98;
+
+  font-size: 13px;
+}
+
+.detail-field-value {
+  color: #e2e5e9;
+
+  font-size: 14px;
+  line-height: 1.65;
+
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.detail-empty {
+  padding: 35px;
+
+  color: #727a87;
+
+  text-align: center;
+}
+
+.entity-detail-panel-footer {
+  padding: 12px 24px;
+
+  border-top: 1px solid var(--color-border-panel);
+
+  color: #656d79;
+
+  font-size: 11px;
+}
+
+
+@media (max-width: 700px) {
+  .detail-field {
+    display: block;
+  }
+
+  .detail-field-label {
+    margin-bottom: 8px;
+  }
+}

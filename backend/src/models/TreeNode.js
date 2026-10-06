@@ -9,36 +9,36 @@ const treeNodeSchema = new mongoose.Schema(
       index: true,
     },
 
-    // folder = 用户创建的纯文件夹
-    // entity = 对应一个真实 Entity
+    // folder = user-created folder
+    // entity = node connected to a real Entity
     kind: {
       type: String,
       enum: ["folder", "entity"],
       required: true,
     },
 
-    // Folder 使用
+    // Used by folder nodes.
     name: {
       type: String,
       default: "",
       trim: true,
     },
 
-    // Entity Node 使用
+    // Used by entity nodes.
     entityId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Entity",
       default: null,
     },
 
-    // null = 根目录
+    // null means the node is located at the tree root.
     parentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "TreeNode",
       default: null,
     },
 
-    // 同一级里的顺序
+    // Position among sibling nodes.
     order: {
       type: Number,
       default: 0,
@@ -49,8 +49,7 @@ const treeNodeSchema = new mongoose.Schema(
   }
 );
 
-
-// 一个 Entity 在一个 World 的 Tree 中只能出现一次
+// An Entity can only appear once in a World's tree.
 treeNodeSchema.index(
   {
     worldId: 1,
@@ -65,7 +64,6 @@ treeNodeSchema.index(
     },
   }
 );
-
 
 const TreeNode = mongoose.model(
   "TreeNode",
