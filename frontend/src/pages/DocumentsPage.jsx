@@ -547,6 +547,42 @@ function DocumentsPage() {
     setDocumentParentId,
   ] = useState(null);
 
+  // ====================================================
+  // Story Suggestions
+  // ====================================================
+
+  const [
+    storySuggestions,
+    setStorySuggestions,
+  ] = useState([]);
+
+
+  const [
+    storyAnalysisState,
+    setStoryAnalysisState,
+  ] = useState(
+    "idle"
+  );
+
+
+  const [
+    storyAnalysisError,
+    setStoryAnalysisError,
+  ] = useState("");
+
+
+  const [
+    storySuggestionActionId,
+    setStorySuggestionActionId,
+  ] = useState(null);
+
+
+  const [
+    editorSaveState,
+    setEditorSaveState,
+  ] = useState(
+    "saved"
+  );
 
   // ====================================================
   // Explorer
@@ -664,7 +700,59 @@ function DocumentsPage() {
     };
   }, []);
 
+  useEffect(() => {
+    setStorySuggestions(
+      []
+    );
 
+    setStoryAnalysisError(
+      ""
+    );
+
+    setStoryAnalysisState(
+      "idle"
+    );
+
+
+    if (
+      !selectedDocument?._id
+    ) {
+      return;
+    }
+
+
+    /*
+    * The current text changed after the most recent
+    * analysis. Old suggestions should not be shown as
+    * if they belonged to the new version.
+    */
+    if (
+      selectedDocument
+        .contentVersion !==
+      selectedDocument
+        .syncedVersion
+    ) {
+      return;
+    }
+
+
+    if (
+      !selectedDocument
+        .syncedVersion
+    ) {
+      return;
+    }
+
+
+    loadStorySuggestions(
+      selectedDocument._id
+    );
+  }, [
+    selectedDocument?._id,
+    selectedDocument?.contentVersion,
+    selectedDocument?.syncedVersion,
+  ]);
+  
   async function loadPage() {
     try {
       setLoading(
@@ -2044,6 +2132,383 @@ function DocumentsPage() {
     });
   }
 
+// ====================================================
+// Story Suggestions
+// ====================================================
+
+async function loadStorySuggestions(
+  documentId
+) {
+  if (!documentId) {
+    return;
+  }
+
+
+  try {
+    setStoryAnalysisError(
+      ""
+    );
+
+
+    const response =
+      await fetch(
+        `${API_URL.storySync}/documents/${documentId}/candidates`
+      );
+
+
+    if (
+      !response.ok
+    ) {
+      const data =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
+
+
+      throw new Error(
+        data.message ||
+          t(
+            "documents.storySuggestionsLoadFailed"
+          )
+      );
+    }
+
+
+    const data =
+      await response.json();
+
+
+    setStorySuggestions(
+      Array.isArray(
+        data.candidates
+      )
+        ? data.candidates
+        : []
+    );
+
+
+    setStoryAnalysisState(
+      "complete"
+    );
+  } catch (error) {
+    console.error(
+      "Failed to load Story Suggestions:",
+      error
+    );
+
+
+    setStoryAnalysisError(
+      error.message ||
+        t(
+          "documents.storySuggestionsLoadFailed"
+        )
+    );
+
+
+    setStoryAnalysisState(
+      "error"
+    );
+  }
+}
+
+
+async function analyzeStory() {
+  if (
+    !selectedDocument?._id
+  ) {
+    return;
+  }
+
+
+  /*
+   * Never analyze an older backend snapshot.
+   */
+  if (
+    editorSaveState !==
+    "saved"
+  ) {
+    return;
+  }
+
+
+  try {
+    setStoryAnalysisState(
+      "analyzing"
+    );
+
+    setStoryAnalysisError(
+      ""
+    );
+
+
+    const response =
+      await fetch(
+        `${API_URL.storySync}/documents/${selectedDocument._id}/analyze`,
+        {
+          method:
+            "POST",
+        }
+      );
+
+
+    if (
+      !response.ok
+    ) {
+      const data =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
+
+
+      throw new Error(
+        data.message ||
+          t(
+            "documents.storyAnalysisFailed"
+          )
+      );
+    }
+
+
+    const data =
+      await response.json();
+
+
+    const analyzedDocument =
+      data.document;
+
+
+    const candidates =
+      Array.isArray(
+        data.candidates
+      )
+        ? data.candidates
+        : [];
+
+
+    setStorySuggestions(
+      candidates
+    );
+
+
+    setStoryAnalysisState(
+      "complete"
+    );
+
+
+    /*
+     * Story Sync updates syncedVersion and
+     * lastSyncedAt, so update the same Document object
+     * used by the rest of the page.
+     */
+    if (
+      analyzedDocument
+    ) {
+      handleDocumentSaved(
+        analyzedDocument
+      );
+    }
+  } catch (error) {
+    console.error(
+      "Story analysis failed:",
+      error
+    );
+
+
+    setStoryAnalysisError(
+      error.message ||
+        t(
+          "documents.storyAnalysisFailed"
+        )
+    );
+
+
+    setStoryAnalysisState(
+      "error"
+    );
+  }
+}
+
+
+async function applyStorySuggestion(
+  candidate
+) {
+  if (
+    !candidate?._id
+  ) {
+    return;
+  }
+
+
+  try {
+    setStorySuggestionActionId(
+      candidate._id
+    );
+
+    setStoryAnalysisError(
+      ""
+    );
+
+
+    const response =
+      await fetch(
+        `${API_URL.storySync}/candidates/${candidate._id}/apply`,
+        {
+          method:
+            "POST",
+        }
+      );
+
+
+    if (
+      !response.ok
+    ) {
+      const data =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
+
+
+      throw new Error(
+        data.message ||
+          t(
+            "documents.storySuggestionApplyFailed"
+          )
+      );
+    }
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      data.candidate
+    ) {
+      setStorySuggestions(
+        (current) =>
+          current.map(
+            (item) =>
+              item._id ===
+              data.candidate._id
+                ? data.candidate
+                : item
+          )
+      );
+    }
+  } catch (error) {
+    console.error(
+      "Failed to apply Story Suggestion:",
+      error
+    );
+
+
+    setStoryAnalysisError(
+      error.message ||
+        t(
+          "documents.storySuggestionApplyFailed"
+        )
+    );
+  } finally {
+    setStorySuggestionActionId(
+      null
+    );
+  }
+}
+
+
+async function ignoreStorySuggestion(
+  candidate
+) {
+  if (
+    !candidate?._id
+  ) {
+    return;
+  }
+
+
+  try {
+    setStorySuggestionActionId(
+      candidate._id
+    );
+
+    setStoryAnalysisError(
+      ""
+    );
+
+
+    const response =
+      await fetch(
+        `${API_URL.storySync}/candidates/${candidate._id}/ignore`,
+        {
+          method:
+            "POST",
+        }
+      );
+
+
+    if (
+      !response.ok
+    ) {
+      const data =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
+
+
+      throw new Error(
+        data.message ||
+          t(
+            "documents.storySuggestionIgnoreFailed"
+          )
+      );
+    }
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      data.candidate
+    ) {
+      setStorySuggestions(
+        (current) =>
+          current.map(
+            (item) =>
+              item._id ===
+              data.candidate._id
+                ? data.candidate
+                : item
+          )
+      );
+    }
+  } catch (error) {
+    console.error(
+      "Failed to ignore Story Suggestion:",
+      error
+    );
+
+
+    setStoryAnalysisError(
+      error.message ||
+        t(
+          "documents.storySuggestionIgnoreFailed"
+        )
+    );
+  } finally {
+    setStorySuggestionActionId(
+      null
+    );
+  }
+}
 
   // ====================================================
   // Editor Save Callback
@@ -2643,25 +3108,59 @@ function DocumentsPage() {
 
                   {storyNeedsSync
                     ? t(
-                        "documents.storyOutOfSync"
+                        "documents.storyNeedsAnalysis"
                       )
                     : t(
-                        "documents.storySynced"
+                        "documents.storyAnalyzed"
                       )}
                 </div>
 
                 <button
                   type="button"
-                  className="document-sync-button"
-                  disabled
-                  title={t(
-                    "documents.syncComingSoon"
-                  )}
+                  className={[
+                    "document-sync-button",
+
+                    storyNeedsSync
+                      ? "needs-analysis"
+                      : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  disabled={
+                    storyAnalysisState ===
+                      "analyzing" ||
+                    editorSaveState !==
+                      "saved"
+                  }
+                  title={
+                    editorSaveState !==
+                    "saved"
+                      ? t(
+                          "documents.analyzeAfterSave"
+                        )
+                      : t(
+                          "documents.analyzeStoryDescription"
+                        )
+                  }
+                  onClick={
+                    analyzeStory
+                  }
                 >
-                  ↻{" "}
-                  {t(
-                    "documents.sync"
-                  )}
+                  {storyAnalysisState ===
+                  "analyzing"
+                    ? "…"
+                    : "◇"}
+
+                  {" "}
+
+                  {storyAnalysisState ===
+                  "analyzing"
+                    ? t(
+                        "documents.analyzingStory"
+                      )
+                    : t(
+                        "documents.analyzeStory"
+                      )}
                 </button>
               </div>
 
@@ -2676,8 +3175,256 @@ function DocumentsPage() {
                 onSaved={
                   handleDocumentSaved
                 }
+                onSaveStateChange={
+                  setEditorSaveState
+                }
               />
 
+              {(
+                storyAnalysisState ===
+                  "complete" ||
+                storyAnalysisState ===
+                  "error"
+              ) && (
+                <section className="story-suggestions">
+
+                  <div className="story-suggestions-header">
+
+                    <div>
+                      <h3>
+                        {t(
+                          "documents.storySuggestionsTitle"
+                        )}
+                      </h3>
+
+                      <p>
+                        {t(
+                          "documents.storySuggestionsDescription"
+                        )}
+                      </p>
+                    </div>
+
+
+                    <span className="story-suggestions-count">
+                      {
+                        storySuggestions.filter(
+                          (candidate) =>
+                            candidate.status ===
+                            "pending"
+                        ).length
+                      }
+                    </span>
+
+                  </div>
+
+
+                  {storyAnalysisError && (
+                    <div className="story-suggestions-error">
+                      {
+                        storyAnalysisError
+                      }
+                    </div>
+                  )}
+
+
+                  {!storyAnalysisError &&
+                    storySuggestions.length ===
+                      0 && (
+                      <div className="story-suggestions-empty">
+                        {t(
+                          "documents.storySuggestionsEmpty"
+                        )}
+                      </div>
+                    )}
+
+
+                  {storySuggestions.length >
+                    0 && (
+                    <div className="story-suggestions-list">
+
+                      {storySuggestions.map(
+                        (candidate) => {
+                          const subject =
+                            candidate
+                              .subjectEntityId;
+
+                          const object =
+                            candidate
+                              .objectEntityId;
+
+                          const working =
+                            storySuggestionActionId ===
+                            candidate._id;
+
+                          const resolved =
+                            candidate.status !==
+                            "pending";
+
+
+                          return (
+                            <article
+                              key={
+                                candidate._id
+                              }
+                              className={[
+                                "story-suggestion-card",
+
+                                `status-${candidate.status}`,
+                              ].join(" ")}
+                            >
+
+                              <div className="story-suggestion-kind">
+                                {t(
+                                  "documents.relationSuggestion"
+                                )}
+                              </div>
+
+
+                              <div className="story-suggestion-relation">
+
+                                <strong>
+                                  {
+                                    subject?.name ||
+                                    "?"
+                                  }
+                                </strong>
+
+                                <span className="story-suggestion-arrow">
+                                  →
+                                </span>
+
+                                <span className="story-suggestion-label">
+                                  {
+                                    candidate
+                                      .relationLabel ||
+                                    candidate
+                                      .relationType
+                                  }
+                                </span>
+
+                                <span className="story-suggestion-arrow">
+                                  →
+                                </span>
+
+                                <strong>
+                                  {
+                                    object?.name ||
+                                    "?"
+                                  }
+                                </strong>
+
+                              </div>
+
+
+                              {candidate.sourceText && (
+                                <blockquote className="story-suggestion-source">
+                                  “
+                                  {
+                                    candidate.sourceText
+                                  }
+                                  ”
+                                </blockquote>
+                              )}
+
+
+                              <div className="story-suggestion-meta">
+
+                                <span>
+                                  {t(
+                                    "documents.confidence"
+                                  )}
+                                  {" "}
+                                  {
+                                    Math.round(
+                                      (
+                                        candidate.confidence ??
+                                        0
+                                      ) *
+                                        100
+                                    )
+                                  }
+                                  %
+                                </span>
+
+
+                                {candidate.status ===
+                                  "accepted" && (
+                                  <span className="story-suggestion-status accepted">
+                                    ✓{" "}
+                                    {t(
+                                      "documents.suggestionApplied"
+                                    )}
+                                  </span>
+                                )}
+
+
+                                {candidate.status ===
+                                  "ignored" && (
+                                  <span className="story-suggestion-status ignored">
+                                    {t(
+                                      "documents.suggestionIgnored"
+                                    )}
+                                  </span>
+                                )}
+
+                              </div>
+
+
+                              {!resolved && (
+                                <div className="story-suggestion-actions">
+
+                                  <button
+                                    type="button"
+                                    className="story-suggestion-ignore"
+                                    disabled={
+                                      working
+                                    }
+                                    onClick={() =>
+                                      ignoreStorySuggestion(
+                                        candidate
+                                      )
+                                    }
+                                  >
+                                    {t(
+                                      "documents.ignoreSuggestion"
+                                    )}
+                                  </button>
+
+
+                                  <button
+                                    type="button"
+                                    className="story-suggestion-apply"
+                                    disabled={
+                                      working
+                                    }
+                                    onClick={() =>
+                                      applyStorySuggestion(
+                                        candidate
+                                      )
+                                    }
+                                  >
+                                    {working
+                                      ? t(
+                                          "documents.processingSuggestion"
+                                        )
+                                      : t(
+                                          "documents.applySuggestion"
+                                        )}
+                                  </button>
+
+                                </div>
+                              )}
+
+                            </article>
+                          );
+                        }
+                      )}
+
+                    </div>
+                  )}
+
+                </section>
+              )}
 
               <footer className="document-preview-footer">
                 <span>
@@ -2692,10 +3439,10 @@ function DocumentsPage() {
                 <span>
                   {storyNeedsSync
                     ? t(
-                        "documents.syncPending"
+                        "documents.analysisPending"
                       )
                     : t(
-                        "documents.syncUpToDate"
+                        "documents.analysisUpToDate"
                       )}
                 </span>
               </footer>

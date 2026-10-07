@@ -854,3 +854,529 @@ button.danger {
       14px;
   }
 }
+
+/* ======================================================
+   Story Analysis Button
+   ====================================================== */
+
+.document-sync-button.needs-analysis {
+  border-color:
+    #52677e;
+
+  color:
+    #91b6dc;
+}
+
+.document-sync-button.needs-analysis:not(:disabled) {
+  background:
+    rgba(
+      72,
+      111,
+      151,
+      0.08
+    );
+}
+
+.document-sync-button.needs-analysis:not(:disabled):hover {
+  background:
+    rgba(
+      72,
+      111,
+      151,
+      0.16
+    );
+
+  border-color:
+    #65809d;
+
+  color:
+    #b5d1ec;
+}
+
+
+/* ======================================================
+   Story Suggestions
+   ====================================================== */
+
+.story-suggestions {
+  width: 100%;
+
+  max-height:
+    300px;
+
+  flex-shrink: 0;
+
+  box-sizing:
+    border-box;
+
+  padding:
+    14px 0 16px;
+
+  overflow-y:
+    auto;
+
+  border-top:
+    1px solid
+    var(--color-border);
+
+  background:
+    #12161b;
+}
+
+.story-suggestions-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 18px;
+
+  padding:
+    0 10px 12px;
+}
+
+.story-suggestions-header h3 {
+  margin:
+    0 0 3px;
+
+  color:
+    #dce2e9;
+
+  font-size:
+    13px;
+
+  font-weight:
+    600;
+}
+
+.story-suggestions-header p {
+  margin: 0;
+
+  color:
+    var(--color-text-dim);
+
+  font-size:
+    11px;
+
+  line-height:
+    1.45;
+}
+
+.story-suggestions-count {
+  min-width:
+    24px;
+
+  height:
+    24px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  padding:
+    0 6px;
+
+  box-sizing:
+    border-box;
+
+  border:
+    1px solid
+    #3b4653;
+
+  border-radius:
+    999px;
+
+  background:
+    #1b2128;
+
+  color:
+    #8fb7e3;
+
+  font-size:
+    10px;
+}
+
+
+/* ======================================================
+   Suggestion List
+   ====================================================== */
+
+.story-suggestions-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  padding:
+    0 10px;
+}
+
+.story-suggestion-card {
+  padding:
+    10px 11px;
+
+  background:
+    #181d23;
+
+  border:
+    1px solid
+    #2c343e;
+
+  border-radius:
+    7px;
+}
+
+.story-suggestion-card.status-accepted {
+  border-color:
+    rgba(
+      92,
+      142,
+      105,
+      0.42
+    );
+
+  background:
+    rgba(
+      48,
+      77,
+      57,
+      0.12
+    );
+}
+
+.story-suggestion-card.status-ignored {
+  opacity:
+    0.58;
+}
+
+.story-suggestion-kind {
+  margin-bottom:
+    7px;
+
+  color:
+    #738195;
+
+  font-size:
+    9px;
+
+  font-weight:
+    600;
+
+  letter-spacing:
+    0.06em;
+
+  text-transform:
+    uppercase;
+}
+
+.story-suggestion-relation {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  min-width: 0;
+
+  color:
+    var(--color-text-secondary);
+
+  font-size:
+    12px;
+
+  flex-wrap:
+    wrap;
+}
+
+.story-suggestion-relation strong {
+  color:
+    #dce5ed;
+
+  font-weight:
+    600;
+}
+
+.story-suggestion-arrow {
+  color:
+    #596878;
+}
+
+.story-suggestion-label {
+  padding:
+    2px 6px;
+
+  border-radius:
+    4px;
+
+  background:
+    rgba(
+      70,
+      112,
+      155,
+      0.14
+    );
+
+  color:
+    #86add3;
+
+  font-size:
+    10px;
+}
+
+
+/* ======================================================
+   Suggestion Evidence
+   ====================================================== */
+
+.story-suggestion-source {
+  margin:
+    9px 0 0;
+
+  padding:
+    7px 9px;
+
+  border-left:
+    2px solid
+    #3e5269;
+
+  background:
+    #14191f;
+
+  color:
+    #9ca6b3;
+
+  font-size:
+    10px;
+
+  line-height:
+    1.5;
+}
+
+.story-suggestion-meta {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  margin-top:
+    8px;
+
+  color:
+    #717c89;
+
+  font-size:
+    9px;
+}
+
+.story-suggestion-status.accepted {
+  color:
+    #79a987;
+}
+
+.story-suggestion-status.ignored {
+  color:
+    #858d97;
+}
+
+
+/* ======================================================
+   Suggestion Actions
+   ====================================================== */
+
+.story-suggestion-actions {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 7px;
+
+  margin-top:
+    10px;
+}
+
+.story-suggestion-actions button {
+  min-height:
+    30px;
+
+  padding:
+    5px 10px;
+
+  border-radius:
+    5px;
+
+  cursor:
+    pointer;
+
+  font-size:
+    10px;
+}
+
+.story-suggestion-actions button:disabled {
+  opacity:
+    0.45;
+
+  cursor:
+    default;
+}
+
+.story-suggestion-ignore {
+  background:
+    transparent;
+
+  border:
+    1px solid
+    #39414b;
+
+  color:
+    #9ca4ae;
+}
+
+.story-suggestion-ignore:hover:not(:disabled) {
+  background:
+    #22272e;
+}
+
+.story-suggestion-apply {
+  background:
+    #263849;
+
+  border:
+    1px solid
+    #405c76;
+
+  color:
+    #a8cbed;
+}
+
+.story-suggestion-apply:hover:not(:disabled) {
+  background:
+    #30465b;
+
+  border-color:
+    #527596;
+}
+
+
+/* ======================================================
+   Empty / Error
+   ====================================================== */
+
+.story-suggestions-empty,
+.story-suggestions-error {
+  margin:
+    0 10px;
+
+  padding:
+    11px;
+
+  border-radius:
+    6px;
+
+  font-size:
+    11px;
+
+  line-height:
+    1.5;
+}
+
+.story-suggestions-empty {
+  background:
+    #171b20;
+
+  color:
+    var(--color-text-dim);
+}
+
+.story-suggestions-error {
+  background:
+    rgba(
+      140,
+      63,
+      63,
+      0.12
+    );
+
+  border:
+    1px solid
+    rgba(
+      170,
+      75,
+      75,
+      0.22
+    );
+
+  color:
+    #d19292;
+}
+
+
+/* ======================================================
+   Mobile Story Suggestions
+   ====================================================== */
+
+@media (max-width: 760px) {
+  .story-suggestions {
+    max-height:
+      220px;
+
+    margin:
+      0 10px;
+
+    width:
+      auto;
+
+    padding:
+      12px 0 14px;
+
+    border:
+      1px solid
+      #292f38;
+
+    border-radius:
+      7px;
+
+    background:
+      #14181d;
+
+    -webkit-overflow-scrolling:
+      touch;
+  }
+
+  .story-suggestions-header,
+  .story-suggestions-list {
+    padding-left:
+      9px;
+
+    padding-right:
+      9px;
+  }
+
+  .story-suggestion-card {
+    padding:
+      10px;
+  }
+
+  .story-suggestion-relation {
+    gap:
+      5px;
+
+    font-size:
+      11px;
+  }
+
+  .story-suggestion-actions button {
+    min-height:
+      36px;
+
+    padding:
+      7px 11px;
+  }
+
+  .story-suggestions-empty,
+  .story-suggestions-error {
+    margin-left:
+      9px;
+
+    margin-right:
+      9px;
+  }
+}

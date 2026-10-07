@@ -3,6 +3,7 @@
    ====================================================== */
 
 .document-editor {
+  position: relative;
   width: 100%;
 
   min-width: 0;
@@ -114,9 +115,11 @@
 
   cursor: pointer;
 
-  font-size: 12px;
+  font-size:
+    12px;
 
-  line-height: 1;
+  line-height:
+    1;
 }
 
 .document-editor-tool:hover:not(:disabled) {
@@ -162,11 +165,6 @@
 
   flex: 1;
 
-  /*
-   * Do not add horizontal padding here.
-   * This keeps the editing surface aligned with
-   * the toolbar and status bars.
-   */
   padding:
     12px 0 28px;
 
@@ -272,7 +270,7 @@
 
 
 /* ======================================================
-   Document Typography
+   Typography
    ====================================================== */
 
 .document-editor-content
@@ -540,6 +538,287 @@ p.is-editor-empty:first-child::before {
 
 
 /* ======================================================
+   Entity Mention
+   ====================================================== */
+
+.entity-mention {
+  position: relative;
+
+  padding:
+    0 2px;
+
+  border-radius:
+    3px;
+
+  background:
+    rgba(
+      71,
+      132,
+      196,
+      0.12
+    );
+
+  color:
+    #79aee8;
+
+  border-bottom:
+    1px solid
+    rgba(
+      121,
+      174,
+      232,
+      0.55
+    );
+
+  cursor: pointer;
+
+  box-decoration-break:
+    clone;
+
+  -webkit-box-decoration-break:
+    clone;
+
+  transition:
+    color 0.12s ease,
+    background 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.entity-mention:hover {
+  background:
+    rgba(
+      78,
+      145,
+      215,
+      0.22
+    );
+
+  color:
+    #a1c9f3;
+
+  border-bottom-color:
+    #82b8ee;
+}
+
+
+/* ======================================================
+   Entity Mention Tooltip
+   ====================================================== */
+
+.entity-mention-tooltip {
+  position: absolute;
+
+  z-index:
+    10000;
+
+  width:
+    min(
+      270px,
+      calc(
+        100% -
+        16px
+      )
+    );
+
+  box-sizing:
+    border-box;
+
+  display: flex;
+
+  gap: 10px;
+
+  padding:
+    11px 12px;
+
+  background:
+    #1b2027;
+
+  border:
+    1px solid
+    #394453;
+
+  border-radius:
+    7px;
+
+  box-shadow:
+    0 12px 32px
+    rgba(
+      0,
+      0,
+      0,
+      0.42
+    );
+
+  color:
+    var(--color-text);
+}
+
+.entity-mention-tooltip.desktop-mode {
+  pointer-events:
+    none;
+}
+
+.entity-mention-tooltip.touch-mode {
+  pointer-events:
+    auto;
+}
+
+.entity-mention-tooltip-icon {
+  width: 30px;
+  height: 30px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    #252c35;
+
+  border-radius:
+    5px;
+
+  font-size:
+    16px;
+}
+
+.entity-mention-tooltip-content {
+  min-width: 0;
+
+  flex: 1;
+}
+
+.entity-mention-tooltip-content strong {
+  display: block;
+
+  overflow: hidden;
+
+  color:
+    #eef2f6;
+
+  font-size:
+    13px;
+
+  white-space:
+    nowrap;
+
+  text-overflow:
+    ellipsis;
+}
+
+.entity-mention-tooltip-type {
+  margin-top:
+    2px;
+
+  color:
+    #8994a3;
+
+  font-size:
+    10px;
+}
+
+.entity-mention-tooltip-content p {
+  margin:
+    7px 0 0;
+
+  color:
+    #aeb6c1;
+
+  font-size:
+    11px;
+
+  line-height:
+    1.45;
+
+  display:
+    -webkit-box;
+
+  overflow: hidden;
+
+  -webkit-line-clamp:
+    3;
+
+  -webkit-box-orient:
+    vertical;
+}
+
+.entity-mention-tooltip-hint {
+  display: block;
+
+  margin-top:
+    8px;
+
+  color:
+    #6f9dcb;
+
+  font-size:
+    10px;
+}
+
+
+/* ======================================================
+   Open Entity Button
+   ====================================================== */
+
+.entity-mention-tooltip-open {
+  width: 100%;
+
+  min-height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-sizing:
+    border-box;
+
+  margin-top:
+    10px;
+
+  padding:
+    7px 10px;
+
+  background:
+    #273444;
+
+  color:
+    #9bc6f1;
+
+  border:
+    1px solid
+    #40536a;
+
+  border-radius:
+    5px;
+
+  cursor: pointer;
+
+  font-size:
+    11px;
+
+  font-weight:
+    600;
+
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.entity-mention-tooltip-open:hover {
+  background:
+    #314258;
+
+  border-color:
+    #526c89;
+
+  color:
+    #c3dff8;
+}
+
+
+/* ======================================================
    Mobile / Narrow Screen
    ====================================================== */
 
@@ -561,7 +840,8 @@ p.is-editor-empty:first-child::before {
   .document-editor-toolbar,
   .document-editor-content,
   .document-editor-statusbar {
-    box-sizing: border-box;
+    box-sizing:
+      border-box;
   }
 
 
@@ -595,7 +875,8 @@ p.is-editor-empty:first-child::before {
     overflow-x: auto;
     overflow-y: hidden;
 
-    scrollbar-width: thin;
+    scrollbar-width:
+      thin;
 
     -webkit-overflow-scrolling:
       touch;
@@ -631,7 +912,7 @@ p.is-editor-empty:first-child::before {
 
 
   /* ====================================================
-     Editor Scroll Area
+     Editor
      ==================================================== */
 
   .document-editor-scroll {
@@ -656,15 +937,11 @@ p.is-editor-empty:first-child::before {
       touch;
   }
 
-
-  /* ====================================================
-     Editing Surface
-     ==================================================== */
-
   .document-editor-content {
     width: 100%;
 
-    min-height: 340px;
+    min-height:
+      340px;
 
     margin: 0;
 
@@ -736,7 +1013,7 @@ p.is-editor-empty:first-child::before {
 
 
   /* ====================================================
-     Status Bar
+     Status
      ==================================================== */
 
   .document-editor-statusbar {
@@ -780,7 +1057,7 @@ p.is-editor-empty:first-child::before {
 
 
   /* ====================================================
-     Document Preview Alignment
+     Preview Alignment
      ==================================================== */
 
   .document-preview-toolbar {
@@ -795,28 +1072,153 @@ p.is-editor-empty:first-child::before {
 
 
   /* ====================================================
-     Mobile Typography
+     Typography
      ==================================================== */
 
   .document-editor-content h1 {
-    font-size: 1.6em;
+    font-size:
+      1.6em;
   }
 
   .document-editor-content h2 {
-    font-size: 1.3em;
+    font-size:
+      1.3em;
   }
 
   .document-editor-content h3 {
-    font-size: 1.15em;
+    font-size:
+      1.15em;
   }
 
   .document-editor-content ul,
   .document-editor-content ol {
-    padding-left: 1.4em;
+    padding-left:
+      1.4em;
   }
 
   .document-editor-content blockquote {
-    padding-left: 12px;
+    padding-left:
+      12px;
+  }
+
+
+  /* ====================================================
+     Mobile Entity Mention
+     ==================================================== */
+
+  .entity-mention {
+    padding:
+      0 1px;
+
+    background:
+      rgba(
+        71,
+        132,
+        196,
+        0.14
+      );
+
+    color:
+      #83b8ef;
+
+    /*
+     * Suppress the normal mobile tap highlight.
+     */
+    -webkit-tap-highlight-color:
+      transparent;
+  }
+
+
+  /* ====================================================
+     Mobile Entity Popup
+     ==================================================== */
+
+  .entity-mention-tooltip {
+    width:
+      min(
+        290px,
+        calc(
+          100% -
+          24px
+        )
+      );
+
+    max-width:
+      calc(
+        100% -
+        24px
+      );
+
+    gap: 10px;
+
+    padding:
+      12px;
+
+    border-radius:
+      9px;
+
+    box-shadow:
+      0 14px 36px
+      rgba(
+        0,
+        0,
+        0,
+        0.5
+      );
+  }
+
+  .entity-mention-tooltip.touch-mode {
+    pointer-events:
+      auto;
+  }
+
+  .entity-mention-tooltip-icon {
+    width: 34px;
+    height: 34px;
+
+    font-size:
+      18px;
+  }
+
+  .entity-mention-tooltip-content strong {
+    font-size:
+      14px;
+  }
+
+  .entity-mention-tooltip-type {
+    margin-top:
+      3px;
+
+    font-size:
+      11px;
+  }
+
+  .entity-mention-tooltip-content p {
+    margin-top:
+      8px;
+
+    font-size:
+      12px;
+
+    line-height:
+      1.45;
+  }
+
+  .entity-mention-tooltip-open {
+    min-height:
+      40px;
+
+    margin-top:
+      11px;
+
+    font-size:
+      12px;
+
+    touch-action:
+      manipulation;
+
+    -webkit-tap-highlight-color:
+      transparent;
   }
 
 
@@ -847,13 +1249,31 @@ p.is-editor-empty:first-child::before {
     }
 
     .document-editor-content {
-      min-height: 320px;
+      min-height:
+        320px;
 
       padding:
         20px 14px 54px;
 
       font-size:
         14.5px;
+    }
+
+    .entity-mention-tooltip {
+      width:
+        min(
+          280px,
+          calc(
+            100vw -
+            20px
+          )
+        );
+
+      max-width:
+        calc(
+          100vw -
+          20px
+        );
     }
   }
 }

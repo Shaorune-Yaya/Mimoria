@@ -205,6 +205,38 @@
     "renameFailed": "Failed to rename item.",
     "deleteFailed": "Failed to delete item.",
     "drag": "Drag",
-    "moveFailed": "Failed to move document item."
+    "moveFailed": "Failed to move document item.",
+    "entityMentionType": "Entity Type",
+    "entityMentionUnknownType": "Unknown Type",
+    "entityMentionOpenHint": "Click to open this Entity",
+    "entityMentionOpen": "Open Entity",
+
+    "analyzeStory": "Analyze Story",
+    "analyzingStory": "Analyzing...",
+    "analyzeStoryDescription": "Analyze this document and suggest possible world data.",
+    "analyzeAfterSave": "Wait for the current changes to finish saving before analyzing.",
+
+    "storyNeedsAnalysis": "Current version needs analysis",
+    "storyAnalyzed": "Current version analyzed",
+    "analysisPending": "Story analysis pending",
+    "analysisUpToDate": "Current version analyzed",
+
+    "storySuggestionsTitle": "Story Suggestions",
+    "storySuggestionsDescription": "These suggestions come from rule-based analysis. Nothing is added to your world until you approve it.",
+    "storySuggestionsEmpty": "No sufficiently clear world-data suggestions were found.",
+
+    "relationSuggestion": "Relation Suggestion",
+    "confidence": "Confidence",
+
+    "applySuggestion": "Apply",
+    "ignoreSuggestion": "Ignore",
+    "processingSuggestion": "Processing...",
+    "suggestionApplied": "Applied",
+    "suggestionIgnored": "Ignored",
+
+    "storyAnalysisFailed": "Failed to analyze this document.",
+    "storySuggestionsLoadFailed": "Failed to load Story Suggestions.",
+    "storySuggestionApplyFailed": "Failed to apply this suggestion.",
+    "storySuggestionIgnoreFailed": "Failed to ignore this suggestion."
   }
 }

@@ -34,7 +34,7 @@ router.get(
       })
         .populate(
           "entityTypeId",
-          "name icon"
+          "name icon description"
         )
         .sort({
           updatedAt: -1,

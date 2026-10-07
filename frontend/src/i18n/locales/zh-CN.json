@@ -205,6 +205,38 @@
     "renameFailed": "重命名失败。",
     "deleteFailed": "删除失败。",
     "drag": "拖动",
-    "moveFailed": "移动文档项目失败。"
+    "moveFailed": "移动文档项目失败。",
+    "entityMentionType": "实体类型",
+    "entityMentionUnknownType": "未知类型",
+    "entityMentionOpenHint": "点击打开这个实体。",
+    "entityMentionOpen": "打开实体",
+
+    "analyzeStory": "分析设定",
+    "analyzingStory": "正在分析……",
+    "analyzeStoryDescription": "分析当前文档，并提出可能的世界设定建议。",
+    "analyzeAfterSave": "请等待当前修改保存完成后再分析。",
+
+    "storyNeedsAnalysis": "当前版本尚未分析",
+    "storyAnalyzed": "当前版本已分析",
+    "analysisPending": "设定分析待处理",
+    "analysisUpToDate": "当前版本已完成设定分析",
+
+    "storySuggestionsTitle": "设定建议",
+    "storySuggestionsDescription": "这些内容由规则分析产生，只有在你确认后才会写入世界数据库。",
+    "storySuggestionsEmpty": "没有发现足够明确的设定建议。",
+
+    "relationSuggestion": "关系建议",
+    "confidence": "置信度",
+
+    "applySuggestion": "应用建议",
+    "ignoreSuggestion": "忽略",
+    "processingSuggestion": "处理中……",
+    "suggestionApplied": "已应用",
+    "suggestionIgnored": "已忽略",
+
+    "storyAnalysisFailed": "分析当前文档失败。",
+    "storySuggestionsLoadFailed": "加载设定建议失败。",
+    "storySuggestionApplyFailed": "应用设定建议失败。",
+    "storySuggestionIgnoreFailed": "忽略设定建议失败。"
   }
 }

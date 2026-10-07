@@ -14,15 +14,68 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 
 import {
+  useNavigate,
+  useParams,
+} from "react-router-dom";
+
+import {
   useTranslation,
 } from "react-i18next";
 
-import { API_URL } from "../config/api";
+import {
+  API_URL,
+} from "../config/api";
+
+import EntityMentionHighlighter, {
+  ENTITY_MENTION_REFRESH_META,
+} from "../extensions/EntityMentionHighlighter";
 
 
 const AUTOSAVE_DELAY =
   1000;
 
+
+// ======================================================
+// Environment Helpers
+// ======================================================
+
+function isTouchEnvironment() {
+  if (
+    typeof window ===
+    "undefined"
+  ) {
+    return false;
+  }
+
+
+  const narrowScreen =
+    window.innerWidth <=
+    760;
+
+
+  const coarsePointer =
+    window.matchMedia(
+      "(pointer: coarse)"
+    ).matches;
+
+
+  const noHover =
+    window.matchMedia(
+      "(hover: none)"
+    ).matches;
+
+
+  return (
+    narrowScreen ||
+    coarsePointer ||
+    noHover
+  );
+}
+
+
+// ======================================================
+// Toolbar Button
+// ======================================================
 
 function ToolbarButton({
   active = false,
@@ -36,6 +89,7 @@ function ToolbarButton({
       type="button"
       className={[
         "document-editor-tool",
+
         active
           ? "active"
           : "",
@@ -55,8 +109,8 @@ function ToolbarButton({
         event
       ) => {
         /*
-         * Prevent toolbar clicks from stealing
-         * focus from the editor selection.
+         * Toolbar buttons should not destroy the
+         * current editor selection.
          */
         event.preventDefault();
       }}
@@ -70,13 +124,32 @@ function ToolbarButton({
 }
 
 
+// ======================================================
+// Document Editor
+// ======================================================
+
 function DocumentEditor({
   document,
   onSaved,
+  onSaveStateChange,
 }) {
+  const {
+    worldId,
+  } = useParams();
+
+
+  const navigate =
+    useNavigate();
+
+
   const {
     t,
   } = useTranslation();
+
+
+  // ====================================================
+  // Save State
+  // ====================================================
 
   const [
     saveState,
@@ -85,28 +158,116 @@ function DocumentEditor({
     "saved"
   );
 
+
   const [
     saveError,
     setSaveError,
   ] = useState("");
 
+    // ====================================================
+    // Report Save State to Parent
+    // ====================================================
+
+    useEffect(() => {
+    if (
+        typeof onSaveStateChange ===
+        "function"
+    ) {
+        onSaveStateChange(
+        saveState
+        );
+    }
+    }, [
+    saveState,
+    onSaveStateChange,
+    ]);
+    
+  // ====================================================
+  // Responsive Input State
+  // ====================================================
+
+  const [
+    touchMode,
+    setTouchMode,
+  ] = useState(
+    () =>
+      isTouchEnvironment()
+  );
+
+
+  // ====================================================
+  // Entity Mentions
+  // ====================================================
+
+  const entitiesRef =
+    useRef([]);
+
+
+  const [
+    mentionTooltip,
+    setMentionTooltip,
+  ] = useState(null);
+
+
+  // ====================================================
+  // Save Refs
+  // ====================================================
+
   const saveTimerRef =
     useRef(null);
+
 
   const currentDocumentIdRef =
     useRef(
       document._id
     );
 
+
   const revisionRef =
     useRef(0);
+
 
   const mountedRef =
     useRef(true);
 
+
   const latestSnapshotRef =
     useRef(null);
 
+
+  // ====================================================
+  // Watch Responsive Mode
+  // ====================================================
+
+  useEffect(() => {
+    function updateInputMode() {
+      setTouchMode(
+        isTouchEnvironment()
+      );
+    }
+
+
+    updateInputMode();
+
+
+    window.addEventListener(
+      "resize",
+      updateInputMode
+    );
+
+
+    return () => {
+      window.removeEventListener(
+        "resize",
+        updateInputMode
+      );
+    };
+  }, []);
+
+
+  // ====================================================
+  // Save Helpers
+  // ====================================================
 
   function clearSaveTimer() {
     if (
@@ -116,9 +277,26 @@ function DocumentEditor({
         saveTimerRef.current
       );
 
+
       saveTimerRef.current =
         null;
     }
+  }
+
+
+  function createSnapshot(
+    editorInstance
+  ) {
+    return {
+      content:
+        editorInstance.getJSON(),
+
+      plainText:
+        editorInstance.getText({
+          blockSeparator:
+            "\n",
+        }),
+    };
   }
 
 
@@ -137,6 +315,7 @@ function DocumentEditor({
       return;
     }
 
+
     try {
       if (
         !silent &&
@@ -148,10 +327,12 @@ function DocumentEditor({
           "saving"
         );
 
+
         setSaveError(
           ""
         );
       }
+
 
       const response =
         await fetch(
@@ -174,14 +355,11 @@ function DocumentEditor({
                   snapshot.plainText,
               }),
 
-            /*
-             * Allows a final save request to continue
-             * while navigating away from the page.
-             */
             keepalive:
               silent,
           }
         );
+
 
       if (
         !response.ok
@@ -193,6 +371,7 @@ function DocumentEditor({
               () => ({})
             );
 
+
         throw new Error(
           data.message ||
             t(
@@ -201,18 +380,15 @@ function DocumentEditor({
         );
       }
 
+
       const data =
         await response.json();
+
 
       const savedDocument =
         data.document;
 
-      /*
-       * Always tell the parent that this specific
-       * document was saved. The parent will only
-       * replace the currently selected document
-       * when the IDs still match.
-       */
+
       if (
         savedDocument &&
         onSaved
@@ -222,11 +398,7 @@ function DocumentEditor({
         );
       }
 
-      /*
-       * A newer edit may have happened while the
-       * request was in flight. In that case the
-       * editor should remain in the "unsaved" state.
-       */
+
       if (
         !silent &&
         mountedRef.current &&
@@ -240,6 +412,10 @@ function DocumentEditor({
           setSaveState(
             "saved"
           );
+
+
+          latestSnapshotRef.current =
+            null;
         } else {
           setSaveState(
             "dirty"
@@ -252,6 +428,7 @@ function DocumentEditor({
         error
       );
 
+
       if (
         !silent &&
         mountedRef.current &&
@@ -261,6 +438,7 @@ function DocumentEditor({
         setSaveState(
           "error"
         );
+
 
         setSaveError(
           error.message ||
@@ -273,38 +451,26 @@ function DocumentEditor({
   }
 
 
-  function createSnapshot(
-    editorInstance
-  ) {
-    return {
-      content:
-        editorInstance.getJSON(),
-
-      plainText:
-        editorInstance.getText({
-          blockSeparator:
-            "\n",
-        }),
-    };
-  }
-
-
   function scheduleSave(
     editorInstance
   ) {
     const documentId =
       currentDocumentIdRef.current;
 
+
     revisionRef.current +=
       1;
 
+
     const revision =
       revisionRef.current;
+
 
     const snapshot =
       createSnapshot(
         editorInstance
       );
+
 
     latestSnapshotRef.current =
       {
@@ -313,15 +479,19 @@ function DocumentEditor({
         snapshot,
       };
 
+
     setSaveState(
       "dirty"
     );
+
 
     setSaveError(
       ""
     );
 
+
     clearSaveTimer();
+
 
     saveTimerRef.current =
       setTimeout(
@@ -329,16 +499,273 @@ function DocumentEditor({
           saveTimerRef.current =
             null;
 
+
           saveSnapshot(
             documentId,
             snapshot,
             revision
           );
         },
+
         AUTOSAVE_DELAY
       );
   }
 
+
+  function flushPendingSave() {
+    clearSaveTimer();
+
+
+    const pending =
+      latestSnapshotRef.current;
+
+
+    if (!pending) {
+      return;
+    }
+
+
+    if (
+      pending.documentId !==
+      currentDocumentIdRef.current
+    ) {
+      return;
+    }
+
+
+    saveSnapshot(
+      pending.documentId,
+      pending.snapshot,
+      pending.revision
+    );
+  }
+
+
+  // ====================================================
+  // Entity Navigation
+  // ====================================================
+
+  function openEntity(
+    entity
+  ) {
+    if (
+      !entity?._id ||
+      !worldId
+    ) {
+      return;
+    }
+
+
+    setMentionTooltip(
+      null
+    );
+
+
+    localStorage.setItem(
+      `mimoria:world:${worldId}:selected-entity`,
+      String(
+        entity._id
+      )
+    );
+
+
+    navigate(
+      `/world/${worldId}/entities`
+    );
+  }
+
+
+  // ====================================================
+  // Tooltip Position
+  // ====================================================
+
+  function createTooltip(
+    element,
+    entity
+    ) {
+    if (
+        !element ||
+        !entity
+    ) {
+        return null;
+    }
+
+
+    const editorRoot =
+        element.closest(
+        ".document-editor"
+        );
+
+
+    if (
+        !editorRoot
+    ) {
+        return null;
+    }
+
+
+    const mentionRect =
+        element.getBoundingClientRect();
+
+    const editorRect =
+        editorRoot.getBoundingClientRect();
+
+
+    const currentTouchMode =
+        isTouchEnvironment();
+
+
+    const tooltipWidth =
+        currentTouchMode
+        ? 290
+        : 270;
+
+
+    const estimatedHeight =
+        currentTouchMode
+        ? 170
+        : 120;
+
+
+    /*
+    * Convert viewport coordinates into coordinates
+    * relative to .document-editor.
+    */
+    let left =
+        mentionRect.left -
+        editorRect.left;
+
+
+    let top =
+        mentionRect.bottom -
+        editorRect.top +
+        6;
+
+
+    /*
+    * Keep the popup inside the editor horizontally.
+    */
+    const availableWidth =
+        editorRoot.clientWidth;
+
+
+    const horizontalMargin =
+        currentTouchMode
+        ? 8
+        : 6;
+
+
+    left =
+        Math.max(
+        horizontalMargin,
+        Math.min(
+            left,
+            availableWidth -
+            tooltipWidth -
+            horizontalMargin
+        )
+        );
+
+
+    /*
+    * If there is not enough room below the Entity,
+    * place the popup immediately above it.
+    */
+    const availableBelow =
+        editorRoot.clientHeight -
+        top;
+
+
+    if (
+        availableBelow <
+        estimatedHeight
+    ) {
+        top =
+        mentionRect.top -
+        editorRect.top -
+        estimatedHeight -
+        6;
+    }
+
+
+    top =
+        Math.max(
+        6,
+        top
+        );
+
+
+    return {
+        entity,
+        left,
+        top,
+    };
+    }
+
+
+  // ====================================================
+  // Entity Mention Click
+  // ====================================================
+
+  function handleEntityMentionClick(
+    entity,
+    details
+  ) {
+    /*
+     * IMPORTANT:
+     *
+     * Never use touchMode state to decide whether a
+     * mention should navigate.
+     *
+     * TipTap may retain the callback created during
+     * editor initialization.
+     *
+     * Checking the browser environment NOW avoids
+     * stale React closure problems completely.
+     */
+    const currentTouchMode =
+      isTouchEnvironment();
+
+
+    if (
+      currentTouchMode
+    ) {
+      const tooltip =
+        createTooltip(
+          details?.element,
+          entity
+        );
+
+
+      if (
+        tooltip
+      ) {
+        setMentionTooltip(
+          tooltip
+        );
+      }
+
+
+      /*
+       * Absolutely no navigation happens here on
+       * mobile / touch devices.
+       */
+      return;
+    }
+
+
+    /*
+     * Desktop click opens the Entity immediately.
+     */
+    openEntity(
+      entity
+    );
+  }
+
+
+  // ====================================================
+  // TipTap
+  // ====================================================
 
   const editor =
     useEditor({
@@ -351,10 +778,21 @@ function DocumentEditor({
               "documents.editorPlaceholder"
             ),
         }),
+
+        EntityMentionHighlighter.configure({
+          getEntities:
+            () =>
+              entitiesRef.current,
+
+          onEntityClick:
+            handleEntityMentionClick,
+        }),
       ],
+
 
       content:
         document.content,
+
 
       editorProps: {
         attributes: {
@@ -362,6 +800,7 @@ function DocumentEditor({
             "document-editor-content",
         },
       },
+
 
       onUpdate({
         editor:
@@ -374,36 +813,130 @@ function DocumentEditor({
     });
 
 
-  /*
-   * Change the editor content only when switching
-   * to a different document.
-   *
-   * Auto-save updates the document object frequently,
-   * but must not reset the cursor or selection.
-   */
+  // ====================================================
+  // Load Entities
+  // ====================================================
+
+  useEffect(() => {
+    if (
+      !worldId ||
+      !editor
+    ) {
+      return;
+    }
+
+
+    let cancelled =
+      false;
+
+
+    async function loadEntities() {
+      try {
+        const response =
+          await fetch(
+            `${API_URL.entities}/world/${worldId}`
+          );
+
+
+        if (
+          !response.ok
+        ) {
+          throw new Error(
+            "Failed to load Entities for document mentions."
+          );
+        }
+
+
+        const data =
+          await response.json();
+
+
+        if (
+          cancelled
+        ) {
+          return;
+        }
+
+
+        entitiesRef.current =
+          Array.isArray(
+            data
+          )
+            ? data
+            : [];
+
+
+        if (
+          !editor.isDestroyed
+        ) {
+          editor.view.dispatch(
+            editor.state.tr.setMeta(
+              ENTITY_MENTION_REFRESH_META,
+              true
+            )
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Failed to load Entity mentions:",
+          error
+        );
+      }
+    }
+
+
+    loadEntities();
+
+
+    return () => {
+      cancelled =
+        true;
+    };
+  }, [
+    worldId,
+    editor,
+  ]);
+
+
+  // ====================================================
+  // Change Document
+  // ====================================================
+
   useEffect(() => {
     if (!editor) {
       return;
     }
 
+
     clearSaveTimer();
+
 
     currentDocumentIdRef.current =
       document._id;
 
+
     revisionRef.current =
       0;
 
+
     latestSnapshotRef.current =
       null;
+
 
     setSaveState(
       "saved"
     );
 
+
     setSaveError(
       ""
     );
+
+
+    setMentionTooltip(
+      null
+    );
+
 
     editor.commands.setContent(
       document.content || {
@@ -425,58 +958,39 @@ function DocumentEditor({
           false,
       }
     );
+
+
+    editor.view.dispatch(
+      editor.state.tr.setMeta(
+        ENTITY_MENTION_REFRESH_META,
+        true
+      )
+    );
   }, [
     document._id,
     editor,
   ]);
 
 
-  /*
-   * Save immediately when the editor loses focus.
-   * This also protects edits when the user clicks
-   * another document before the debounce timer fires.
-   */
-  function flushPendingSave() {
-    clearSaveTimer();
-
-    const pending =
-      latestSnapshotRef.current;
-
-    if (!pending) {
-      return;
-    }
-
-    if (
-      pending.documentId !==
-      currentDocumentIdRef.current
-    ) {
-      return;
-    }
-
-    saveSnapshot(
-      pending.documentId,
-      pending.snapshot,
-      pending.revision
-    );
-  }
-
+  // ====================================================
+  // Final Save
+  // ====================================================
 
   useEffect(() => {
     mountedRef.current =
       true;
 
+
     function handleBeforeUnload() {
       const pending =
         latestSnapshotRef.current;
+
 
       if (!pending) {
         return;
       }
 
-      /*
-       * Use a keepalive fetch for the last pending
-       * snapshot when the browser is closing/reloading.
-       */
+
       saveSnapshot(
         pending.documentId,
         pending.snapshot,
@@ -488,24 +1002,30 @@ function DocumentEditor({
       );
     }
 
+
     window.addEventListener(
       "beforeunload",
       handleBeforeUnload
     );
 
+
     return () => {
       mountedRef.current =
         false;
 
+
       clearSaveTimer();
+
 
       window.removeEventListener(
         "beforeunload",
         handleBeforeUnload
       );
 
+
       const pending =
         latestSnapshotRef.current;
+
 
       if (pending) {
         saveSnapshot(
@@ -522,6 +1042,211 @@ function DocumentEditor({
   }, []);
 
 
+  // ====================================================
+  // Desktop Hover
+  // ====================================================
+
+  function handleEditorMouseOver(
+    event
+  ) {
+    /*
+     * Never create hover popups on mobile / touch.
+     */
+    if (
+      isTouchEnvironment()
+    ) {
+      return;
+    }
+
+
+    const target =
+      event.target;
+
+
+    if (
+      !target ||
+      typeof target.closest !==
+        "function"
+    ) {
+      return;
+    }
+
+
+    const mentionElement =
+      target.closest(
+        ".entity-mention[data-entity-id]"
+      );
+
+
+    if (
+      !mentionElement
+    ) {
+      return;
+    }
+
+
+    const entityId =
+      mentionElement.dataset
+        .entityId;
+
+
+    const entity =
+      entitiesRef.current.find(
+        (item) =>
+          String(
+            item._id
+          ) ===
+          String(
+            entityId
+          )
+      );
+
+
+    if (!entity) {
+      return;
+    }
+
+
+    const tooltip =
+      createTooltip(
+        mentionElement,
+        entity
+      );
+
+
+    if (
+      tooltip
+    ) {
+      setMentionTooltip(
+        tooltip
+      );
+    }
+  }
+
+
+  function handleEditorMouseOut(
+    event
+  ) {
+    if (
+      isTouchEnvironment()
+    ) {
+      return;
+    }
+
+
+    const target =
+      event.target;
+
+
+    if (
+      !target ||
+      typeof target.closest !==
+        "function"
+    ) {
+      return;
+    }
+
+
+    const mentionElement =
+      target.closest(
+        ".entity-mention"
+      );
+
+
+    if (
+      !mentionElement
+    ) {
+      return;
+    }
+
+
+    if (
+      event.relatedTarget &&
+      mentionElement.contains(
+        event.relatedTarget
+      )
+    ) {
+      return;
+    }
+
+
+    setMentionTooltip(
+      null
+    );
+  }
+
+
+  // ====================================================
+  // Close Mobile Popup When Tapping Elsewhere
+  // ====================================================
+
+  useEffect(() => {
+    if (
+      !mentionTooltip
+    ) {
+      return;
+    }
+
+
+    function handleOutsidePointer(
+      event
+    ) {
+      if (
+        !isTouchEnvironment()
+      ) {
+        return;
+      }
+
+
+      const target =
+        event.target;
+
+
+      if (
+        target?.closest?.(
+          ".entity-mention-tooltip"
+        )
+      ) {
+        return;
+      }
+
+
+      if (
+        target?.closest?.(
+          ".entity-mention"
+        )
+      ) {
+        return;
+      }
+
+
+      setMentionTooltip(
+        null
+      );
+    }
+
+
+    window.document.addEventListener(
+    "pointerdown",
+    handleOutsidePointer
+    );
+
+
+    return () => {
+    window.document.removeEventListener(
+    "pointerdown",
+    handleOutsidePointer
+    );
+    };
+  }, [
+    mentionTooltip,
+  ]);
+
+
+  // ====================================================
+  // Loading
+  // ====================================================
+
   if (!editor) {
     return (
       <div className="document-editor-loading">
@@ -532,6 +1257,10 @@ function DocumentEditor({
     );
   }
 
+
+  // ====================================================
+  // Save Label
+  // ====================================================
 
   const saveLabel = {
     dirty:
@@ -558,10 +1287,21 @@ function DocumentEditor({
   ];
 
 
+  // ====================================================
+  // Render
+  // ====================================================
+
   return (
     <div className="document-editor">
+
+      {/* ==================================================
+          Toolbar
+          ================================================== */}
+
       <div className="document-editor-toolbar">
+
         <div className="document-editor-toolbar-group">
+
           <ToolbarButton
             active={
               editor.isActive(
@@ -629,6 +1369,7 @@ function DocumentEditor({
               S
             </span>
           </ToolbarButton>
+
         </div>
 
 
@@ -636,6 +1377,7 @@ function DocumentEditor({
 
 
         <div className="document-editor-toolbar-group">
+
           <ToolbarButton
             active={
               editor.isActive(
@@ -711,6 +1453,7 @@ function DocumentEditor({
           >
             H2
           </ToolbarButton>
+
         </div>
 
 
@@ -718,6 +1461,7 @@ function DocumentEditor({
 
 
         <div className="document-editor-toolbar-group">
+
           <ToolbarButton
             active={
               editor.isActive(
@@ -779,6 +1523,7 @@ function DocumentEditor({
           >
             “
           </ToolbarButton>
+
         </div>
 
 
@@ -786,9 +1531,11 @@ function DocumentEditor({
 
 
         <div className="document-editor-toolbar-group">
+
           <ToolbarButton
             disabled={
-              !editor.can()
+              !editor
+                .can()
                 .chain()
                 .focus()
                 .undo()
@@ -811,7 +1558,8 @@ function DocumentEditor({
 
           <ToolbarButton
             disabled={
-              !editor.can()
+              !editor
+                .can()
                 .chain()
                 .focus()
                 .redo()
@@ -830,29 +1578,53 @@ function DocumentEditor({
           >
             ↷
           </ToolbarButton>
+
         </div>
+
       </div>
 
 
+      {/* ==================================================
+          Editor
+          ================================================== */}
+
       <div
         className="document-editor-scroll"
-        onBlurCapture={
-          (event) => {
-            /*
-             * Ignore focus moving between controls
-             * inside the editor itself.
-             */
-            if (
-              event.currentTarget.contains(
-                event.relatedTarget
-              )
-            ) {
-              return;
-            }
-
-            flushPendingSave();
+        onBlurCapture={(
+          event
+        ) => {
+          if (
+            event.currentTarget.contains(
+              event.relatedTarget
+            )
+          ) {
+            return;
           }
+
+
+          flushPendingSave();
+        }}
+        onMouseOver={
+          handleEditorMouseOver
         }
+        onMouseOut={
+          handleEditorMouseOut
+        }
+        onScroll={() => {
+          /*
+           * Desktop hover popup is tied to a visual
+           * position, so hide it while scrolling.
+           *
+           * Mobile popup stays open.
+           */
+          if (
+            !isTouchEnvironment()
+          ) {
+            setMentionTooltip(
+              null
+            );
+          }
+        }}
       >
         <EditorContent
           editor={
@@ -862,7 +1634,12 @@ function DocumentEditor({
       </div>
 
 
+      {/* ==================================================
+          Save Status
+          ================================================== */}
+
       <footer className="document-editor-statusbar">
+
         <div
           className={[
             "document-save-state",
@@ -881,6 +1658,7 @@ function DocumentEditor({
           </span>
         </div>
 
+
         {saveState ===
           "error" &&
           saveError && (
@@ -891,14 +1669,138 @@ function DocumentEditor({
             </span>
           )}
 
+
         <div className="document-editor-status-spacer" />
+
 
         <span>
           {t(
             "documents.autoSaveEnabled"
           )}
         </span>
+
       </footer>
+
+
+      {/* ==================================================
+          Entity Tooltip
+          ================================================== */}
+
+      {mentionTooltip && (
+        <div
+          className={[
+            "entity-mention-tooltip",
+
+            touchMode
+              ? "touch-mode"
+              : "desktop-mode",
+          ].join(" ")}
+          style={{
+            left:
+              mentionTooltip.left,
+
+            top:
+              mentionTooltip.top,
+          }}
+        >
+
+          <div className="entity-mention-tooltip-icon">
+            {
+              mentionTooltip
+                .entity
+                .entityTypeId
+                ?.icon ||
+              "◆"
+            }
+          </div>
+
+
+          <div className="entity-mention-tooltip-content">
+
+            <strong>
+              {
+                mentionTooltip
+                  .entity
+                  .name
+              }
+            </strong>
+
+
+            <div className="entity-mention-tooltip-type">
+              {t(
+                "documents.entityMentionType"
+              )}
+
+              {" · "}
+
+              {
+                mentionTooltip
+                  .entity
+                  .entityTypeId
+                  ?.name ||
+                t(
+                  "documents.entityMentionUnknownType"
+                )
+              }
+            </div>
+
+
+            {mentionTooltip
+              .entity
+              .entityTypeId
+              ?.description && (
+              <p>
+                {
+                  mentionTooltip
+                    .entity
+                    .entityTypeId
+                    .description
+                }
+              </p>
+            )}
+
+
+            {!touchMode && (
+              <span className="entity-mention-tooltip-hint">
+                {t(
+                  "documents.entityMentionOpenHint"
+                )}
+              </span>
+            )}
+
+
+            {touchMode && (
+              <button
+                type="button"
+                className="entity-mention-tooltip-open"
+                onPointerDown={(
+                  event
+                ) => {
+                  /*
+                   * Keep the global outside-pointer
+                   * handler from closing the popup
+                   * before the button click occurs.
+                   */
+                  event.stopPropagation();
+                }}
+                onClick={() => {
+                  openEntity(
+                    mentionTooltip
+                      .entity
+                  );
+                }}
+              >
+                {t(
+                  "documents.entityMentionOpen"
+                )}
+              </button>
+            )}
+
+          </div>
+
+        </div>
+      )}
+
     </div>
   );
 }
