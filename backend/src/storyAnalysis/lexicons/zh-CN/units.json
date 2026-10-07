@@ -1,0 +1,109 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.0.0",
+    "category": "units"
+  },
+
+  "entries": [
+    {
+      "conceptId": "unit.age.year",
+      "aliases": {
+        "strong": ["岁"],
+        "normal": ["周岁"],
+        "weak": ["年纪"]
+      }
+    },
+
+    {
+      "conceptId": "unit.length.mm",
+      "aliases": {
+        "strong": ["毫米", "mm"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "unit.length.cm",
+      "aliases": {
+        "strong": ["厘米", "公分", "cm"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "unit.length.m",
+      "aliases": {
+        "strong": ["米", "公尺"],
+        "normal": ["m"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "unit.length.km",
+      "aliases": {
+        "strong": ["公里", "千米", "km"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "unit.mass.g",
+      "aliases": {
+        "strong": ["克", "g"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "unit.mass.kg",
+      "aliases": {
+        "strong": ["千克", "公斤", "kg"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "unit.mass.lb",
+      "aliases": {
+        "strong": ["磅", "lb", "lbs"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "unit.area.m2",
+      "aliases": {
+        "strong": [
+          "平方米",
+          "平方公尺",
+          "m²",
+          "m2"
+        ],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "unit.area.km2",
+      "aliases": {
+        "strong": [
+          "平方公里",
+          "平方千米",
+          "km²",
+          "km2"
+        ],
+        "normal": [],
+        "weak": []
+      }
+    }
+  ]
+}

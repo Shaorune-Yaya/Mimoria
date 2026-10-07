@@ -1,0 +1,209 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.0.0",
+    "category": "modifiers"
+  },
+
+  "entries": [
+    {
+      "conceptId": "modifier.negation",
+      "aliases": {
+        "strong": [
+          "没有",
+          "并没有",
+          "并未",
+          "从未",
+          "未曾",
+          "并非",
+          "不是",
+          "绝非"
+        ],
+        "normal": [
+          "不",
+          "没",
+          "未",
+          "不曾",
+          "不可"
+        ],
+        "weak": [
+          "别"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "modifier.uncertainty",
+      "aliases": {
+        "strong": [
+          "可能",
+          "也许",
+          "或许",
+          "大概",
+          "很可能"
+        ],
+        "normal": [
+          "似乎",
+          "好像",
+          "貌似",
+          "可能会"
+        ],
+        "weak": [
+          "没准",
+          "说不定"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "modifier.intention",
+      "aliases": {
+        "strong": [
+          "计划",
+          "打算",
+          "准备",
+          "意图"
+        ],
+        "normal": [
+          "希望",
+          "想要",
+          "试图",
+          "企图"
+        ],
+        "weak": [
+          "想",
+          "寻思着"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "modifier.hypothetical",
+      "aliases": {
+        "strong": [
+          "如果",
+          "假如",
+          "倘若",
+          "若是"
+        ],
+        "normal": [
+          "要是",
+          "假设"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "modifier.reported",
+      "aliases": {
+        "strong": [
+          "据说",
+          "据传",
+          "传闻",
+          "传言"
+        ],
+        "normal": [
+          "听说",
+          "相传",
+          "有消息称"
+        ],
+        "weak": [
+          "听闻"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "modifier.past",
+      "aliases": {
+        "strong": [
+          "曾经",
+          "过去",
+          "此前",
+          "先前"
+        ],
+        "normal": [
+          "以前",
+          "当时",
+          "昔日",
+          "昔年"
+        ],
+        "weak": [
+          "曾"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "modifier.present",
+      "aliases": {
+        "strong": [
+          "现在",
+          "目前",
+          "如今",
+          "现今"
+        ],
+        "normal": [
+          "当前",
+          "现阶段",
+          "眼下"
+        ],
+        "weak": [
+          "现"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "modifier.future",
+      "aliases": {
+        "strong": [
+          "未来",
+          "将来",
+          "即将"
+        ],
+        "normal": [
+          "将会",
+          "将要",
+          "之后会"
+        ],
+        "weak": [
+          "会"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "modifier.completed",
+      "aliases": {
+        "strong": [
+          "已经",
+          "已然",
+          "早已"
+        ],
+        "normal": [
+          "已",
+          "完成了"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "modifier.ongoing",
+      "aliases": {
+        "strong": [
+          "正在",
+          "仍在",
+          "依然在"
+        ],
+        "normal": [
+          "正",
+          "持续"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

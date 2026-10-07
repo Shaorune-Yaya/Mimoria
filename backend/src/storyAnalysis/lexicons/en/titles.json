@@ -1,0 +1,187 @@
+{
+  "meta": {
+    "locale": "en",
+    "version": "1.0.0",
+    "category": "titles"
+  },
+
+  "entries": [
+    {
+      "conceptId": "role.religious",
+      "aliases": {
+        "strong": [
+          "priest",
+          "priestess",
+          "monk",
+          "nun",
+          "bishop",
+          "pope",
+          "cleric",
+          "pastor",
+          "rabbi",
+          "imam",
+          "shaman",
+          "druid"
+        ],
+        "normal": [
+          "mage",
+          "wizard",
+          "sorcerer",
+          "sorceress",
+          "warlock",
+          "witch",
+          "oracle",
+          "seer",
+          "mystic"
+        ],
+        "weak": [
+          "holy man",
+          "holy woman"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "role.ruler",
+      "aliases": {
+        "strong": [
+          "emperor",
+          "empress",
+          "king",
+          "queen",
+          "monarch",
+          "sovereign"
+        ],
+        "normal": [
+          "lord",
+          "lady",
+          "ruler",
+          "chieftain",
+          "warlord"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "role.military",
+      "aliases": {
+        "strong": [
+          "marshal",
+          "field marshal",
+          "general",
+          "admiral",
+          "commander",
+          "captain",
+          "colonel",
+          "major",
+          "lieutenant",
+          "sergeant"
+        ],
+        "normal": [
+          "officer",
+          "centurion",
+          "captain-general",
+          "fleet commander"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "role.title",
+      "aliases": {
+        "strong": [
+          "duke",
+          "duchess",
+          "marquess",
+          "marquis",
+          "marchioness",
+          "earl",
+          "count",
+          "countess",
+          "viscount",
+          "viscountess",
+          "baron",
+          "baroness",
+          "prince",
+          "princess"
+        ],
+        "normal": [
+          "sir",
+          "dame",
+          "lord",
+          "lady"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "role.occupation",
+      "aliases": {
+        "strong": [
+          "doctor",
+          "physician",
+          "nurse",
+          "engineer",
+          "programmer",
+          "developer",
+          "scientist",
+          "researcher",
+          "professor",
+          "teacher",
+          "lawyer",
+          "attorney",
+          "merchant",
+          "blacksmith",
+          "hunter",
+          "mercenary",
+          "assassin",
+          "detective",
+          "police officer",
+          "journalist",
+          "writer",
+          "artist",
+          "painter",
+          "chef",
+          "pilot",
+          "sailor",
+          "farmer",
+          "miner"
+        ],
+        "normal": [
+          "knight",
+          "warrior",
+          "soldier",
+          "archer",
+          "swordsman",
+          "swordswoman",
+          "samurai",
+          "ninja",
+          "ranger",
+          "adventurer",
+          "alchemist",
+          "healer",
+          "apothecary",
+          "student",
+          "craftsman",
+          "craftswoman",
+          "smith",
+          "trader"
+        ],
+        "weak": [
+          "streamer",
+          "youtuber",
+          "vtuber",
+          "influencer",
+          "content creator",
+          "blogger",
+          "moderator",
+          "mod",
+          "admin"
+        ]
+      }
+    }
+  ]
+}

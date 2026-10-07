@@ -1,0 +1,217 @@
+{
+  "meta": {
+    "locale": "en",
+    "version": "1.0.0",
+    "category": "modifiers"
+  },
+
+  "entries": [
+    {
+      "conceptId": "modifier.negation",
+      "aliases": {
+        "strong": [
+          "did not",
+          "does not",
+          "has not",
+          "have not",
+          "was not",
+          "were not",
+          "never",
+          "not"
+        ],
+        "normal": [
+          "didn't",
+          "doesn't",
+          "hasn't",
+          "haven't",
+          "wasn't",
+          "weren't",
+          "cannot",
+          "can't"
+        ],
+        "weak": [
+          "no"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "modifier.uncertainty",
+      "aliases": {
+        "strong": [
+          "possibly",
+          "probably",
+          "perhaps",
+          "maybe",
+          "likely"
+        ],
+        "normal": [
+          "seems",
+          "appears",
+          "apparently",
+          "might",
+          "may",
+          "could"
+        ],
+        "weak": [
+          "maybe even",
+          "sort of"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "modifier.intention",
+      "aliases": {
+        "strong": [
+          "plans to",
+          "planned to",
+          "intends to",
+          "intended to"
+        ],
+        "normal": [
+          "wants to",
+          "wanted to",
+          "hopes to",
+          "tries to",
+          "attempts to"
+        ],
+        "weak": [
+          "thinking of",
+          "looking to"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "modifier.hypothetical",
+      "aliases": {
+        "strong": [
+          "if",
+          "if only",
+          "assuming that",
+          "suppose that"
+        ],
+        "normal": [
+          "provided that",
+          "in case"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "modifier.reported",
+      "aliases": {
+        "strong": [
+          "reportedly",
+          "according to reports",
+          "rumored to",
+          "rumoured to"
+        ],
+        "normal": [
+          "it is said that",
+          "said to be",
+          "according to legend",
+          "allegedly"
+        ],
+        "weak": [
+          "word is",
+          "people say"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "modifier.past",
+      "aliases": {
+        "strong": [
+          "formerly",
+          "previously",
+          "once",
+          "in the past"
+        ],
+        "normal": [
+          "before",
+          "earlier",
+          "back then",
+          "formerly known as"
+        ],
+        "weak": [
+          "used to"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "modifier.present",
+      "aliases": {
+        "strong": [
+          "currently",
+          "presently",
+          "now"
+        ],
+        "normal": [
+          "at present",
+          "today",
+          "these days"
+        ],
+        "weak": [
+          "still"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "modifier.future",
+      "aliases": {
+        "strong": [
+          "in the future",
+          "will",
+          "soon to"
+        ],
+        "normal": [
+          "going to",
+          "is expected to",
+          "later will"
+        ],
+        "weak": [
+          "eventually may"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "modifier.completed",
+      "aliases": {
+        "strong": [
+          "already",
+          "has already",
+          "had already"
+        ],
+        "normal": [
+          "completed",
+          "finished"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "modifier.ongoing",
+      "aliases": {
+        "strong": [
+          "currently",
+          "is currently",
+          "still"
+        ],
+        "normal": [
+          "continues to",
+          "is continuing to",
+          "ongoing"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

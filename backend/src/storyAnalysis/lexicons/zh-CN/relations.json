@@ -1,0 +1,537 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.0.0",
+    "category": "relations"
+  },
+
+  "entries": [
+    {
+      "conceptId": "relation.member_of",
+      "aliases": {
+        "strong": [
+          "隶属于",
+          "隶属",
+          "为其成员",
+          "是其成员",
+          "成员之一"
+        ],
+        "normal": [
+          "属于",
+          "归属",
+          "归于",
+          "效力于",
+          "供职于"
+        ],
+        "weak": [
+          "麾下",
+          "门下",
+          "旗下"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.leader_of",
+      "aliases": {
+        "strong": [
+          "领导着",
+          "领导",
+          "统领",
+          "率领",
+          "执掌"
+        ],
+        "normal": [
+          "带领",
+          "掌管",
+          "主持",
+          "领衔"
+        ],
+        "weak": [
+          "领着"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.founder_of",
+      "aliases": {
+        "strong": [
+          "创始人",
+          "创建者",
+          "创立者",
+          "建立者"
+        ],
+        "normal": [
+          "开创者",
+          "缔造者",
+          "开山祖师"
+        ],
+        "weak": [
+          "始祖"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.works_for",
+      "aliases": {
+        "strong": [
+          "任职于",
+          "就职于",
+          "工作于",
+          "供职于"
+        ],
+        "normal": [
+          "效力于",
+          "受雇于"
+        ],
+        "weak": [
+          "在职于"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.located_in",
+      "aliases": {
+        "strong": [
+          "位于",
+          "坐落于",
+          "坐落在",
+          "地处"
+        ],
+        "normal": [
+          "位处",
+          "处于",
+          "设于",
+          "设在"
+        ],
+        "weak": [
+          "在"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.part_of",
+      "aliases": {
+        "strong": [
+          "是其一部分",
+          "隶属于",
+          "归属于"
+        ],
+        "normal": [
+          "属于",
+          "归入",
+          "划入"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.capital_of",
+      "aliases": {
+        "strong": [
+          "首都是",
+          "首府是",
+          "都城是"
+        ],
+        "normal": [
+          "国都是",
+          "治所在"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.borders",
+      "aliases": {
+        "strong": [
+          "接壤",
+          "毗邻"
+        ],
+        "normal": [
+          "相邻",
+          "邻接"
+        ],
+        "weak": [
+          "邻近"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.near",
+      "aliases": {
+        "strong": [
+          "邻近",
+          "靠近",
+          "临近"
+        ],
+        "normal": [
+          "附近",
+          "近邻"
+        ],
+        "weak": [
+          "旁边"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.north_of",
+      "aliases": {
+        "strong": [
+          "位于其北部",
+          "位于其北方",
+          "在其北面"
+        ],
+        "normal": [
+          "北于",
+          "以北"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.south_of",
+      "aliases": {
+        "strong": [
+          "位于其南部",
+          "位于其南方",
+          "在其南面"
+        ],
+        "normal": [
+          "南于",
+          "以南"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.east_of",
+      "aliases": {
+        "strong": [
+          "位于其东部",
+          "位于其东方",
+          "在其东面"
+        ],
+        "normal": [
+          "东于",
+          "以东"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.west_of",
+      "aliases": {
+        "strong": [
+          "位于其西部",
+          "位于其西方",
+          "在其西面"
+        ],
+        "normal": [
+          "西于",
+          "以西"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.born_in",
+      "aliases": {
+        "strong": [
+          "出生于",
+          "出生在",
+          "生于"
+        ],
+        "normal": [
+          "诞生于",
+          "降生于"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.from",
+      "aliases": {
+        "strong": [
+          "来自",
+          "出身于"
+        ],
+        "normal": [
+          "源自",
+          "源于",
+          "籍贯为"
+        ],
+        "weak": [
+          "老家在"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.lives_in",
+      "aliases": {
+        "strong": [
+          "居住在",
+          "住在",
+          "定居于"
+        ],
+        "normal": [
+          "居于",
+          "寓居于",
+          "栖居于"
+        ],
+        "weak": [
+          "常住"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.allied_with",
+      "aliases": {
+        "strong": [
+          "是盟友",
+          "互为盟友",
+          "结盟关系"
+        ],
+        "normal": [
+          "同盟",
+          "联盟"
+        ],
+        "weak": [
+          "友军"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.enemy_of",
+      "aliases": {
+        "strong": [
+          "是敌人",
+          "互为敌人",
+          "敌对于"
+        ],
+        "normal": [
+          "敌对",
+          "敌视"
+        ],
+        "weak": [
+          "死敌",
+          "宿敌"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.at_war_with",
+      "aliases": {
+        "strong": [
+          "处于战争状态",
+          "正在交战",
+          "与之交战"
+        ],
+        "normal": [
+          "开战",
+          "交战"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.diplomatic_relations_with",
+      "aliases": {
+        "strong": [
+          "有外交关系",
+          "建立外交关系"
+        ],
+        "normal": [
+          "外交关系",
+          "邦交"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.controls",
+      "aliases": {
+        "strong": [
+          "控制着",
+          "实际控制",
+          "掌控着"
+        ],
+        "normal": [
+          "控制",
+          "掌控",
+          "支配"
+        ],
+        "weak": [
+          "影响"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.ruled_by",
+      "aliases": {
+        "strong": [
+          "由其统治",
+          "由其治理"
+        ],
+        "normal": [
+          "受其统治",
+          "受其管辖"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.vassal_of",
+      "aliases": {
+        "strong": [
+          "附庸于",
+          "臣属于",
+          "称臣于"
+        ],
+        "normal": [
+          "臣服于",
+          "归附于"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.owns",
+      "aliases": {
+        "strong": [
+          "拥有",
+          "持有",
+          "所有"
+        ],
+        "normal": [
+          "占有",
+          "掌握"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.wields",
+      "aliases": {
+        "strong": [
+          "持有并使用",
+          "挥舞",
+          "持用"
+        ],
+        "normal": [
+          "使用",
+          "佩戴"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.parent_of",
+      "aliases": {
+        "strong": [
+          "父亲是",
+          "母亲是",
+          "父母是"
+        ],
+        "normal": [
+          "生父",
+          "生母",
+          "养父",
+          "养母"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.sibling_of",
+      "aliases": {
+        "strong": [
+          "兄弟姐妹",
+          "亲兄弟",
+          "亲姐妹"
+        ],
+        "normal": [
+          "哥哥",
+          "姐姐",
+          "弟弟",
+          "妹妹"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.spouse_of",
+      "aliases": {
+        "strong": [
+          "配偶",
+          "夫妻",
+          "夫妇"
+        ],
+        "normal": [
+          "丈夫",
+          "妻子",
+          "夫君",
+          "娘子"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.friend_of",
+      "aliases": {
+        "strong": [
+          "好友",
+          "朋友"
+        ],
+        "normal": [
+          "挚友",
+          "友人",
+          "故交"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.mentor_of",
+      "aliases": {
+        "strong": [
+          "师父",
+          "导师"
+        ],
+        "normal": [
+          "师傅",
+          "恩师",
+          "先生"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

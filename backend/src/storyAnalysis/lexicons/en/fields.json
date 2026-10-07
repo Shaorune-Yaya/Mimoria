@@ -1,0 +1,594 @@
+{
+  "meta": {
+    "locale": "en",
+    "version": "1.0.0",
+    "category": "fields"
+  },
+
+  "entries": [
+    {
+      "conceptId": "field.description",
+      "aliases": {
+        "strong": ["description", "biography"],
+        "normal": ["bio", "profile", "overview"],
+        "weak": ["about"]
+      }
+    },
+
+    {
+      "conceptId": "field.summary",
+      "aliases": {
+        "strong": ["summary"],
+        "normal": ["synopsis", "overview"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.background",
+      "aliases": {
+        "strong": ["background"],
+        "normal": ["backstory", "origin story"],
+        "weak": ["history"]
+      }
+    },
+
+    {
+      "conceptId": "field.alias",
+      "aliases": {
+        "strong": ["alias", "aliases"],
+        "normal": ["also known as", "former name"],
+        "weak": ["aka"]
+      }
+    },
+
+    {
+      "conceptId": "field.nickname",
+      "aliases": {
+        "strong": ["nickname"],
+        "normal": ["epithet", "moniker"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.age",
+      "aliases": {
+        "strong": ["age"],
+        "normal": ["years old"],
+        "weak": ["aged"]
+      }
+    },
+
+    {
+      "conceptId": "field.birthdate",
+      "aliases": {
+        "strong": ["date of birth", "birth date"],
+        "normal": ["birthday"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.birthplace",
+      "aliases": {
+        "strong": ["place of birth", "birthplace"],
+        "normal": ["birth location"],
+        "weak": ["hometown"]
+      }
+    },
+
+    {
+      "conceptId": "field.deathdate",
+      "aliases": {
+        "strong": ["date of death", "death date"],
+        "normal": ["died on"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.deathplace",
+      "aliases": {
+        "strong": ["place of death"],
+        "normal": ["death place"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.gender",
+      "aliases": {
+        "strong": ["gender"],
+        "normal": ["sex"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.pronouns",
+      "aliases": {
+        "strong": ["pronouns"],
+        "normal": ["personal pronouns"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.race",
+      "aliases": {
+        "strong": ["race"],
+        "normal": ["ancestry"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.species",
+      "aliases": {
+        "strong": ["species"],
+        "normal": ["lifeform"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.nationality",
+      "aliases": {
+        "strong": ["nationality"],
+        "normal": ["citizenship"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.occupation",
+      "aliases": {
+        "strong": ["occupation", "profession"],
+        "normal": ["job", "career", "vocation"],
+        "weak": ["work"]
+      }
+    },
+
+    {
+      "conceptId": "field.title",
+      "aliases": {
+        "strong": ["title"],
+        "normal": ["honorific", "epithet", "noble title"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.rank",
+      "aliases": {
+        "strong": ["rank"],
+        "normal": ["grade", "military rank"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.affiliation",
+      "aliases": {
+        "strong": ["affiliation"],
+        "normal": ["organization", "faction", "membership"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.residence",
+      "aliases": {
+        "strong": ["residence"],
+        "normal": ["home", "place of residence"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.currentLocation",
+      "aliases": {
+        "strong": ["current location"],
+        "normal": ["present location"],
+        "weak": ["location"]
+      }
+    },
+
+    {
+      "conceptId": "field.hometown",
+      "aliases": {
+        "strong": ["hometown"],
+        "normal": ["home town", "home city"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.height",
+      "aliases": {
+        "strong": ["height"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.weight",
+      "aliases": {
+        "strong": ["weight"],
+        "normal": ["body weight"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.eyeColor",
+      "aliases": {
+        "strong": ["eye color", "eye colour"],
+        "normal": ["eyes"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.hairColor",
+      "aliases": {
+        "strong": ["hair color", "hair colour"],
+        "normal": ["hair"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.appearance",
+      "aliases": {
+        "strong": ["appearance"],
+        "normal": ["physical appearance", "looks"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.personality",
+      "aliases": {
+        "strong": ["personality"],
+        "normal": ["temperament", "character traits"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.goal",
+      "aliases": {
+        "strong": ["goal"],
+        "normal": ["objective", "ambition"],
+        "weak": ["desire"]
+      }
+    },
+
+    {
+      "conceptId": "field.motivation",
+      "aliases": {
+        "strong": ["motivation"],
+        "normal": ["motive", "driving force"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.locationType",
+      "aliases": {
+        "strong": ["location type"],
+        "normal": ["place type"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.parentLocation",
+      "aliases": {
+        "strong": ["parent location"],
+        "normal": ["region", "located within"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.capital",
+      "aliases": {
+        "strong": ["capital", "capital city"],
+        "normal": ["seat of government"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.population",
+      "aliases": {
+        "strong": ["population"],
+        "normal": ["inhabitants"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.area",
+      "aliases": {
+        "strong": ["area"],
+        "normal": ["land area", "surface area"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.climate",
+      "aliases": {
+        "strong": ["climate"],
+        "normal": ["climate type"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.terrain",
+      "aliases": {
+        "strong": ["terrain"],
+        "normal": ["landform", "geography"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.biome",
+      "aliases": {
+        "strong": ["biome"],
+        "normal": ["ecoregion"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.government",
+      "aliases": {
+        "strong": ["government"],
+        "normal": ["governing body"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.ruler",
+      "aliases": {
+        "strong": ["ruler"],
+        "normal": ["sovereign", "leader", "monarch"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.organizationType",
+      "aliases": {
+        "strong": ["organization type", "organisation type"],
+        "normal": ["group type"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.founder",
+      "aliases": {
+        "strong": ["founder"],
+        "normal": ["creator", "founding member"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.leader",
+      "aliases": {
+        "strong": ["leader"],
+        "normal": ["chief", "head", "commander"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.headquarters",
+      "aliases": {
+        "strong": ["headquarters"],
+        "normal": ["head office", "main base"],
+        "weak": ["hq"]
+      }
+    },
+
+    {
+      "conceptId": "field.memberCount",
+      "aliases": {
+        "strong": ["member count"],
+        "normal": ["members", "membership size"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.ideology",
+      "aliases": {
+        "strong": ["ideology"],
+        "normal": ["beliefs", "doctrine"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.mission",
+      "aliases": {
+        "strong": ["mission"],
+        "normal": ["purpose", "mandate"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.motto",
+      "aliases": {
+        "strong": ["motto"],
+        "normal": ["slogan"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.itemType",
+      "aliases": {
+        "strong": ["item type"],
+        "normal": ["item category"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.creator",
+      "aliases": {
+        "strong": ["creator"],
+        "normal": ["maker", "author", "designer"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.material",
+      "aliases": {
+        "strong": ["material"],
+        "normal": ["materials", "composition"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.rarity",
+      "aliases": {
+        "strong": ["rarity"],
+        "normal": ["rarity level"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.value",
+      "aliases": {
+        "strong": ["value"],
+        "normal": ["worth"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.price",
+      "aliases": {
+        "strong": ["price"],
+        "normal": ["cost"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.effect",
+      "aliases": {
+        "strong": ["effect"],
+        "normal": ["effects", "special effect"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.date",
+      "aliases": {
+        "strong": ["date"],
+        "normal": ["event date"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.startDate",
+      "aliases": {
+        "strong": ["start date"],
+        "normal": ["starting date", "began on"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.endDate",
+      "aliases": {
+        "strong": ["end date"],
+        "normal": ["ending date"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.foundedDate",
+      "aliases": {
+        "strong": ["founding date", "date founded"],
+        "normal": ["established date"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.cause",
+      "aliases": {
+        "strong": ["cause"],
+        "normal": ["reason", "trigger"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.result",
+      "aliases": {
+        "strong": ["result"],
+        "normal": ["outcome", "consequence"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.language",
+      "aliases": {
+        "strong": ["language"],
+        "normal": ["official language"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.currency",
+      "aliases": {
+        "strong": ["currency"],
+        "normal": ["legal tender"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.religion",
+      "aliases": {
+        "strong": ["religion"],
+        "normal": ["faith", "belief system"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.governmentType",
+      "aliases": {
+        "strong": ["government type"],
+        "normal": ["form of government", "political system"],
+        "weak": []
+      }
+    }
+  ]
+}

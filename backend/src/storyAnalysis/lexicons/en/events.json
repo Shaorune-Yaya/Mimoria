@@ -1,0 +1,787 @@
+{
+  "meta": {
+    "locale": "en",
+    "version": "1.0.0",
+    "category": "events"
+  },
+
+  "entries": [
+    {
+      "conceptId": "event.birth",
+      "aliases": {
+        "strong": [
+          "was born",
+          "born"
+        ],
+        "normal": [
+          "came into the world"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.death",
+      "aliases": {
+        "strong": [
+          "died",
+          "was killed",
+          "passed away",
+          "perished"
+        ],
+        "normal": [
+          "fell in battle",
+          "was slain",
+          "succumbed",
+          "deceased"
+        ],
+        "weak": [
+          "kicked the bucket",
+          "croaked"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.resurrection",
+      "aliases": {
+        "strong": [
+          "resurrected",
+          "rose from the dead",
+          "returned from death"
+        ],
+        "normal": [
+          "revived",
+          "was reborn"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.join",
+      "aliases": {
+        "strong": [
+          "officially joined",
+          "became a member of",
+          "enlisted in",
+          "enrolled in",
+          "signed on with",
+          "joined the ranks of"
+        ],
+        "normal": [
+          "join",
+          "joined",
+          "joined up with",
+          "entered",
+          "entered service with",
+          "signed up with",
+          "aligned himself with",
+          "aligned herself with"
+        ],
+        "weak": [
+          "joined the server",
+          "joined the group",
+          "joined the chat",
+          "joined the community",
+          "hopped in"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.leave",
+      "aliases": {
+        "strong": [
+          "officially left",
+          "resigned from",
+          "withdrew from",
+          "departed from",
+          "quit the organization"
+        ],
+        "normal": [
+          "left",
+          "quit",
+          "departed",
+          "withdrew",
+          "broke away from"
+        ],
+        "weak": [
+          "left the server",
+          "left the group",
+          "left the chat",
+          "rage quit",
+          "bailed"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.surrender",
+      "aliases": {
+        "strong": [
+          "surrendered",
+          "capitulated",
+          "yielded"
+        ],
+        "normal": [
+          "gave himself up",
+          "gave herself up",
+          "laid down arms",
+          "submitted"
+        ],
+        "weak": [
+          "gave up"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.changeSide",
+      "aliases": {
+        "strong": [
+          "defected to",
+          "changed sides",
+          "switched sides"
+        ],
+        "normal": [
+          "went over to",
+          "crossed over to",
+          "changed allegiance",
+          "shifted allegiance"
+        ],
+        "weak": [
+          "flipped sides"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.betray",
+      "aliases": {
+        "strong": [
+          "betrayed",
+          "turned against"
+        ],
+        "normal": [
+          "double-crossed",
+          "backstabbed",
+          "broke faith with"
+        ],
+        "weak": [
+          "stabbed in the back"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.appoint",
+      "aliases": {
+        "strong": [
+          "appointed",
+          "named as",
+          "installed as"
+        ],
+        "normal": [
+          "assigned",
+          "designated",
+          "commissioned"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.promote",
+      "aliases": {
+        "strong": [
+          "promoted",
+          "was promoted"
+        ],
+        "normal": [
+          "advanced in rank",
+          "elevated",
+          "raised to"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.demote",
+      "aliases": {
+        "strong": [
+          "demoted",
+          "was demoted"
+        ],
+        "normal": [
+          "reduced in rank",
+          "stripped of rank"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.resign",
+      "aliases": {
+        "strong": [
+          "resigned",
+          "stepped down"
+        ],
+        "normal": [
+          "abdicated",
+          "retired from office",
+          "gave up office"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.expel",
+      "aliases": {
+        "strong": [
+          "expelled",
+          "banished",
+          "exiled"
+        ],
+        "normal": [
+          "removed from",
+          "cast out",
+          "kicked out"
+        ],
+        "weak": [
+          "booted"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.travel",
+      "aliases": {
+        "strong": [
+          "traveled to",
+          "travelled to",
+          "journeyed to",
+          "went to"
+        ],
+        "normal": [
+          "headed to",
+          "made for",
+          "set out for",
+          "ventured to"
+        ],
+        "weak": [
+          "went over to"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.arrive",
+      "aliases": {
+        "strong": [
+          "arrived at",
+          "arrived in",
+          "reached"
+        ],
+        "normal": [
+          "came to",
+          "entered",
+          "made it to"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.depart",
+      "aliases": {
+        "strong": [
+          "departed",
+          "departed from",
+          "set out"
+        ],
+        "normal": [
+          "left",
+          "set off",
+          "started out"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.return",
+      "aliases": {
+        "strong": [
+          "returned",
+          "returned to",
+          "came back"
+        ],
+        "normal": [
+          "went back",
+          "returned home",
+          "came home"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.escape",
+      "aliases": {
+        "strong": [
+          "escaped",
+          "fled"
+        ],
+        "normal": [
+          "ran away",
+          "broke free",
+          "made his escape",
+          "made her escape"
+        ],
+        "weak": [
+          "bailed",
+          "got out"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.exile",
+      "aliases": {
+        "strong": [
+          "was exiled",
+          "exiled",
+          "banished"
+        ],
+        "normal": [
+          "sent into exile"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.migrate",
+      "aliases": {
+        "strong": [
+          "migrated",
+          "relocated"
+        ],
+        "normal": [
+          "moved to",
+          "settled in"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.found",
+      "aliases": {
+        "strong": [
+          "founded",
+          "established",
+          "formed"
+        ],
+        "normal": [
+          "created",
+          "set up",
+          "organized",
+          "organised"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.create",
+      "aliases": {
+        "strong": [
+          "created",
+          "made"
+        ],
+        "normal": [
+          "crafted",
+          "produced",
+          "designed"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.build",
+      "aliases": {
+        "strong": [
+          "built",
+          "constructed"
+        ],
+        "normal": [
+          "erected",
+          "raised",
+          "assembled"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.destroy",
+      "aliases": {
+        "strong": [
+          "destroyed",
+          "demolished",
+          "annihilated"
+        ],
+        "normal": [
+          "razed",
+          "wrecked",
+          "burned down",
+          "burnt down"
+        ],
+        "weak": [
+          "blew up"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.discover",
+      "aliases": {
+        "strong": [
+          "discovered",
+          "found"
+        ],
+        "normal": [
+          "uncovered",
+          "unearthed",
+          "located"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.invent",
+      "aliases": {
+        "strong": [
+          "invented"
+        ],
+        "normal": [
+          "developed",
+          "devised",
+          "engineered"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.attack",
+      "aliases": {
+        "strong": [
+          "attacked",
+          "assaulted",
+          "struck"
+        ],
+        "normal": [
+          "raided",
+          "ambushed",
+          "launched an attack on"
+        ],
+        "weak": [
+          "hit"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.defend",
+      "aliases": {
+        "strong": [
+          "defended",
+          "protected"
+        ],
+        "normal": [
+          "guarded",
+          "held",
+          "stood in defense of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.invade",
+      "aliases": {
+        "strong": [
+          "invaded"
+        ],
+        "normal": [
+          "entered by force",
+          "launched an invasion of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.conquer",
+      "aliases": {
+        "strong": [
+          "conquered"
+        ],
+        "normal": [
+          "subjugated",
+          "defeated and took",
+          "overran"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.occupy",
+      "aliases": {
+        "strong": [
+          "occupied"
+        ],
+        "normal": [
+          "seized",
+          "took control of",
+          "held"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.liberate",
+      "aliases": {
+        "strong": [
+          "liberated"
+        ],
+        "normal": [
+          "freed",
+          "recaptured",
+          "retook"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.rebel",
+      "aliases": {
+        "strong": [
+          "rebelled",
+          "rose in rebellion"
+        ],
+        "normal": [
+          "revolted",
+          "rose up",
+          "mutinied"
+        ],
+        "weak": [
+          "turned rebel"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.formAlliance",
+      "aliases": {
+        "strong": [
+          "formed an alliance",
+          "entered an alliance",
+          "allied with"
+        ],
+        "normal": [
+          "joined forces with",
+          "partnered with"
+        ],
+        "weak": [
+          "teamed up with"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.breakAlliance",
+      "aliases": {
+        "strong": [
+          "ended the alliance",
+          "broke the alliance",
+          "dissolved the alliance"
+        ],
+        "normal": [
+          "broke with",
+          "abandoned the alliance"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.establishDiplomacy",
+      "aliases": {
+        "strong": [
+          "established diplomatic relations",
+          "opened diplomatic relations"
+        ],
+        "normal": [
+          "established relations",
+          "opened relations",
+          "exchanged ambassadors"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.breakDiplomacy",
+      "aliases": {
+        "strong": [
+          "severed diplomatic relations",
+          "broke diplomatic relations"
+        ],
+        "normal": [
+          "cut diplomatic ties",
+          "ended formal relations"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.marry",
+      "aliases": {
+        "strong": [
+          "married",
+          "got married",
+          "wed"
+        ],
+        "normal": [
+          "was wed to",
+          "took as spouse"
+        ],
+        "weak": [
+          "tied the knot"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.divorce",
+      "aliases": {
+        "strong": [
+          "divorced"
+        ],
+        "normal": [
+          "ended the marriage",
+          "separated from"
+        ],
+        "weak": [
+          "split up"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.acquire",
+      "aliases": {
+        "strong": [
+          "acquired",
+          "obtained",
+          "received"
+        ],
+        "normal": [
+          "gained",
+          "secured",
+          "came into possession of"
+        ],
+        "weak": [
+          "got"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.lose",
+      "aliases": {
+        "strong": [
+          "lost"
+        ],
+        "normal": [
+          "misplaced",
+          "was deprived of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.give",
+      "aliases": {
+        "strong": [
+          "gave",
+          "granted"
+        ],
+        "normal": [
+          "handed over",
+          "bestowed"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.steal",
+      "aliases": {
+        "strong": [
+          "stole"
+        ],
+        "normal": [
+          "robbed",
+          "took unlawfully"
+        ],
+        "weak": [
+          "swiped"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.buy",
+      "aliases": {
+        "strong": [
+          "bought",
+          "purchased"
+        ],
+        "normal": [
+          "acquired for",
+          "paid for"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.sell",
+      "aliases": {
+        "strong": [
+          "sold"
+        ],
+        "normal": [
+          "sold off",
+          "traded away"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

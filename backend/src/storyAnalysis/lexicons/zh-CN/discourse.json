@@ -1,0 +1,148 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.0.0",
+    "category": "discourse"
+  },
+
+  "entries": [
+    {
+      "conceptId": "discourse.contrast",
+      "aliases": {
+        "strong": [
+          "但是",
+          "然而",
+          "不过",
+          "可是"
+        ],
+        "normal": [
+          "但",
+          "却",
+          "反而"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "discourse.sequence",
+      "aliases": {
+        "strong": [
+          "然后",
+          "随后",
+          "接着",
+          "后来"
+        ],
+        "normal": [
+          "继而",
+          "之后",
+          "再后来"
+        ],
+        "weak": [
+          "再"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "discourse.before",
+      "aliases": {
+        "strong": [
+          "之前",
+          "此前",
+          "在此之前"
+        ],
+        "normal": [
+          "先前",
+          "原先",
+          "起初",
+          "一开始"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "discourse.after",
+      "aliases": {
+        "strong": [
+          "之后",
+          "以后",
+          "此后"
+        ],
+        "normal": [
+          "后来",
+          "其后",
+          "随后"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "discourse.finally",
+      "aliases": {
+        "strong": [
+          "最终",
+          "最后",
+          "终于"
+        ],
+        "normal": [
+          "终究",
+          "到头来"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "discourse.cause",
+      "aliases": {
+        "strong": [
+          "因为",
+          "由于"
+        ],
+        "normal": [
+          "因",
+          "鉴于",
+          "缘于"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "discourse.result",
+      "aliases": {
+        "strong": [
+          "因此",
+          "所以",
+          "于是"
+        ],
+        "normal": [
+          "因而",
+          "故而",
+          "故"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "discourse.condition",
+      "aliases": {
+        "strong": [
+          "如果",
+          "假如",
+          "只要"
+        ],
+        "normal": [
+          "若",
+          "倘若",
+          "一旦"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

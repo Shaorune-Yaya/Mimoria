@@ -1,0 +1,159 @@
+{
+  "meta": {
+    "locale": "en",
+    "version": "1.0.0",
+    "category": "units"
+  },
+
+  "entries": [
+    {
+      "conceptId": "unit.age.year",
+      "aliases": {
+        "strong": [
+          "years old",
+          "year old"
+        ],
+        "normal": [
+          "years of age"
+        ],
+        "weak": [
+          "aged"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "unit.length.mm",
+      "aliases": {
+        "strong": [
+          "millimeter",
+          "millimeters",
+          "millimetre",
+          "millimetres",
+          "mm"
+        ],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "unit.length.cm",
+      "aliases": {
+        "strong": [
+          "centimeter",
+          "centimeters",
+          "centimetre",
+          "centimetres",
+          "cm"
+        ],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "unit.length.m",
+      "aliases": {
+        "strong": [
+          "meter",
+          "meters",
+          "metre",
+          "metres"
+        ],
+        "normal": [
+          "m"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "unit.length.km",
+      "aliases": {
+        "strong": [
+          "kilometer",
+          "kilometers",
+          "kilometre",
+          "kilometres",
+          "km"
+        ],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "unit.mass.g",
+      "aliases": {
+        "strong": [
+          "gram",
+          "grams"
+        ],
+        "normal": [
+          "g"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "unit.mass.kg",
+      "aliases": {
+        "strong": [
+          "kilogram",
+          "kilograms",
+          "kg"
+        ],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "unit.mass.lb",
+      "aliases": {
+        "strong": [
+          "pound",
+          "pounds",
+          "lb",
+          "lbs"
+        ],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "unit.area.m2",
+      "aliases": {
+        "strong": [
+          "square meter",
+          "square meters",
+          "square metre",
+          "square metres",
+          "m²",
+          "m2"
+        ],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "unit.area.km2",
+      "aliases": {
+        "strong": [
+          "square kilometer",
+          "square kilometers",
+          "square kilometre",
+          "square kilometres",
+          "km²",
+          "km2"
+        ],
+        "normal": [],
+        "weak": []
+      }
+    }
+  ]
+}

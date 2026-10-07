@@ -1,0 +1,735 @@
+{
+  "meta": {
+    "locale": "en",
+    "version": "1.0.0",
+    "category": "relations"
+  },
+
+  "entries": [
+    {
+      "conceptId": "relation.member_of",
+      "aliases": {
+        "strong": [
+          "is a member of",
+          "member of",
+          "belongs to",
+          "is affiliated with",
+          "is part of"
+        ],
+        "normal": [
+          "serves in",
+          "serves under",
+          "is with",
+          "works with",
+          "under the banner of",
+          "under the command of"
+        ],
+        "weak": [
+          "with",
+          "under"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.leader_of",
+      "aliases": {
+        "strong": [
+          "leader of",
+          "leads",
+          "commands",
+          "heads",
+          "rules"
+        ],
+        "normal": [
+          "is in charge of",
+          "oversees",
+          "directs",
+          "presides over"
+        ],
+        "weak": [
+          "runs"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.founder_of",
+      "aliases": {
+        "strong": [
+          "founder of",
+          "founded by",
+          "creator of",
+          "established by"
+        ],
+        "normal": [
+          "co-founder of",
+          "originator of",
+          "establisher of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.works_for",
+      "aliases": {
+        "strong": [
+          "works for",
+          "employed by",
+          "is employed by",
+          "works at"
+        ],
+        "normal": [
+          "serves under",
+          "serves for",
+          "is in the employ of",
+          "is employed at"
+        ],
+        "weak": [
+          "works with"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.commands",
+      "aliases": {
+        "strong": [
+          "commands",
+          "is commander of",
+          "has command of"
+        ],
+        "normal": [
+          "leads",
+          "directs",
+          "is in command of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.serves",
+      "aliases": {
+        "strong": [
+          "serves",
+          "serves under",
+          "serves as"
+        ],
+        "normal": [
+          "is in service to",
+          "is sworn to"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.located_in",
+      "aliases": {
+        "strong": [
+          "located in",
+          "located at",
+          "situated in",
+          "situated within",
+          "lies in"
+        ],
+        "normal": [
+          "found in",
+          "based in",
+          "set in",
+          "positioned in"
+        ],
+        "weak": [
+          "in"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.part_of",
+      "aliases": {
+        "strong": [
+          "part of",
+          "forms part of",
+          "is a component of"
+        ],
+        "normal": [
+          "belongs to",
+          "falls under",
+          "is within"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.contains",
+      "aliases": {
+        "strong": [
+          "contains",
+          "includes",
+          "encompasses"
+        ],
+        "normal": [
+          "holds",
+          "comprises",
+          "consists of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.capital_of",
+      "aliases": {
+        "strong": [
+          "capital of",
+          "capital city of"
+        ],
+        "normal": [
+          "seat of government of",
+          "seat of power of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.borders",
+      "aliases": {
+        "strong": [
+          "borders",
+          "shares a border with"
+        ],
+        "normal": [
+          "is adjacent to",
+          "adjoins"
+        ],
+        "weak": [
+          "neighbors"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.near",
+      "aliases": {
+        "strong": [
+          "near",
+          "nearby",
+          "close to"
+        ],
+        "normal": [
+          "next to",
+          "adjacent to"
+        ],
+        "weak": [
+          "beside"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.north_of",
+      "aliases": {
+        "strong": [
+          "north of",
+          "to the north of"
+        ],
+        "normal": [
+          "northward of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.south_of",
+      "aliases": {
+        "strong": [
+          "south of",
+          "to the south of"
+        ],
+        "normal": [
+          "southward of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.east_of",
+      "aliases": {
+        "strong": [
+          "east of",
+          "to the east of"
+        ],
+        "normal": [
+          "eastward of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.west_of",
+      "aliases": {
+        "strong": [
+          "west of",
+          "to the west of"
+        ],
+        "normal": [
+          "westward of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.born_in",
+      "aliases": {
+        "strong": [
+          "born in",
+          "born at"
+        ],
+        "normal": [
+          "was born in",
+          "was born at"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.from",
+      "aliases": {
+        "strong": [
+          "comes from",
+          "came from",
+          "hails from",
+          "originates from"
+        ],
+        "normal": [
+          "is from",
+          "native of",
+          "originally from"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.lives_in",
+      "aliases": {
+        "strong": [
+          "lives in",
+          "resides in",
+          "dwells in"
+        ],
+        "normal": [
+          "stays in",
+          "makes a home in"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.resides_in",
+      "aliases": {
+        "strong": [
+          "resides at",
+          "resides in"
+        ],
+        "normal": [
+          "dwells at",
+          "is resident in"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.allied_with",
+      "aliases": {
+        "strong": [
+          "allied with",
+          "is allied with",
+          "in alliance with"
+        ],
+        "normal": [
+          "allies with",
+          "aligned with"
+        ],
+        "weak": [
+          "friendly with"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.enemy_of",
+      "aliases": {
+        "strong": [
+          "enemy of",
+          "is an enemy of",
+          "hostile to"
+        ],
+        "normal": [
+          "opposed to",
+          "adversary of"
+        ],
+        "weak": [
+          "against"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.rival_of",
+      "aliases": {
+        "strong": [
+          "rival of",
+          "is a rival of"
+        ],
+        "normal": [
+          "competes with",
+          "rivals"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.at_war_with",
+      "aliases": {
+        "strong": [
+          "at war with",
+          "is at war with"
+        ],
+        "normal": [
+          "fighting against",
+          "waging war against"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.diplomatic_relations_with",
+      "aliases": {
+        "strong": [
+          "has diplomatic relations with",
+          "maintains diplomatic relations with"
+        ],
+        "normal": [
+          "diplomatic relations with",
+          "formal relations with"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.controls",
+      "aliases": {
+        "strong": [
+          "controls",
+          "has control over",
+          "controls the"
+        ],
+        "normal": [
+          "dominates",
+          "governs",
+          "holds"
+        ],
+        "weak": [
+          "influences"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.ruled_by",
+      "aliases": {
+        "strong": [
+          "ruled by",
+          "governed by"
+        ],
+        "normal": [
+          "controlled by",
+          "administered by"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+        "conceptId": "relation.vassal_of",
+        "aliases": {
+            "strong": [
+            "vassal of",
+            "is a vassal of",
+            "swore fealty to",
+            "sworn to",
+            "pledged allegiance to"
+            ],
+            "normal": [
+            "subject to",
+            "owes fealty to",
+            "owes allegiance to",
+            "is sworn to"
+            ],
+            "weak": [
+            "serves under"
+            ]
+        }
+    },
+
+    {
+      "conceptId": "relation.occupied_by",
+      "aliases": {
+        "strong": [
+          "occupied by"
+        ],
+        "normal": [
+          "held by",
+          "under occupation by"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.owns",
+      "aliases": {
+        "strong": [
+          "owns",
+          "possesses"
+        ],
+        "normal": [
+          "holds",
+          "has ownership of"
+        ],
+        "weak": [
+          "has"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "relation.owned_by",
+      "aliases": {
+        "strong": [
+          "owned by"
+        ],
+        "normal": [
+          "belongs to",
+          "property of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.created",
+      "aliases": {
+        "strong": [
+          "created",
+          "made",
+          "built"
+        ],
+        "normal": [
+          "crafted",
+          "designed",
+          "forged"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.created_by",
+      "aliases": {
+        "strong": [
+          "created by",
+          "made by"
+        ],
+        "normal": [
+          "built by",
+          "crafted by",
+          "designed by",
+          "forged by"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.uses",
+      "aliases": {
+        "strong": [
+          "uses",
+          "makes use of"
+        ],
+        "normal": [
+          "utilizes",
+          "employs"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.wields",
+      "aliases": {
+        "strong": [
+          "wields"
+        ],
+        "normal": [
+          "carries",
+          "uses",
+          "bears"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.parent_of",
+      "aliases": {
+        "strong": [
+          "parent of",
+          "father of",
+          "mother of"
+        ],
+        "normal": [
+          "is the father of",
+          "is the mother of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.child_of",
+      "aliases": {
+        "strong": [
+          "child of",
+          "son of",
+          "daughter of"
+        ],
+        "normal": [
+          "born to",
+          "offspring of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.sibling_of",
+      "aliases": {
+        "strong": [
+          "sibling of",
+          "brother of",
+          "sister of"
+        ],
+        "normal": [
+          "siblings with"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.spouse_of",
+      "aliases": {
+        "strong": [
+          "spouse of",
+          "husband of",
+          "wife of"
+        ],
+        "normal": [
+          "married to"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.partner_of",
+      "aliases": {
+        "strong": [
+          "partner of",
+          "romantic partner of"
+        ],
+        "normal": [
+          "in a relationship with"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.friend_of",
+      "aliases": {
+        "strong": [
+          "friend of",
+          "friends with"
+        ],
+        "normal": [
+          "close friend of",
+          "companion of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.mentor_of",
+      "aliases": {
+        "strong": [
+          "mentor of",
+          "teacher of"
+        ],
+        "normal": [
+          "master of",
+          "tutor of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.student_of",
+      "aliases": {
+        "strong": [
+          "student of",
+          "pupil of",
+          "disciple of"
+        ],
+        "normal": [
+          "apprentice of"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "relation.master_of",
+      "aliases": {
+        "strong": [
+          "master of"
+        ],
+        "normal": [
+          "lord of",
+          "owner of"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

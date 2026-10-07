@@ -1,0 +1,1032 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.0.0",
+    "category": "entity-types"
+  },
+
+  "entries": [
+    {
+      "conceptId": "entityType.character",
+      "aliases": {
+        "strong": ["人物角色", "人物档案", "角色档案"],
+        "normal": ["角色", "人物"],
+        "weak": ["人"]
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.family",
+      "aliases": {
+        "strong": ["家族", "世家"],
+        "normal": ["宗族", "家门"],
+        "weak": ["一家"]
+      },
+      "suffixes": {
+        "strong": ["家族", "氏族"],
+        "normal": ["世家"],
+        "weak": ["家"]
+      }
+    },
+
+    {
+      "conceptId": "entityType.clan",
+      "aliases": {
+        "strong": ["氏族", "部族"],
+        "normal": ["宗族", "族群"],
+        "weak": ["一族"]
+      },
+      "suffixes": {
+        "strong": ["氏族"],
+        "normal": ["一族", "部族"],
+        "weak": ["族"]
+      }
+    },
+
+    {
+      "conceptId": "entityType.dynasty",
+      "aliases": {
+        "strong": ["王朝", "皇朝"],
+        "normal": ["朝代"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["王朝"],
+        "normal": ["朝"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.race",
+      "aliases": {
+        "strong": ["种族"],
+        "normal": ["族裔", "族群"],
+        "weak": ["族"]
+      },
+      "suffixes": {
+        "strong": ["种族"],
+        "normal": ["族"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.species",
+      "aliases": {
+        "strong": ["物种"],
+        "normal": ["种类", "生物种"],
+        "weak": ["种"]
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.creature",
+      "aliases": {
+        "strong": ["生物", "生灵"],
+        "normal": ["异兽", "野兽"],
+        "weak": ["兽"]
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["兽"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.monster",
+      "aliases": {
+        "strong": ["怪物", "魔物"],
+        "normal": ["妖怪", "妖兽", "魔兽"],
+        "weak": ["怪"]
+      },
+      "suffixes": {
+        "strong": ["魔兽"],
+        "normal": ["妖", "怪"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.deity",
+      "aliases": {
+        "strong": ["神祇", "神明", "神灵"],
+        "normal": ["神祗", "神"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["神"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.spirit",
+      "aliases": {
+        "strong": ["灵体", "精灵体"],
+        "normal": ["幽灵", "亡灵", "魂灵"],
+        "weak": ["灵"]
+      },
+      "suffixes": {
+        "strong": ["之灵"],
+        "normal": ["灵"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.robot",
+      "aliases": {
+        "strong": ["机器人", "机械人", "仿生人"],
+        "normal": ["人形机械", "机械生命"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["机器人"],
+        "normal": ["仿生人"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.artificialIntelligence",
+      "aliases": {
+        "strong": ["人工智能", "智能人格", "数字人格"],
+        "normal": ["智能体", "AI"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.location",
+      "aliases": {
+        "strong": ["地点", "地理位置"],
+        "normal": ["位置", "地方", "区域"],
+        "weak": ["地"]
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.country",
+      "aliases": {
+        "strong": ["国家", "国度"],
+        "normal": ["政权国家", "主权国家"],
+        "weak": ["国"]
+      },
+      "suffixes": {
+        "strong": ["共和国", "联邦共和国", "合众国"],
+        "normal": ["国", "联邦", "公国", "汗国"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.kingdom",
+      "aliases": {
+        "strong": ["王国"],
+        "normal": ["王国政权"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["王国"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.empire",
+      "aliases": {
+        "strong": ["帝国"],
+        "normal": ["帝国政权"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["帝国"],
+        "normal": ["皇朝"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.city",
+      "aliases": {
+        "strong": ["城市", "都市"],
+        "normal": ["城池", "都会"],
+        "weak": ["城"]
+      },
+      "suffixes": {
+        "strong": ["都市"],
+        "normal": ["城", "市", "府"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.town",
+      "aliases": {
+        "strong": ["城镇", "市镇"],
+        "normal": ["小镇", "镇子"],
+        "weak": ["镇"]
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["镇", "集镇"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.village",
+      "aliases": {
+        "strong": ["村庄", "村落"],
+        "normal": ["聚落", "村子"],
+        "weak": ["村"]
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["村", "寨", "屯"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.region",
+      "aliases": {
+        "strong": ["地区", "地域"],
+        "normal": ["区域", "领地"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["地区", "区域", "领", "境"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.province",
+      "aliases": {
+        "strong": ["省份", "行省"],
+        "normal": ["州", "郡"],
+        "weak": ["省"]
+      },
+      "suffixes": {
+        "strong": ["行省"],
+        "normal": ["省", "州", "郡", "行省"],
+        "weak": ["道", "区"]
+      }
+    },
+
+    {
+      "conceptId": "entityType.continent",
+      "aliases": {
+        "strong": ["大陆", "大洲"],
+        "normal": ["洲陆"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["大陆"],
+        "normal": ["洲"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.planet",
+      "aliases": {
+        "strong": ["行星", "星球"],
+        "normal": ["星体"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["星球"],
+        "normal": ["星"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.world",
+      "aliases": {
+        "strong": ["世界", "世界域"],
+        "normal": ["世界观世界"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["世界"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.dimension",
+      "aliases": {
+        "strong": ["位面", "维度空间", "异空间"],
+        "normal": ["维度", "空间"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["位面"],
+        "normal": ["界"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.island",
+      "aliases": {
+        "strong": ["岛屿", "群岛"],
+        "normal": ["海岛"],
+        "weak": ["岛"]
+      },
+      "suffixes": {
+        "strong": ["群岛"],
+        "normal": ["岛", "屿"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.mountain",
+      "aliases": {
+        "strong": ["山脉", "山岳"],
+        "normal": ["高山", "山峰"],
+        "weak": ["山"]
+      },
+      "suffixes": {
+        "strong": ["山脉"],
+        "normal": ["山", "峰", "岭"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.forest",
+      "aliases": {
+        "strong": ["森林", "林地"],
+        "normal": ["密林", "树林"],
+        "weak": ["林"]
+      },
+      "suffixes": {
+        "strong": ["森林"],
+        "normal": ["林"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.river",
+      "aliases": {
+        "strong": ["河流"],
+        "normal": ["江河", "水道"],
+        "weak": ["河"]
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["河", "江", "溪", "川"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.lake",
+      "aliases": {
+        "strong": ["湖泊"],
+        "normal": ["湖水"],
+        "weak": ["湖"]
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["湖", "泽", "潭"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.ocean",
+      "aliases": {
+        "strong": ["海洋"],
+        "normal": ["海域"],
+        "weak": ["海"]
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["海", "洋", "海湾", "湾"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.desert",
+      "aliases": {
+        "strong": ["沙漠"],
+        "normal": ["荒漠", "沙海"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["沙漠"],
+        "normal": ["荒漠"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.building",
+      "aliases": {
+        "strong": ["建筑物", "建筑"],
+        "normal": ["设施", "建筑设施"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [
+          "宫",
+          "宫殿",
+          "殿",
+          "塔",
+          "堡",
+          "堡垒",
+          "馆",
+          "院",
+          "楼",
+          "庄园",
+          "宅",
+          "府邸",
+          "神殿",
+          "寺",
+          "庙",
+          "教堂",
+          "学院",
+          "学校",
+          "基地",
+          "车站",
+          "港口",
+          "机场"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.ruin",
+      "aliases": {
+        "strong": ["遗迹", "遗址", "废墟"],
+        "normal": ["古迹", "旧址"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["遗迹", "遗址"],
+        "normal": ["废墟", "旧址"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.dungeon",
+      "aliases": {
+        "strong": ["地下城", "迷宫"],
+        "normal": ["地牢", "秘境"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["地下城"],
+        "normal": ["迷宫", "秘境", "地牢"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.organization",
+      "aliases": {
+        "strong": ["组织", "机构"],
+        "normal": ["团体", "组织机构"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["委员会", "协会", "联合会"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.faction",
+      "aliases": {
+        "strong": ["势力", "阵营"],
+        "normal": ["派系", "集团势力"],
+        "weak": ["一方"]
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["派", "阵营"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.government",
+      "aliases": {
+        "strong": ["政府", "政权"],
+        "normal": ["统治机构", "行政机构"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["政府"],
+        "normal": ["政权", "朝廷"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.politicalParty",
+      "aliases": {
+        "strong": ["政党", "党派"],
+        "normal": ["政治党派"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["党"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.guild",
+      "aliases": {
+        "strong": ["公会", "行会"],
+        "normal": ["协会", "同业公会"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["公会", "行会"],
+        "normal": ["协会"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.corporation",
+      "aliases": {
+        "strong": ["公司", "企业", "集团公司"],
+        "normal": ["财团", "商业集团"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["有限公司", "股份公司", "公司"],
+        "normal": ["集团", "财团", "商会"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.military",
+      "aliases": {
+        "strong": ["军队", "武装力量"],
+        "normal": ["部队", "军事组织"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["军团"],
+        "normal": ["军", "舰队"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.militaryUnit",
+      "aliases": {
+        "strong": ["军事单位", "军事部队"],
+        "normal": ["部队单位"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [
+            "旅",
+            "军团",
+            "舰队",
+            "大队",
+            "中队",
+            "小队"
+        ],
+        "weak": [
+            "营",
+            "团"
+        ]
+        }
+    },
+
+    {
+      "conceptId": "entityType.order",
+      "aliases": {
+        "strong": ["骑士团", "修会"],
+        "normal": ["团体组织", "结社"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["骑士团"],
+        "normal": ["教团", "修会"],
+        "weak": ["团"]
+      }
+    },
+
+    {
+      "conceptId": "entityType.religion",
+      "aliases": {
+        "strong": ["宗教", "信仰体系"],
+        "normal": ["信仰", "教义体系"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["教"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.church",
+      "aliases": {
+        "strong": ["教会", "宗教组织"],
+        "normal": ["圣会"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["教会"],
+        "normal": ["圣会"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.cult",
+      "aliases": {
+        "strong": ["邪教", "秘密教派"],
+        "normal": ["教派", "教团"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["教团", "教派"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.school",
+      "aliases": {
+        "strong": ["学校", "学院"],
+        "normal": ["学府", "教育机构"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["大学", "学院"],
+        "normal": ["学校", "学园", "书院"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.secretSociety",
+      "aliases": {
+        "strong": ["秘密结社", "秘密组织"],
+        "normal": ["地下组织"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["秘密会", "兄弟会"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.criminalOrganization",
+      "aliases": {
+        "strong": ["犯罪组织", "黑帮"],
+        "normal": ["匪帮", "帮派"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["帮", "黑帮"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.item",
+      "aliases": {
+        "strong": ["物品", "道具"],
+        "normal": ["物件", "物件道具"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.weapon",
+      "aliases": {
+        "strong": ["武器", "兵器"],
+        "normal": ["军械"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [
+          "剑",
+          "刀",
+          "枪",
+          "弓",
+          "矛",
+          "戟",
+          "炮",
+          "步枪",
+          "手枪"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.armor",
+      "aliases": {
+        "strong": ["护甲", "防具", "盔甲"],
+        "normal": ["甲胄"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["甲", "铠"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.artifact",
+      "aliases": {
+        "strong": ["神器", "奇物"],
+        "normal": ["魔法物品", "特殊物品"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["神器"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.relic",
+      "aliases": {
+        "strong": ["圣物", "遗物"],
+        "normal": ["遗宝"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["圣物"],
+        "normal": ["遗物"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.vehicle",
+      "aliases": {
+        "strong": ["载具", "交通工具"],
+        "normal": ["车辆", "交通载具"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["车", "舰", "船"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.spacecraft",
+      "aliases": {
+        "strong": ["宇宙飞船", "太空船", "航天器"],
+        "normal": ["星舰", "飞船"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["星舰"],
+        "normal": ["飞船", "舰"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.event",
+      "aliases": {
+        "strong": ["历史事件", "重大事件"],
+        "normal": ["事件"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["事件"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.war",
+      "aliases": {
+        "strong": ["战争"],
+        "normal": ["大战", "战争冲突"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["战争"],
+        "normal": ["大战"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.battle",
+      "aliases": {
+        "strong": ["战役"],
+        "normal": ["战斗", "会战"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["战役", "之战"],
+        "normal": ["会战"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.disaster",
+      "aliases": {
+        "strong": ["灾难", "灾害"],
+        "normal": ["浩劫", "大灾变"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["灾难"],
+        "normal": ["浩劫", "灾变"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.era",
+      "aliases": {
+        "strong": ["时代", "纪元"],
+        "normal": ["时期", "年代"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["纪元"],
+        "normal": ["时代", "时期"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.language",
+      "aliases": {
+        "strong": ["语言", "语种"],
+        "normal": ["方言", "语言体系"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["语", "语系"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.culture",
+      "aliases": {
+        "strong": ["文化", "文明文化"],
+        "normal": ["风俗文化", "传统文化"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["文化"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.technology",
+      "aliases": {
+        "strong": ["技术", "科技"],
+        "normal": ["技术体系"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["技术"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.magic",
+      "aliases": {
+        "strong": ["魔法体系", "魔法"],
+        "normal": ["术法", "法术体系"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["魔法"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.spell",
+      "aliases": {
+        "strong": ["法术", "术式"],
+        "normal": ["魔法术式"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["术", "咒"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.ability",
+      "aliases": {
+        "strong": ["能力", "特殊能力"],
+        "normal": ["天赋", "异能"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["能力"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.skill",
+      "aliases": {
+        "strong": ["技能"],
+        "normal": ["技艺", "招式"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["技", "术"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.profession",
+      "aliases": {
+        "strong": ["职业类型", "职业"],
+        "normal": ["职种", "行当"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    }
+  ]
+}

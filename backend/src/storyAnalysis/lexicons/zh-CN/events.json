@@ -1,0 +1,758 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.0.0",
+    "category": "events"
+  },
+
+  "entries": [
+    {
+      "conceptId": "event.birth",
+      "aliases": {
+        "strong": [
+          "出生",
+          "诞生",
+          "降生"
+        ],
+        "normal": [
+          "出生了",
+          "诞生了"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.death",
+      "aliases": {
+        "strong": [
+          "死亡",
+          "去世",
+          "逝世",
+          "身亡"
+        ],
+        "normal": [
+          "阵亡",
+          "病逝",
+          "遇难",
+          "殒命",
+          "毙命"
+        ],
+        "weak": [
+          "死了",
+          "挂了",
+          "没了"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.resurrection",
+      "aliases": {
+        "strong": [
+          "复活",
+          "死而复生"
+        ],
+        "normal": [
+          "重生",
+          "还魂"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.join",
+      "aliases": {
+        "strong": [
+          "正式加入",
+          "成为成员",
+          "成为其成员",
+          "入党",
+          "入会",
+          "入伍",
+          "参军",
+          "入职",
+          "加盟"
+        ],
+        "normal": [
+          "加入",
+          "加入了",
+          "加入到",
+          "投奔",
+          "归附",
+          "依附",
+          "投靠",
+          "拜入",
+          "入门",
+          "入仕"
+        ],
+        "weak": [
+          "入群",
+          "进群",
+          "入圈",
+          "进圈",
+          "站队",
+          "上车"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.leave",
+      "aliases": {
+        "strong": [
+          "正式退出",
+          "退出组织",
+          "退党",
+          "退会",
+          "退伍",
+          "离职",
+          "辞职"
+        ],
+        "normal": [
+          "退出",
+          "退出了",
+          "离开",
+          "脱离",
+          "离队",
+          "离任",
+          "脱籍"
+        ],
+        "weak": [
+          "退群",
+          "退圈",
+          "跑路",
+          "退坑",
+          "脱坑",
+          "下车"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.surrender",
+      "aliases": {
+        "strong": [
+          "投降",
+          "投诚",
+          "归降",
+          "请降",
+          "献降"
+        ],
+        "normal": [
+          "纳降",
+          "受降",
+          "降服"
+        ],
+        "weak": [
+          "降了"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.changeSide",
+      "aliases": {
+        "strong": [
+          "倒戈",
+          "改换阵营",
+          "转投敌方"
+        ],
+        "normal": [
+          "转投",
+          "变节",
+          "叛变",
+          "易帜"
+        ],
+        "weak": [
+          "跳反",
+          "站队"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.betray",
+      "aliases": {
+        "strong": [
+          "背叛",
+          "叛变"
+        ],
+        "normal": [
+          "反叛",
+          "倒戈",
+          "谋反"
+        ],
+        "weak": [
+          "反水",
+          "跳反"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.appoint",
+      "aliases": {
+        "strong": [
+          "任命",
+          "委任",
+          "册封"
+        ],
+        "normal": [
+          "任用",
+          "授予职位",
+          "授官"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.promote",
+      "aliases": {
+        "strong": [
+          "晋升",
+          "升任",
+          "升职"
+        ],
+        "normal": [
+          "提拔",
+          "擢升",
+          "晋级"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.demote",
+      "aliases": {
+        "strong": [
+          "降职",
+          "降级"
+        ],
+        "normal": [
+          "贬职",
+          "贬官",
+          "降任"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.resign",
+      "aliases": {
+        "strong": [
+          "辞职",
+          "辞任",
+          "卸任"
+        ],
+        "normal": [
+          "辞官",
+          "致仕",
+          "退位"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.expel",
+      "aliases": {
+        "strong": [
+          "开除",
+          "驱逐",
+          "逐出"
+        ],
+        "normal": [
+          "除名",
+          "革除",
+          "放逐"
+        ],
+        "weak": [
+          "踢出"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.travel",
+      "aliases": {
+        "strong": [
+          "前往",
+          "前去",
+          "赴往"
+        ],
+        "normal": [
+          "去了",
+          "去往",
+          "赶往",
+          "移步至"
+        ],
+        "weak": [
+          "去",
+          "跑去"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.arrive",
+      "aliases": {
+        "strong": [
+          "抵达",
+          "到达"
+        ],
+        "normal": [
+          "来到",
+          "抵临",
+          "抵京",
+          "抵城"
+        ],
+        "weak": [
+          "到了"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.depart",
+      "aliases": {
+        "strong": [
+          "出发",
+          "启程",
+          "离开"
+        ],
+        "normal": [
+          "动身",
+          "起程",
+          "启行"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.return",
+      "aliases": {
+        "strong": [
+          "返回",
+          "归来",
+          "回归"
+        ],
+        "normal": [
+          "回到",
+          "返乡",
+          "还乡",
+          "凯旋"
+        ],
+        "weak": [
+          "回来了"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.escape",
+      "aliases": {
+        "strong": [
+          "逃亡",
+          "逃离",
+          "逃脱"
+        ],
+        "normal": [
+          "出逃",
+          "潜逃",
+          "遁走"
+        ],
+        "weak": [
+          "跑路"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.exile",
+      "aliases": {
+        "strong": [
+          "流放",
+          "放逐"
+        ],
+        "normal": [
+          "贬谪",
+          "发配"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.found",
+      "aliases": {
+        "strong": [
+          "创立",
+          "创建",
+          "成立"
+        ],
+        "normal": [
+          "建立",
+          "组建",
+          "开创",
+          "创办"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.build",
+      "aliases": {
+        "strong": [
+          "建造",
+          "修建",
+          "建设"
+        ],
+        "normal": [
+          "筑造",
+          "兴建",
+          "营建"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.destroy",
+      "aliases": {
+        "strong": [
+          "摧毁",
+          "毁灭",
+          "破坏"
+        ],
+        "normal": [
+          "覆灭",
+          "毁掉",
+          "夷平",
+          "焚毁"
+        ],
+        "weak": [
+          "拆了",
+          "炸了"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.discover",
+      "aliases": {
+        "strong": [
+          "发现",
+          "发掘"
+        ],
+        "normal": [
+          "找到",
+          "探明",
+          "寻获"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.invent",
+      "aliases": {
+        "strong": [
+          "发明"
+        ],
+        "normal": [
+          "研发",
+          "研制",
+          "创造"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.attack",
+      "aliases": {
+        "strong": [
+          "攻击",
+          "袭击",
+          "进攻"
+        ],
+        "normal": [
+          "攻打",
+          "攻伐",
+          "讨伐",
+          "袭扰"
+        ],
+        "weak": [
+          "打"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.defend",
+      "aliases": {
+        "strong": [
+          "防守",
+          "防御",
+          "保卫"
+        ],
+        "normal": [
+          "守卫",
+          "固守",
+          "据守"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.invade",
+      "aliases": {
+        "strong": [
+          "入侵",
+          "侵略"
+        ],
+        "normal": [
+          "侵入",
+          "犯境",
+          "进犯"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.conquer",
+      "aliases": {
+        "strong": [
+          "征服"
+        ],
+        "normal": [
+          "攻克",
+          "拿下",
+          "平定"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.occupy",
+      "aliases": {
+        "strong": [
+          "占领",
+          "占据"
+        ],
+        "normal": [
+          "夺取",
+          "据有"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.liberate",
+      "aliases": {
+        "strong": [
+          "解放",
+          "收复"
+        ],
+        "normal": [
+          "夺回",
+          "光复"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.rebel",
+      "aliases": {
+        "strong": [
+          "起义",
+          "叛乱",
+          "造反"
+        ],
+        "normal": [
+          "反叛",
+          "举兵",
+          "揭竿而起"
+        ],
+        "weak": [
+          "反了"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.formAlliance",
+      "aliases": {
+        "strong": [
+          "结盟",
+          "缔结同盟"
+        ],
+        "normal": [
+          "联盟",
+          "联手",
+          "结为盟友"
+        ],
+        "weak": [
+          "抱团"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.breakAlliance",
+      "aliases": {
+        "strong": [
+          "解除同盟",
+          "撕毁盟约"
+        ],
+        "normal": [
+          "解盟",
+          "破盟"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.establishDiplomacy",
+      "aliases": {
+        "strong": [
+          "建交",
+          "建立外交关系"
+        ],
+        "normal": [
+          "缔结邦交",
+          "互派使节"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.breakDiplomacy",
+      "aliases": {
+        "strong": [
+          "断交",
+          "断绝外交关系"
+        ],
+        "normal": [
+          "中断邦交"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.marry",
+      "aliases": {
+        "strong": [
+          "结婚",
+          "成婚",
+          "成亲"
+        ],
+        "normal": [
+          "婚配",
+          "完婚",
+          "联姻"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.divorce",
+      "aliases": {
+        "strong": [
+          "离婚"
+        ],
+        "normal": [
+          "解除婚姻",
+          "和离",
+          "休妻"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "event.acquire",
+      "aliases": {
+        "strong": [
+          "获得",
+          "取得",
+          "得到"
+        ],
+        "normal": [
+          "赢得",
+          "收获",
+          "入手"
+        ],
+        "weak": [
+          "搞到",
+          "拿到"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.lose",
+      "aliases": {
+        "strong": [
+          "失去",
+          "丢失"
+        ],
+        "normal": [
+          "遗失",
+          "失却"
+        ],
+        "weak": [
+          "丢了"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.buy",
+      "aliases": {
+        "strong": [
+          "购买",
+          "买下"
+        ],
+        "normal": [
+          "购入",
+          "买入"
+        ],
+        "weak": [
+          "买了"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "event.sell",
+      "aliases": {
+        "strong": [
+          "出售",
+          "卖出"
+        ],
+        "normal": [
+          "售出",
+          "卖掉"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

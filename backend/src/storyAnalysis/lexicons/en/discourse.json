@@ -1,0 +1,148 @@
+{
+  "meta": {
+    "locale": "en",
+    "version": "1.0.0",
+    "category": "discourse"
+  },
+
+  "entries": [
+    {
+      "conceptId": "discourse.contrast",
+      "aliases": {
+        "strong": [
+          "however",
+          "but",
+          "nevertheless",
+          "nonetheless"
+        ],
+        "normal": [
+          "yet",
+          "although",
+          "though",
+          "even so"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "discourse.sequence",
+      "aliases": {
+        "strong": [
+          "then",
+          "afterward",
+          "afterwards",
+          "subsequently"
+        ],
+        "normal": [
+          "later",
+          "next",
+          "thereafter"
+        ],
+        "weak": [
+          "after that"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "discourse.before",
+      "aliases": {
+        "strong": [
+          "before",
+          "previously",
+          "prior to that"
+        ],
+        "normal": [
+          "earlier",
+          "at first",
+          "initially",
+          "originally"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "discourse.after",
+      "aliases": {
+        "strong": [
+          "after",
+          "afterward",
+          "afterwards"
+        ],
+        "normal": [
+          "later",
+          "thereafter",
+          "following that"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "discourse.finally",
+      "aliases": {
+        "strong": [
+          "finally",
+          "eventually",
+          "ultimately"
+        ],
+        "normal": [
+          "in the end",
+          "at last"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "discourse.cause",
+      "aliases": {
+        "strong": [
+          "because",
+          "because of",
+          "due to"
+        ],
+        "normal": [
+          "since",
+          "owing to"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "discourse.result",
+      "aliases": {
+        "strong": [
+          "therefore",
+          "thus",
+          "as a result"
+        ],
+        "normal": [
+          "consequently",
+          "hence",
+          "so"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "discourse.condition",
+      "aliases": {
+        "strong": [
+          "if",
+          "provided that"
+        ],
+        "normal": [
+          "assuming",
+          "unless",
+          "once"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

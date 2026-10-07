@@ -1,0 +1,628 @@
+{
+  "meta": {
+    "locale": "en",
+    "version": "1.0.0",
+    "category": "entity-types"
+  },
+
+  "entries": [
+    {
+      "conceptId": "entityType.character",
+      "aliases": {
+        "strong": ["character profile"],
+        "normal": ["character", "person"],
+        "weak": ["individual"]
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.family",
+      "aliases": {
+        "strong": ["family", "house"],
+        "normal": ["lineage", "bloodline"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Family", "House"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.clan",
+      "aliases": {
+        "strong": ["clan"],
+        "normal": ["tribe"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Clan"],
+        "normal": ["Tribe"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.race",
+      "aliases": {
+        "strong": ["race"],
+        "normal": ["people", "ancestry"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.species",
+      "aliases": {
+        "strong": ["species"],
+        "normal": ["lifeform"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.creature",
+      "aliases": {
+        "strong": ["creature"],
+        "normal": ["beast"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.deity",
+      "aliases": {
+        "strong": ["deity"],
+        "normal": ["god", "goddess", "divine being"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.location",
+      "aliases": {
+        "strong": ["location"],
+        "normal": ["place", "geographic location"],
+        "weak": ["area"]
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.country",
+      "aliases": {
+        "strong": ["country", "nation"],
+        "normal": ["state"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Republic", "Federation"],
+        "normal": ["Nation"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.kingdom",
+      "aliases": {
+        "strong": ["kingdom"],
+        "normal": ["realm"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Kingdom"],
+        "normal": ["Realm"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.empire",
+      "aliases": {
+        "strong": ["empire"],
+        "normal": ["imperium"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Empire"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.city",
+      "aliases": {
+        "strong": ["city"],
+        "normal": ["metropolis"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["City"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.town",
+      "aliases": {
+        "strong": ["town"],
+        "normal": ["township"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Town"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.village",
+      "aliases": {
+        "strong": ["village"],
+        "normal": ["hamlet", "settlement"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Village"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.region",
+      "aliases": {
+        "strong": ["region"],
+        "normal": ["territory", "area"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Region"],
+        "normal": ["Territory"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.province",
+      "aliases": {
+        "strong": ["province"],
+        "normal": ["state", "county"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Province"],
+        "normal": ["State", "County"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.continent",
+      "aliases": {
+        "strong": ["continent"],
+        "normal": ["landmass"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Continent"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.planet",
+      "aliases": {
+        "strong": ["planet"],
+        "normal": ["world"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.island",
+      "aliases": {
+        "strong": ["island"],
+        "normal": ["isle"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Island", "Isle"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.mountain",
+      "aliases": {
+        "strong": ["mountain"],
+        "normal": ["mount", "peak"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Mountain", "Mountains"],
+        "normal": ["Peak"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.forest",
+      "aliases": {
+        "strong": ["forest"],
+        "normal": ["woodland", "woods"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Forest"],
+        "normal": ["Woods"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.river",
+      "aliases": {
+        "strong": ["river"],
+        "normal": ["stream"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["River"],
+        "normal": ["Stream"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.lake",
+      "aliases": {
+        "strong": ["lake"],
+        "normal": ["loch"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Lake"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.ocean",
+      "aliases": {
+        "strong": ["ocean"],
+        "normal": ["sea"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Ocean"],
+        "normal": ["Sea", "Bay"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.building",
+      "aliases": {
+        "strong": ["building"],
+        "normal": ["structure", "facility"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [
+          "Palace",
+          "Castle",
+          "Tower",
+          "Temple",
+          "Church",
+          "Academy",
+          "Station",
+          "Base",
+          "Fortress"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.organization",
+      "aliases": {
+        "strong": ["organization", "organisation"],
+        "normal": ["institution", "group"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["Association", "Committee", "Council"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.faction",
+      "aliases": {
+        "strong": ["faction"],
+        "normal": ["side", "bloc"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Faction"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.politicalParty",
+      "aliases": {
+        "strong": ["political party"],
+        "normal": ["party"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Party"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.guild",
+      "aliases": {
+        "strong": ["guild"],
+        "normal": ["association"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Guild"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.corporation",
+      "aliases": {
+        "strong": ["corporation", "company"],
+        "normal": ["business", "enterprise"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Corporation", "Company", "Corp"],
+        "normal": ["Industries", "Group"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.military",
+      "aliases": {
+        "strong": ["military", "armed forces"],
+        "normal": ["army", "navy"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Army", "Fleet"],
+        "normal": ["Forces"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.order",
+      "aliases": {
+        "strong": ["order"],
+        "normal": ["knightly order"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Order"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.church",
+      "aliases": {
+        "strong": ["church"],
+        "normal": ["religious organization"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Church"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.cult",
+      "aliases": {
+        "strong": ["cult"],
+        "normal": ["sect"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Cult"],
+        "normal": ["Sect"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.school",
+      "aliases": {
+        "strong": ["school", "academy"],
+        "normal": ["college", "university"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Academy", "University"],
+        "normal": ["School", "College"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.weapon",
+      "aliases": {
+        "strong": ["weapon"],
+        "normal": ["arms"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [
+          "Sword",
+          "Blade",
+          "Rifle",
+          "Pistol",
+          "Cannon",
+          "Bow"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.vehicle",
+      "aliases": {
+        "strong": ["vehicle"],
+        "normal": ["transport"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["Ship", "Vessel"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.event",
+      "aliases": {
+        "strong": ["historical event"],
+        "normal": ["event"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["Event"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.war",
+      "aliases": {
+        "strong": ["war"],
+        "normal": ["conflict"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["War"],
+        "normal": ["Conflict"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.battle",
+      "aliases": {
+        "strong": ["battle"],
+        "normal": ["engagement"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Battle"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.language",
+      "aliases": {
+        "strong": ["language"],
+        "normal": ["tongue", "dialect"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": ["Language"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.technology",
+      "aliases": {
+        "strong": ["technology"],
+        "normal": ["tech"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": ["Technology"],
+        "normal": [],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "entityType.magic",
+      "aliases": {
+        "strong": ["magic"],
+        "normal": ["arcana", "sorcery"],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    }
+  ]
+}

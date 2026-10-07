@@ -1,0 +1,837 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.0.0",
+    "category": "fields"
+  },
+
+  "entries": [
+    {
+      "conceptId": "field.description",
+      "aliases": {
+        "strong": ["人物简介", "角色简介", "实体简介", "简介"],
+        "normal": ["介绍", "描述", "概述", "简介资料"],
+        "weak": ["说明"]
+      }
+    },
+
+    {
+      "conceptId": "field.summary",
+      "aliases": {
+        "strong": ["摘要", "概要"],
+        "normal": ["概览", "简述", "概括"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.history",
+      "aliases": {
+        "strong": ["历史", "历史沿革"],
+        "normal": ["经历", "发展史", "过往"],
+        "weak": ["往事"]
+      }
+    },
+
+    {
+      "conceptId": "field.background",
+      "aliases": {
+        "strong": ["背景", "人物背景"],
+        "normal": ["身世", "来历", "背景故事"],
+        "weak": ["底细"]
+      }
+    },
+
+    {
+      "conceptId": "field.alias",
+      "aliases": {
+        "strong": ["别名", "又名"],
+        "normal": ["化名", "曾用名", "其他名称"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.nickname",
+      "aliases": {
+        "strong": ["昵称", "绰号"],
+        "normal": ["外号", "诨名", "雅号"],
+        "weak": ["称号"]
+      }
+    },
+
+    {
+      "conceptId": "field.age",
+      "aliases": {
+        "strong": ["年龄", "岁数"],
+        "normal": ["年纪", "年岁", "芳龄"],
+        "weak": ["岁"]
+      }
+    },
+
+    {
+      "conceptId": "field.birthdate",
+      "aliases": {
+        "strong": ["出生日期", "出生时间"],
+        "normal": ["生日", "生辰", "诞辰"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.birthplace",
+      "aliases": {
+        "strong": ["出生地", "出生地点"],
+        "normal": ["籍贯", "出生所在", "生地"],
+        "weak": ["故乡"]
+      }
+    },
+
+    {
+      "conceptId": "field.deathdate",
+      "aliases": {
+        "strong": ["死亡日期", "去世日期"],
+        "normal": ["卒年", "忌日", "逝世时间"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.deathplace",
+      "aliases": {
+        "strong": ["死亡地点", "去世地点"],
+        "normal": ["卒地", "逝世地"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.gender",
+      "aliases": {
+        "strong": ["性别"],
+        "normal": ["生理性别", "性别认同"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.pronouns",
+      "aliases": {
+        "strong": ["代词", "人称代词"],
+        "normal": ["称谓代词"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.race",
+      "aliases": {
+        "strong": ["种族"],
+        "normal": ["族裔", "族群"],
+        "weak": ["族"]
+      }
+    },
+
+    {
+      "conceptId": "field.species",
+      "aliases": {
+        "strong": ["物种"],
+        "normal": ["生物种类", "种属"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.nationality",
+      "aliases": {
+        "strong": ["国籍"],
+        "normal": ["所属国家", "国家身份"],
+        "weak": ["籍"]
+      }
+    },
+
+    {
+      "conceptId": "field.occupation",
+      "aliases": {
+        "strong": ["职业", "工作职业"],
+        "normal": ["工作", "职务", "职业身份", "行当", "营生"],
+        "weak": ["身份"]
+      }
+    },
+
+    {
+      "conceptId": "field.title",
+      "aliases": {
+        "strong": ["头衔", "称号"],
+        "normal": ["爵位", "尊号", "封号", "官职"],
+        "weak": ["名号"]
+      }
+    },
+
+    {
+      "conceptId": "field.rank",
+      "aliases": {
+        "strong": ["等级", "军衔", "阶级"],
+        "normal": ["级别", "阶位", "品级", "官阶"],
+        "weak": ["阶"]
+      }
+    },
+
+    {
+      "conceptId": "field.role",
+      "aliases": {
+        "strong": ["身份角色", "职责"],
+        "normal": ["角色定位", "职位角色", "作用"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.affiliation",
+      "aliases": {
+        "strong": ["所属组织", "隶属组织", "所属势力"],
+        "normal": ["阵营", "归属", "隶属", "所属"],
+        "weak": ["势力"]
+      }
+    },
+
+    {
+      "conceptId": "field.residence",
+      "aliases": {
+        "strong": ["居住地", "住所"],
+        "normal": ["住址", "定居地", "居所", "寓所"],
+        "weak": ["住处"]
+      }
+    },
+
+    {
+      "conceptId": "field.currentLocation",
+      "aliases": {
+        "strong": ["当前位置", "当前地点"],
+        "normal": ["现所在地", "目前位置"],
+        "weak": ["所在"]
+      }
+    },
+
+    {
+      "conceptId": "field.hometown",
+      "aliases": {
+        "strong": ["故乡", "家乡"],
+        "normal": ["老家", "故里", "乡里"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.height",
+      "aliases": {
+        "strong": ["身高"],
+        "normal": ["高度"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.weight",
+      "aliases": {
+        "strong": ["体重"],
+        "normal": ["重量"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.eyeColor",
+      "aliases": {
+        "strong": ["眼睛颜色", "瞳色"],
+        "normal": ["眼色", "虹膜颜色"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.hairColor",
+      "aliases": {
+        "strong": ["头发颜色", "发色"],
+        "normal": ["毛发颜色"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.appearance",
+      "aliases": {
+        "strong": ["外貌", "外观"],
+        "normal": ["相貌", "容貌", "长相", "外形"],
+        "weak": ["样貌"]
+      }
+    },
+
+    {
+      "conceptId": "field.personality",
+      "aliases": {
+        "strong": ["性格", "人格"],
+        "normal": ["个性", "脾气", "性情"],
+        "weak": ["脾性"]
+      }
+    },
+
+    {
+      "conceptId": "field.goal",
+      "aliases": {
+        "strong": ["目标"],
+        "normal": ["目的", "追求", "理想"],
+        "weak": ["愿望"]
+      }
+    },
+
+    {
+      "conceptId": "field.motivation",
+      "aliases": {
+        "strong": ["动机"],
+        "normal": ["动力", "行动原因", "驱动力"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.likes",
+      "aliases": {
+        "strong": ["喜好", "喜欢"],
+        "normal": ["爱好", "兴趣"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.dislikes",
+      "aliases": {
+        "strong": ["厌恶", "讨厌"],
+        "normal": ["不喜欢", "反感"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.fears",
+      "aliases": {
+        "strong": ["恐惧", "害怕"],
+        "normal": ["惧怕", "畏惧"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.alive",
+      "aliases": {
+        "strong": ["是否存活", "存活状态"],
+        "normal": ["生死状态", "在世"],
+        "weak": ["存活"]
+      }
+    },
+
+    {
+      "conceptId": "field.status",
+      "aliases": {
+        "strong": ["状态"],
+        "normal": ["现状", "当前状态"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.locationType",
+      "aliases": {
+        "strong": ["地点类型"],
+        "normal": ["地区类型", "地理类型"],
+        "weak": ["类型"]
+      }
+    },
+
+    {
+      "conceptId": "field.parentLocation",
+      "aliases": {
+        "strong": ["上级地点", "所属地区"],
+        "normal": ["所属地点", "所属区域", "行政区划"],
+        "weak": ["位于"]
+      }
+    },
+
+    {
+      "conceptId": "field.capital",
+      "aliases": {
+        "strong": ["首都", "首府"],
+        "normal": ["都城", "国都", "治所"],
+        "weak": ["都"]
+      }
+    },
+
+    {
+      "conceptId": "field.population",
+      "aliases": {
+        "strong": ["人口", "人口数量"],
+        "normal": ["人口数", "居民数量"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.area",
+      "aliases": {
+        "strong": ["面积"],
+        "normal": ["占地面积", "疆域面积"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.elevation",
+      "aliases": {
+        "strong": ["海拔", "海拔高度"],
+        "normal": ["高程"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.climate",
+      "aliases": {
+        "strong": ["气候"],
+        "normal": ["气候类型", "气候条件"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.terrain",
+      "aliases": {
+        "strong": ["地形"],
+        "normal": ["地貌", "地势"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.biome",
+      "aliases": {
+        "strong": ["生物群系"],
+        "normal": ["生态区", "生态类型"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.environment",
+      "aliases": {
+        "strong": ["环境"],
+        "normal": ["自然环境", "生态环境"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.government",
+      "aliases": {
+        "strong": ["政府", "政权"],
+        "normal": ["统治机构"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.ruler",
+      "aliases": {
+        "strong": ["统治者"],
+        "normal": ["君主", "领主", "执政者", "掌权者"],
+        "weak": ["主君"]
+      }
+    },
+
+    {
+      "conceptId": "field.owner",
+      "aliases": {
+        "strong": ["所有者", "拥有者"],
+        "normal": ["主人", "持有人"],
+        "weak": ["物主"]
+      }
+    },
+
+    {
+      "conceptId": "field.controller",
+      "aliases": {
+        "strong": ["控制者"],
+        "normal": ["实际控制者", "掌控者"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.coordinates",
+      "aliases": {
+        "strong": ["坐标"],
+        "normal": ["地理坐标", "位置坐标"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.organizationType",
+      "aliases": {
+        "strong": ["组织类型"],
+        "normal": ["组织性质", "机构类型"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.founder",
+      "aliases": {
+        "strong": ["创始人", "创建者"],
+        "normal": ["建立者", "创立者", "开山祖师"],
+        "weak": ["始祖"]
+      }
+    },
+
+    {
+      "conceptId": "field.leader",
+      "aliases": {
+        "strong": ["领导人", "领导者"],
+        "normal": ["领袖", "首领", "负责人", "掌门", "宗主", "会长"],
+        "weak": ["头领"]
+      }
+    },
+
+    {
+      "conceptId": "field.headquarters",
+      "aliases": {
+        "strong": ["总部", "总部所在地"],
+        "normal": ["本部", "总坛", "总舵", "山门"],
+        "weak": ["驻地"]
+      }
+    },
+
+    {
+      "conceptId": "field.memberCount",
+      "aliases": {
+        "strong": ["成员数量", "成员人数"],
+        "normal": ["会员数量", "人数", "规模"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.ideology",
+      "aliases": {
+        "strong": ["意识形态"],
+        "normal": ["理念", "思想", "思想体系"],
+        "weak": ["主张"]
+      }
+    },
+
+    {
+      "conceptId": "field.mission",
+      "aliases": {
+        "strong": ["使命"],
+        "normal": ["组织使命", "宗旨", "任务"],
+        "weak": ["目的"]
+      }
+    },
+
+    {
+      "conceptId": "field.motto",
+      "aliases": {
+        "strong": ["格言", "座右铭"],
+        "normal": ["口号", "箴言"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.symbol",
+      "aliases": {
+        "strong": ["象征", "标志"],
+        "normal": ["徽记", "徽章", "图腾"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.parentOrganization",
+      "aliases": {
+        "strong": ["上级组织", "母组织"],
+        "normal": ["所属机构", "所属组织"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.territory",
+      "aliases": {
+        "strong": ["领土", "领地"],
+        "normal": ["辖区", "势力范围", "控制区"],
+        "weak": ["地盘"]
+      }
+    },
+
+    {
+      "conceptId": "field.itemType",
+      "aliases": {
+        "strong": ["物品类型"],
+        "normal": ["道具类型", "物品类别"],
+        "weak": ["类别"]
+      }
+    },
+
+    {
+      "conceptId": "field.creator",
+      "aliases": {
+        "strong": ["创造者", "制作者"],
+        "normal": ["作者", "锻造者", "铸造者", "设计者"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.manufacturer",
+      "aliases": {
+        "strong": ["制造商", "制造者"],
+        "normal": ["生产商", "生产者"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.origin",
+      "aliases": {
+        "strong": ["来源地", "起源地"],
+        "normal": ["来源", "出处", "产地"],
+        "weak": ["来历"]
+      }
+    },
+
+    {
+      "conceptId": "field.material",
+      "aliases": {
+        "strong": ["材料", "材质"],
+        "normal": ["制作材料", "构成材料"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.rarity",
+      "aliases": {
+        "strong": ["稀有度"],
+        "normal": ["稀有等级", "罕见程度"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.value",
+      "aliases": {
+        "strong": ["价值"],
+        "normal": ["估值"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.price",
+      "aliases": {
+        "strong": ["价格"],
+        "normal": ["售价", "价钱"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.power",
+      "aliases": {
+        "strong": ["力量", "威力"],
+        "normal": ["功率", "强度"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.effect",
+      "aliases": {
+        "strong": ["效果"],
+        "normal": ["作用", "特殊效果"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.requirement",
+      "aliases": {
+        "strong": ["使用条件", "需求条件"],
+        "normal": ["要求", "限制条件"],
+        "weak": ["条件"]
+      }
+    },
+
+    {
+      "conceptId": "field.date",
+      "aliases": {
+        "strong": ["日期"],
+        "normal": ["时间", "发生日期"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.startDate",
+      "aliases": {
+        "strong": ["开始日期", "起始日期"],
+        "normal": ["开始时间", "起始时间"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.endDate",
+      "aliases": {
+        "strong": ["结束日期", "终止日期"],
+        "normal": ["结束时间", "终止时间"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.foundedDate",
+      "aliases": {
+        "strong": ["成立日期", "建立日期"],
+        "normal": ["创建时间", "创立时间", "建国时间"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.dissolvedDate",
+      "aliases": {
+        "strong": ["解散日期"],
+        "normal": ["解体时间", "废止时间"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.destroyedDate",
+      "aliases": {
+        "strong": ["毁灭日期", "摧毁日期"],
+        "normal": ["灭亡时间", "覆灭时间"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.eventType",
+      "aliases": {
+        "strong": ["事件类型"],
+        "normal": ["事件类别"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.cause",
+      "aliases": {
+        "strong": ["原因", "起因"],
+        "normal": ["缘由", "诱因", "导火索"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.result",
+      "aliases": {
+        "strong": ["结果", "后果"],
+        "normal": ["结局", "影响"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.winner",
+      "aliases": {
+        "strong": ["胜者", "胜利方"],
+        "normal": ["获胜者", "赢家"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.loser",
+      "aliases": {
+        "strong": ["败者", "战败方"],
+        "normal": ["失败者", "输家"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.casualties",
+      "aliases": {
+        "strong": ["伤亡人数", "伤亡"],
+        "normal": ["死伤", "损失人数"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.language",
+      "aliases": {
+        "strong": ["语言"],
+        "normal": ["官方语言", "通用语言"],
+        "weak": ["语种"]
+      }
+    },
+
+    {
+      "conceptId": "field.currency",
+      "aliases": {
+        "strong": ["货币"],
+        "normal": ["通货", "法定货币", "钱币"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.religion",
+      "aliases": {
+        "strong": ["宗教", "信仰"],
+        "normal": ["主要宗教", "宗教信仰"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.culture",
+      "aliases": {
+        "strong": ["文化"],
+        "normal": ["主要文化", "文化背景"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.governmentType",
+      "aliases": {
+        "strong": ["政体", "政府类型"],
+        "normal": ["政治体制", "统治形式"],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.headOfState",
+      "aliases": {
+        "strong": ["国家元首"],
+        "normal": ["元首", "最高统治者"],
+        "weak": []
+      }
+    }
+  ]
+}
