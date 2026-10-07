@@ -8,7 +8,8 @@ const {
 );
 
 const {
-  loadCategory,
+  loadMatchableCategory,
+  loadSupportCategory,
   loadLocale,
   clearLexiconCache,
 } = require(
@@ -28,19 +29,154 @@ const {
   "./core/textNormalizer"
 );
 
+const {
+  discoverUnknownEntities,
+} = require(
+  "./core/unknownEntityDiscovery"
+);
 
-function analyzeLexicon(
-  text,
-  locale = "zh-CN"
+const {
+  mergeLexicons,
+} = require(
+  "./core/lexiconMerger"
+);
+
+const {
+  loadPackLocale,
+  clearPackCache,
+} = require(
+  "./packs/packLoader"
+);
+
+const {
+  PACK_REGISTRY,
+  getPackDefinition,
+  hasPack,
+  getAllPacks,
+} = require(
+  "./packs/packRegistry"
+);
+
+
+// ======================================================
+// Lexicon Composition
+// ======================================================
+
+function buildLexicon(
+  locale = "zh-CN",
+  options = {}
 ) {
-  const lexicon =
+  const enabledPacks =
+    Array.isArray(
+      options.enabledPacks
+    )
+      ? options.enabledPacks
+      : [];
+
+
+  const nsfwEnabled =
+    options.nsfwEnabled ===
+    true;
+
+
+  let lexicon =
     loadLocale(
       locale
     );
 
 
+  lexicon = {
+    ...lexicon,
+
+    enabledPacks: [],
+
+    nsfwEnabled,
+  };
+
+
+  for (
+    const packId of
+    enabledPacks
+  ) {
+    if (
+      !hasPack(
+        packId
+      )
+    ) {
+      continue;
+    }
+
+
+    const packLexicon =
+      loadPackLocale(
+        packId,
+        locale,
+        {
+          nsfwEnabled,
+        }
+      );
+
+
+    lexicon =
+      mergeLexicons(
+        lexicon,
+        packLexicon
+      );
+  }
+
+
+  lexicon.nsfwEnabled =
+    nsfwEnabled;
+
+
+  return lexicon;
+}
+
+
+// ======================================================
+// Analysis
+// ======================================================
+
+function analyzeLexicon(
+  text,
+  locale = "zh-CN",
+  options = {}
+) {
+  const lexicon =
+    buildLexicon(
+      locale,
+      options
+    );
+
+
+  const rawMatches =
+    matchLexicon({
+      text,
+      lexicon,
+    });
+
+
+  const matches =
+    rawMatches.map(
+      (match) => ({
+        ...match,
+
+        concept:
+          getConcept(
+            match.conceptId
+          ),
+      })
+    );
+
+
   return {
     locale,
+
+    enabledPacks:
+      lexicon.enabledPacks,
+
+    nsfwEnabled:
+      lexicon.nsfwEnabled,
 
     normalizedText:
       normalizeText(
@@ -48,14 +184,50 @@ function analyzeLexicon(
         locale
       ),
 
-    matches:
-      matchLexicon({
+    matches,
+
+    lexicon,
+  };
+}
+
+
+function analyzeUnknownEntities(
+  text,
+  locale = "zh-CN",
+  options = {}
+) {
+  const lexiconAnalysis =
+    analyzeLexicon(
+      text,
+      locale,
+      options
+    );
+
+
+  return {
+    ...lexiconAnalysis,
+
+    unknownEntities:
+      discoverUnknownEntities({
         text,
-        lexicon,
+
+        lexiconAnalysis: {
+          ...lexiconAnalysis,
+
+          conceptResolver:
+            getConcept,
+        },
+
+        lexicon:
+          lexiconAnalysis.lexicon,
       }),
   };
 }
 
+
+// ======================================================
+// Exports
+// ======================================================
 
 module.exports = {
   CONCEPTS,
@@ -64,7 +236,8 @@ module.exports = {
   hasConcept,
   getConceptsByKind,
 
-  loadCategory,
+  loadMatchableCategory,
+  loadSupportCategory,
   loadLocale,
   clearLexiconCache,
 
@@ -73,5 +246,19 @@ module.exports = {
   normalizeText,
   normalizeForComparison,
 
+  mergeLexicons,
+
+  PACK_REGISTRY,
+  getPackDefinition,
+  hasPack,
+  getAllPacks,
+
+  loadPackLocale,
+  clearPackCache,
+
+  buildLexicon,
+
   analyzeLexicon,
+  analyzeUnknownEntities,
+  discoverUnknownEntities,
 };

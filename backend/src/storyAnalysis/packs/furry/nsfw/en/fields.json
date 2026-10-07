@@ -1,0 +1,89 @@
+{
+  "meta": {
+    "locale": "en",
+    "version": "1.0.0",
+    "pack": "furry",
+    "layer": "nsfw",
+    "category": "fields"
+  },
+  "entries": [
+    {
+      "conceptId": "field.sexualAnatomy",
+      "aliases": {
+        "strong": [
+          "genitals",
+          "genitalia",
+          "sexual anatomy",
+          "reproductive anatomy"
+        ],
+        "normal": [
+          "penis",
+          "vulva",
+          "vagina",
+          "clitoris",
+          "testicles",
+          "scrotum"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.reproductiveAnatomy",
+      "aliases": {
+        "strong": [
+          "cloaca"
+        ],
+        "normal": [
+          "genital slit",
+          "reproductive slit"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.matingTrait",
+      "aliases": {
+        "strong": [
+          "canine knot",
+          "bulbus glandis"
+        ],
+        "normal": [
+          "knot",
+          "mating tie"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.heatCycle",
+      "aliases": {
+        "strong": [
+          "heat cycle",
+          "estrous cycle",
+          "oestrous cycle"
+        ],
+        "normal": [
+          "in heat",
+          "rut",
+          "heat"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.adultContentTags",
+      "aliases": {
+        "strong": [
+          "NSFW",
+          "R18",
+          "adult content"
+        ],
+        "normal": [
+          "yiff",
+          "yiffy"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

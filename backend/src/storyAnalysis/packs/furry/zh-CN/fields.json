@@ -1,0 +1,488 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.1.0",
+    "pack": "furry",
+    "category": "fields"
+  },
+  "entries": [
+    {
+      "conceptId": "field.species",
+      "aliases": {
+        "strong": [
+          "兽种",
+          "物种",
+          "种属",
+          "原型动物"
+        ],
+        "normal": [
+          "狼",
+          "犬",
+          "狗",
+          "狐狸",
+          "赤狐",
+          "北极狐",
+          "耳廓狐",
+          "郊狼",
+          "豺",
+          "猫",
+          "虎",
+          "狮",
+          "豹",
+          "雪豹",
+          "猞猁",
+          "狞猫",
+          "熊",
+          "熊猫",
+          "兔",
+          "兔子",
+          "鹿",
+          "驯鹿",
+          "麋鹿",
+          "羊",
+          "山羊",
+          "牛",
+          "马",
+          "斑马",
+          "龙",
+          "东方龙",
+          "西方龙",
+          "龙兽",
+          "鸟",
+          "鹰",
+          "乌鸦",
+          "凤凰",
+          "蝙蝠",
+          "蜥蜴",
+          "鳄鱼",
+          "蛇",
+          "鲨鱼",
+          "鲸",
+          "虎鲸",
+          "海豚",
+          "水獭",
+          "雪貂",
+          "浣熊",
+          "小熊猫",
+          "袋鼠"
+        ],
+        "weak": [
+          "canine",
+          "K9",
+          "feline",
+          "avian",
+          "aquatic",
+          "big cat",
+          "coyote",
+          "yote",
+          "dragon",
+          "hybrid"
+        ]
+      }
+    },
+    {
+      "conceptId": "field.bodyForm",
+      "aliases": {
+        "strong": [
+          "兽化程度",
+          "身体形态",
+          "体态类型"
+        ],
+        "normal": [
+          "拟人型",
+          "拟人兽",
+          "兽型",
+          "四足型",
+          "四足",
+          "anthro",
+          "feral",
+          "kemonomimi",
+          "taur"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.bodyCovering",
+      "aliases": {
+        "strong": [
+          "体表覆盖",
+          "身体覆盖"
+        ],
+        "normal": [
+          "毛发",
+          "皮毛",
+          "鳞片",
+          "羽毛",
+          "羽翼",
+          "裸皮",
+          "皮肤",
+          "甲壳",
+          "fur",
+          "scales",
+          "feathers"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.primaryColor",
+      "aliases": {
+        "strong": [
+          "主色",
+          "主色调",
+          "主要颜色"
+        ],
+        "normal": [
+          "主体色",
+          "基础色"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.secondaryColor",
+      "aliases": {
+        "strong": [
+          "副色",
+          "辅助色"
+        ],
+        "normal": [
+          "辅色",
+          "次色",
+          "次要颜色"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.accentColor",
+      "aliases": {
+        "strong": [
+          "点缀色"
+        ],
+        "normal": [
+          "强调色",
+          "装饰色"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.colorPalette",
+      "aliases": {
+        "strong": [
+          "配色",
+          "配色方案",
+          "色板"
+        ],
+        "normal": [
+          "色卡",
+          "颜色方案",
+          "palette",
+          "color palette",
+          "colour palette"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.markings",
+      "aliases": {
+        "strong": [
+          "花纹",
+          "斑纹",
+          "纹路",
+          "纹样"
+        ],
+        "normal": [
+          "条纹",
+          "斑点",
+          "色块",
+          "面纹",
+          "眼纹",
+          "背纹",
+          "腹纹",
+          "胸口白毛",
+          "白肚皮",
+          "袜套",
+          "渐变",
+          "markings",
+          "pattern",
+          "stripes",
+          "spots"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.furColor",
+      "aliases": {
+        "strong": [
+          "毛色",
+          "毛发颜色",
+          "皮毛颜色"
+        ],
+        "normal": [
+          "体毛颜色",
+          "coat color",
+          "fur color"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.furLength",
+      "aliases": {
+        "strong": [
+          "毛长",
+          "毛发长度"
+        ],
+        "normal": [
+          "长毛",
+          "短毛",
+          "中长毛",
+          "蓬松毛",
+          "炸毛",
+          "fluffy",
+          "long fur",
+          "short fur"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.eyeColor",
+      "aliases": {
+        "strong": [
+          "眼睛颜色",
+          "瞳色",
+          "虹膜颜色"
+        ],
+        "normal": [
+          "异色瞳",
+          "双色瞳",
+          "异瞳"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.earType",
+      "aliases": {
+        "strong": [
+          "耳型",
+          "耳朵类型"
+        ],
+        "normal": [
+          "立耳",
+          "垂耳",
+          "折耳",
+          "尖耳",
+          "圆耳",
+          "大耳",
+          "长耳",
+          "耳尖"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.hornType",
+      "aliases": {
+        "strong": [
+          "角型",
+          "角的类型"
+        ],
+        "normal": [
+          "龙角",
+          "鹿角",
+          "羊角",
+          "兽角",
+          "独角",
+          "双角",
+          "多角",
+          "antlers",
+          "horns"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.tailType",
+      "aliases": {
+        "strong": [
+          "尾型",
+          "尾巴类型"
+        ],
+        "normal": [
+          "长尾",
+          "短尾",
+          "卷尾",
+          "蓬松尾",
+          "双尾",
+          "多尾",
+          "尾尖",
+          "tail tip"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.wingType",
+      "aliases": {
+        "strong": [
+          "翼型",
+          "翅膀类型"
+        ],
+        "normal": [
+          "羽翼",
+          "鸟翼",
+          "龙翼",
+          "蝠翼",
+          "机械翼",
+          "翼膜"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.legType",
+      "aliases": {
+        "strong": [
+          "腿型",
+          "足型"
+        ],
+        "normal": [
+          "趾行",
+          "跖行",
+          "蹄行",
+          "曲腿",
+          "直腿",
+          "兽腿",
+          "digitigrade",
+          "digi",
+          "plantigrade",
+          "unguligrade"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.pawPadColor",
+      "aliases": {
+        "strong": [
+          "肉垫颜色",
+          "肉球颜色",
+          "掌垫颜色"
+        ],
+        "normal": [
+          "肉垫",
+          "肉球",
+          "掌垫",
+          "paw pads",
+          "beans"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.accessories",
+      "aliases": {
+        "strong": [
+          "配饰",
+          "饰品",
+          "随身配件"
+        ],
+        "normal": [
+          "项圈",
+          "铃铛",
+          "耳环",
+          "耳钉",
+          "眼镜",
+          "护目镜",
+          "挂件",
+          "围巾",
+          "颈环",
+          "collar"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.clothing",
+      "aliases": {
+        "strong": [
+          "服装",
+          "服饰",
+          "衣着",
+          "穿着"
+        ],
+        "normal": [
+          "衣服",
+          "装束",
+          "制服",
+          "外套",
+          "裤子",
+          "鞋子",
+          "outfit"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.itemType",
+      "aliases": {
+        "strong": [
+          "兽装类型",
+          "兽装样式"
+        ],
+        "normal": [
+          "仅头",
+          "仅头部",
+          "小半套",
+          "微半套",
+          "半套",
+          "标准半套",
+          "大半套",
+          "全半套",
+          "完整半套",
+          "全套",
+          "四足兽装",
+          "fullsuit",
+          "partial",
+          "mini partial",
+          "lite partial",
+          "heavy partial",
+          "deluxe partial",
+          "quad suit",
+          "quadsuit"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.appearance",
+      "aliases": {
+        "strong": [
+          "兽装风格",
+          "制作风格"
+        ],
+        "normal": [
+          "日系",
+          "萌系",
+          "Kemono",
+          "Kig",
+          "美系卡通",
+          "Toony",
+          "写实",
+          "Realistic",
+          "半写实",
+          "Semi-realistic",
+          "混合风格"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

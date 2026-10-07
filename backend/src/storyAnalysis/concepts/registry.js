@@ -122,6 +122,12 @@ const CONCEPTS = {
     icon: "🏙️",
   },
 
+  "entityType.port": {
+    kind: "entity-type",
+    parent: "entityType.location",
+    icon: "⚓",
+  },
+
   "entityType.town": {
     kind: "entity-type",
     parent: "entityType.location",
@@ -731,7 +737,130 @@ const CONCEPTS = {
     valueType: "boolean",
   },
 
+  // ====================================================
+  // Fields - Character Appearance / Creature Anatomy
+  // ====================================================
 
+  "field.bodyForm": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.bodyCovering": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.primaryColor": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.secondaryColor": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.accentColor": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.colorPalette": {
+    kind: "field",
+    valueType: "long-text",
+  },
+
+  "field.markings": {
+    kind: "field",
+    valueType: "long-text",
+  },
+
+  "field.furColor": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.furLength": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.earType": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.hornType": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.tailType": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.wingType": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.legType": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.pawPadColor": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.accessories": {
+    kind: "field",
+    valueType: "long-text",
+  },
+
+  "field.clothing": {
+    kind: "field",
+    valueType: "long-text",
+  },
+
+
+  // ====================================================
+  // Fields - Optional Adult / Reproductive Anatomy
+  // ====================================================
+
+  "field.sexualAnatomy": {
+    kind: "field",
+    valueType: "long-text",
+    adult: true,
+  },
+
+  "field.reproductiveAnatomy": {
+    kind: "field",
+    valueType: "long-text",
+    adult: true,
+  },
+
+  "field.matingTrait": {
+    kind: "field",
+    valueType: "long-text",
+    adult: true,
+  },
+
+  "field.heatCycle": {
+    kind: "field",
+    valueType: "text",
+    adult: true,
+  },
+
+  "field.adultContentTags": {
+    kind: "field",
+    valueType: "long-text",
+    adult: true,
+  },
+  
   // ====================================================
   // Fields - Location
   // ====================================================

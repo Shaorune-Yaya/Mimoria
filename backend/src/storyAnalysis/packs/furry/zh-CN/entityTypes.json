@@ -1,0 +1,115 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.1.0",
+    "pack": "furry",
+    "category": "entity-types"
+  },
+  "entries": [
+    {
+      "conceptId": "entityType.character",
+      "aliases": {
+        "strong": [
+          "兽设",
+          "兽设角色",
+          "Fursona",
+          "fursona"
+        ],
+        "normal": [
+          "自设",
+          "主设",
+          "副设",
+          "设子",
+          "OC",
+          "原创角色",
+          "sona"
+        ],
+        "weak": [
+          "毛毛"
+        ]
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.creature",
+      "aliases": {
+        "strong": [
+          "拟人动物",
+          "拟人兽"
+        ],
+        "normal": [
+          "兽人",
+          "福瑞",
+          "Furry",
+          "furry",
+          "anthro",
+          "anthropomorphic"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.species",
+      "aliases": {
+        "strong": [
+          "兽种",
+          "原创物种",
+          "自创物种",
+          "original species"
+        ],
+        "normal": [
+          "物种",
+          "种族设定",
+          "混种",
+          "混合种",
+          "hybrid",
+          "open species",
+          "closed species"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.item",
+      "aliases": {
+        "strong": [
+          "兽装",
+          "Fursuit",
+          "fursuit"
+        ],
+        "normal": [
+          "毛装",
+          "毛毛服",
+          "兽头",
+          "头壳",
+          "手爪",
+          "脚爪",
+          "袖套",
+          "尾巴道具",
+          "fullsuit",
+          "partial"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    }
+  ]
+}

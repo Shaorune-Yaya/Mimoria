@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.1.0",
+    "pack": "furry",
+    "category": "generic-terms"
+  },
+  "genericPeople": [
+    "这只兽",
+    "那只兽",
+    "这只毛",
+    "那只毛",
+    "这个兽设",
+    "那个兽设",
+    "这个OC",
+    "那个OC",
+    "本设",
+    "这个角色",
+    "那个角色"
+  ],
+  "genericObjects": [
+    "这套兽装",
+    "那套兽装",
+    "这套毛",
+    "那个兽头",
+    "这个兽头",
+    "这个尾巴",
+    "那个尾巴"
+  ],
+  "genericLocations": [],
+  "genericOrganizations": [],
+  "stopFragments": [
+    "兽",
+    "毛",
+    "尾",
+    "耳",
+    "爪",
+    "角",
+    "翼"
+  ]
+}

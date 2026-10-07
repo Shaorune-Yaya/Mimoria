@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.1.0",
+    "pack": "furry",
+    "category": "titles"
+  },
+  "entries": [
+    {
+      "conceptId": "role.occupation",
+      "aliases": {
+        "strong": [
+          "兽装师",
+          "装师",
+          "兽装制作师",
+          "兽装制作者",
+          "Fursuit Maker",
+          "fursuit maker",
+          "兽设画师",
+          "设定画师"
+        ],
+        "normal": [
+          "画师",
+          "建模师",
+          "摄影师",
+          "角色设计师",
+          "character designer",
+          "furry artist"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

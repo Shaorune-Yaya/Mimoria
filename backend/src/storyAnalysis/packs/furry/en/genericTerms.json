@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "locale": "en",
+    "version": "1.1.0",
+    "pack": "furry",
+    "category": "generic-terms"
+  },
+  "genericPeople": [
+    "this furry",
+    "that furry",
+    "this fursona",
+    "that fursona",
+    "this character",
+    "that character",
+    "this sona"
+  ],
+  "genericObjects": [
+    "this fursuit",
+    "that fursuit",
+    "the suit",
+    "the head",
+    "the paws",
+    "the tail"
+  ],
+  "genericLocations": [],
+  "genericOrganizations": [],
+  "stopFragments": [
+    "fur",
+    "paw",
+    "tail",
+    "ear",
+    "horn",
+    "wing"
+  ]
+}

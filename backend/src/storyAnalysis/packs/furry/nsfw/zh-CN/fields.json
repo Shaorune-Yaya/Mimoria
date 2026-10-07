@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.0.0",
+    "pack": "furry",
+    "layer": "nsfw",
+    "category": "fields"
+  },
+  "entries": [
+    {
+      "conceptId": "field.sexualAnatomy",
+      "aliases": {
+        "strong": [
+          "生殖器",
+          "性器官",
+          "生殖器官"
+        ],
+        "normal": [
+          "阴茎",
+          "阴蒂",
+          "外阴",
+          "阴道",
+          "睾丸",
+          "阴囊"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.reproductiveAnatomy",
+      "aliases": {
+        "strong": [
+          "泄殖腔",
+          "龙缝"
+        ],
+        "normal": [
+          "生殖缝",
+          "生殖裂缝",
+          "cloaca"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.matingTrait",
+      "aliases": {
+        "strong": [
+          "狗结",
+          "犬结",
+          "canine knot"
+        ],
+        "normal": [
+          "结",
+          "knot",
+          "bulbus glandis"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.heatCycle",
+      "aliases": {
+        "strong": [
+          "发情期",
+          "发情周期"
+        ],
+        "normal": [
+          "发情",
+          "热期",
+          "rut",
+          "heat"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.adultContentTags",
+      "aliases": {
+        "strong": [
+          "R18",
+          "NSFW",
+          "成人向"
+        ],
+        "normal": [
+          "yiff",
+          "兽涩",
+          "兽色",
+          "成人兽图"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

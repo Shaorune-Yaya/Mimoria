@@ -1,0 +1,364 @@
+{
+  "meta": {
+    "locale": "en",
+    "version": "1.1.0",
+    "pack": "furry",
+    "category": "fields"
+  },
+  "entries": [
+    {
+      "conceptId": "field.species",
+      "aliases": {
+        "strong": [
+          "species",
+          "base species"
+        ],
+        "normal": [
+          "wolf",
+          "canine",
+          "K9",
+          "fox",
+          "coyote",
+          "yote",
+          "dog",
+          "cat",
+          "feline",
+          "tiger",
+          "lion",
+          "leopard",
+          "snow leopard",
+          "lynx",
+          "bear",
+          "rabbit",
+          "deer",
+          "reindeer",
+          "goat",
+          "sheep",
+          "horse",
+          "dragon",
+          "avian",
+          "bird",
+          "eagle",
+          "crow",
+          "bat",
+          "reptile",
+          "lizard",
+          "snake",
+          "shark",
+          "whale",
+          "orca",
+          "dolphin",
+          "otter",
+          "ferret",
+          "raccoon",
+          "red panda",
+          "hybrid",
+          "aquatic",
+          "big cat"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.bodyForm",
+      "aliases": {
+        "strong": [
+          "body form",
+          "body type"
+        ],
+        "normal": [
+          "anthro",
+          "anthropomorphic",
+          "feral",
+          "kemonomimi",
+          "taur"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.bodyCovering",
+      "aliases": {
+        "strong": [
+          "body covering"
+        ],
+        "normal": [
+          "fur",
+          "coat",
+          "scales",
+          "feathers",
+          "skin",
+          "shell"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.primaryColor",
+      "aliases": {
+        "strong": [
+          "primary color",
+          "primary colour"
+        ],
+        "normal": [
+          "main color",
+          "main colour"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.secondaryColor",
+      "aliases": {
+        "strong": [
+          "secondary color",
+          "secondary colour"
+        ],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.accentColor",
+      "aliases": {
+        "strong": [
+          "accent color",
+          "accent colour"
+        ],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.colorPalette",
+      "aliases": {
+        "strong": [
+          "color palette",
+          "colour palette"
+        ],
+        "normal": [
+          "color scheme",
+          "colour scheme",
+          "palette"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.markings",
+      "aliases": {
+        "strong": [
+          "markings"
+        ],
+        "normal": [
+          "pattern",
+          "patterns",
+          "stripes",
+          "spots",
+          "patches",
+          "gradient",
+          "facial markings",
+          "belly marking",
+          "chest marking"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.furColor",
+      "aliases": {
+        "strong": [
+          "fur color",
+          "fur colour",
+          "coat color",
+          "coat colour"
+        ],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.furLength",
+      "aliases": {
+        "strong": [
+          "fur length",
+          "coat length"
+        ],
+        "normal": [
+          "long fur",
+          "short fur",
+          "fluffy"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.earType",
+      "aliases": {
+        "strong": [
+          "ear type"
+        ],
+        "normal": [
+          "upright ears",
+          "floppy ears",
+          "folded ears",
+          "pointed ears",
+          "round ears"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.hornType",
+      "aliases": {
+        "strong": [
+          "horn type"
+        ],
+        "normal": [
+          "horns",
+          "antlers",
+          "single horn",
+          "double horns"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.tailType",
+      "aliases": {
+        "strong": [
+          "tail type"
+        ],
+        "normal": [
+          "long tail",
+          "short tail",
+          "curled tail",
+          "fluffy tail",
+          "double tail",
+          "multiple tails",
+          "tail tip"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.wingType",
+      "aliases": {
+        "strong": [
+          "wing type"
+        ],
+        "normal": [
+          "wings",
+          "feathered wings",
+          "bat wings",
+          "dragon wings",
+          "membrane wings"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.legType",
+      "aliases": {
+        "strong": [
+          "leg type",
+          "stance type"
+        ],
+        "normal": [
+          "digitigrade",
+          "digi",
+          "plantigrade",
+          "unguligrade"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.pawPadColor",
+      "aliases": {
+        "strong": [
+          "paw pad color",
+          "paw pad colour"
+        ],
+        "normal": [
+          "paw pads",
+          "pads",
+          "beans"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.accessories",
+      "aliases": {
+        "strong": [
+          "accessories"
+        ],
+        "normal": [
+          "collar",
+          "bell",
+          "earrings",
+          "glasses",
+          "goggles",
+          "necklace"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.clothing",
+      "aliases": {
+        "strong": [
+          "clothing",
+          "outfit"
+        ],
+        "normal": [
+          "clothes",
+          "costume",
+          "uniform"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.itemType",
+      "aliases": {
+        "strong": [
+          "fursuit type"
+        ],
+        "normal": [
+          "head only",
+          "mini partial",
+          "lite partial",
+          "partial",
+          "regular partial",
+          "heavy partial",
+          "deluxe partial",
+          "three-quarter suit",
+          "fullsuit",
+          "full suit",
+          "quad suit",
+          "quadsuit"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.appearance",
+      "aliases": {
+        "strong": [
+          "fursuit style"
+        ],
+        "normal": [
+          "Kemono",
+          "Kig",
+          "Toony",
+          "Realistic",
+          "Semi-realistic",
+          "mixed style"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "furry",
+  "version": "1.1.0",
+  "name": {
+    "zh-CN": "Furry / 兽设",
+    "en": "Furry"
+  },
+  "description": {
+    "zh-CN": "Furry、兽设、拟人动物角色、兽装、委托创作及圈内常见表达。",
+    "en": "Vocabulary for furry characters, fursonas, anthropomorphic species, fursuits, commissions, and fandom terminology."
+  },
+  "supportsNSFW": true
+}

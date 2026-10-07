@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "locale": "en",
+    "version": "1.1.0",
+    "pack": "furry",
+    "category": "entity-types"
+  },
+  "entries": [
+    {
+      "conceptId": "entityType.character",
+      "aliases": {
+        "strong": [
+          "fursona",
+          "furry character"
+        ],
+        "normal": [
+          "sona",
+          "original character",
+          "OC",
+          "avatar",
+          "persona"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.creature",
+      "aliases": {
+        "strong": [
+          "anthropomorphic animal"
+        ],
+        "normal": [
+          "anthro",
+          "furry",
+          "feral"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.species",
+      "aliases": {
+        "strong": [
+          "original species",
+          "species"
+        ],
+        "normal": [
+          "hybrid",
+          "hybrid species",
+          "open species",
+          "closed species"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.item",
+      "aliases": {
+        "strong": [
+          "fursuit"
+        ],
+        "normal": [
+          "fullsuit",
+          "partial",
+          "partial suit",
+          "fursuit head",
+          "handpaws",
+          "feetpaws",
+          "armsleeves"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    }
+  ]
+}
