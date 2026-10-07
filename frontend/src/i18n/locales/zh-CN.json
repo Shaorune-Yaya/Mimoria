@@ -7,21 +7,15 @@
     "title": "当前世界",
     "subtitle": "在这里创建和管理你的世界。",
     "newWorld": "+ 新建世界",
-
     "createTitle": "创建一个新世界",
-
     "name": "世界名称",
     "namePlaceholder": "打算叫什么呢？",
-
     "description": "世界描述",
     "descriptionPlaceholder": "这个世界是什么样子的呢？",
-
     "cancel": "取消",
     "create": "确认创建世界",
-
     "emptyTitle": "暂无世界",
     "emptyDescription": "创建你的第一个世界来开始吧。",
-
     "noDescription": "暂无描述。",
     "updated": "更新于"
   },
@@ -29,19 +23,14 @@
   "workspace": {
     "loading": "正在加载世界...",
     "notFound": "找不到这个世界。",
-
     "library": "资料库",
-
     "home": "主页",
     "entityTypes": "实体类型",
     "entities": "实体",
     "documents": "文档",
-
     "timeline": "时间线",
     "graph": "关系图谱",
-
     "settings": "设置",
-
     "startMessage": "你的世界工作区已经准备好了，可以开始创建世界设定。",
     "secondaryWorkspace": "第二工作区",
     "closeSecondary": "关闭第二工作区"
@@ -50,24 +39,16 @@
   "entityTypes": {
     "title": "实体类型",
     "subtitle": "定义这个世界中可以存在的资料类型。",
-
     "newType": "+ 新建实体类型",
-
     "createTitle": "创建实体类型",
-
     "name": "名称",
     "namePlaceholder": "生物、地点、势力……",
-
     "icon": "图标",
     "setEmoji": "📄支持emoji图标等",
-
     "description": "描述",
     "descriptionPlaceholder": "这种实体代表类型的描述",
-
     "create": "创建实体类型",
-
     "noDescription": "暂无描述。",
-
     "emptyTitle": "暂无实体类型",
     "emptyDescription": "创建一个实体类型来开始整理你的世界。"
   },
@@ -75,31 +56,22 @@
   "schema": {
     "fields": "字段",
     "help": "字段决定这种实体中的每条资料可以保存哪些信息。",
-
     "addField": "+ 添加字段",
     "createField": "创建字段",
-
     "fieldName": "字段名称",
     "fieldNamePlaceholder": "年龄、人口、所属势力……",
-
     "fieldType": "字段类型",
-
     "referenceType": "允许引用的实体类型",
     "anyEntityType": "任意实体类型",
-
     "requiredField": "这个字段为必填项",
     "required": "必填",
-
     "nameField": "名称",
-
     "empty": "目前还没有自定义字段。添加字段来定义这种实体。",
-
     "edit": "修改",
     "delete": "删除",
     "editField": "修改字段",
     "saveChanges": "保存修改",
     "deleteConfirm": "确定要删除这个字段吗？",
-
     "options": "下拉选项",
     "option": "选项",
     "addOption": "+ 添加选项"
@@ -118,32 +90,22 @@
   "entities": {
     "title": "实体",
     "subtitle": "创建和管理这个世界中的人物、地点、物品、事件以及其他设定资料。",
-
     "newEntity": "+ 新建实体",
     "createTitle": "创建实体",
     "createDescription": "选择一种实体类型，并填写它定义的字段。",
-
     "entityType": "实体类型",
     "selectType": "选择一种实体类型……",
-
     "create": "创建实体",
-
     "selectOption": "请选择……",
     "selectEntity": "请选择实体……",
-
     "yes": "是",
     "no": "否",
-
     "emptyTitle": "暂无实体",
     "emptyDescription": "创建第一个实体来开始构建这个世界。",
-
     "noEntitiesInType": "暂无实体",
-
     "browserTitle": "实体浏览器",
     "browserDescription": "通过左侧资源管理器组织和浏览这个世界。点击一个实体即可查看详细资料。",
-
     "noCustomFields": "这个实体目前没有自定义字段。",
-
     "lastUpdated": "最后更新",
     "edit": "修改",
     "editTitle": "修改实体",
@@ -165,7 +127,6 @@
     "loadError": "加载文档失败。",
 
     "root": "根目录",
-
     "emptyTree": "暂无文档。",
 
     "newDocument": "+ 新建文档",
@@ -203,10 +164,29 @@
     "syncComingSoon": "故事同步将在编辑器和段落系统完成后加入。",
 
     "saved": "已保存",
+    "unsaved": "有未保存的修改",
+    "saving": "正在保存……",
+    "saveError": "保存失败",
+    "saveFailed": "保存文档失败。",
+    "autoSaveEnabled": "已开启自动保存",
+
+    "editorLoading": "正在加载编辑器……",
+    "editorPlaceholder": "开始写下这个故事……",
+
+    "toolbarBold": "粗体",
+    "toolbarItalic": "斜体",
+    "toolbarStrike": "删除线",
+    "toolbarParagraph": "正文",
+    "toolbarHeading1": "一级标题",
+    "toolbarHeading2": "二级标题",
+    "toolbarBulletList": "项目符号列表",
+    "toolbarOrderedList": "编号列表",
+    "toolbarQuote": "引用",
+    "toolbarUndo": "撤销",
+    "toolbarRedo": "重做",
 
     "rename": "重命名",
     "delete": "删除",
-
     "moreActions": "更多操作",
 
     "expand": "展开",

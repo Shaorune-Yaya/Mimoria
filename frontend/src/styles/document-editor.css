@@ -1,0 +1,859 @@
+/* ======================================================
+   Document Editor
+   ====================================================== */
+
+.document-editor {
+  width: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+
+/* ======================================================
+   Toolbar
+   ====================================================== */
+
+.document-editor-toolbar {
+  width: 100%;
+
+  min-height: 46px;
+
+  box-sizing: border-box;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  margin:
+    0 0 12px;
+
+  padding:
+    7px 10px;
+
+  background:
+    #15191f;
+
+  border:
+    1px solid
+    #2a313b;
+
+  border-radius:
+    6px;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  scrollbar-width:
+    thin;
+}
+
+.document-editor-toolbar-group {
+  display: flex;
+  align-items: center;
+
+  gap: 3px;
+
+  flex-shrink: 0;
+}
+
+.document-editor-toolbar-divider {
+  width: 1px;
+  height: 22px;
+
+  flex-shrink: 0;
+
+  margin:
+    0 4px;
+
+  background:
+    var(--color-border);
+}
+
+.document-editor-toolbar-spacer {
+  flex: 1;
+
+  min-width: 12px;
+}
+
+.document-editor-tool {
+  min-width: 31px;
+  height: 30px;
+
+  flex-shrink: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding:
+    0 8px;
+
+  border:
+    1px solid
+    transparent;
+
+  border-radius:
+    5px;
+
+  background:
+    transparent;
+
+  color:
+    var(--color-text-secondary);
+
+  cursor: pointer;
+
+  font-size: 12px;
+
+  line-height: 1;
+}
+
+.document-editor-tool:hover:not(:disabled) {
+  background:
+    var(--color-bg-hover);
+
+  color:
+    #ffffff;
+}
+
+.document-editor-tool.active {
+  background:
+    var(--color-bg-selected);
+
+  border-color:
+    var(--color-border-light);
+
+  color:
+    #ffffff;
+}
+
+.document-editor-tool:disabled {
+  opacity:
+    0.3;
+
+  cursor:
+    default;
+}
+
+.document-editor-strike-label {
+  text-decoration:
+    line-through;
+}
+
+
+/* ======================================================
+   Scroll Area
+   ====================================================== */
+
+.document-editor-scroll {
+  min-width: 0;
+  min-height: 0;
+
+  flex: 1;
+
+  /*
+   * Do not add horizontal padding here.
+   * This keeps the editing surface aligned with
+   * the toolbar and status bars.
+   */
+  padding:
+    12px 0 28px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  background:
+    var(--color-bg);
+
+  overscroll-behavior:
+    contain;
+
+  -webkit-overflow-scrolling:
+    touch;
+}
+
+
+/* ======================================================
+   TipTap Document
+   ====================================================== */
+
+.document-editor-content {
+  width: 100%;
+
+  min-height:
+    420px;
+
+  box-sizing:
+    border-box;
+
+  margin: 0;
+
+  padding:
+    38px 42px 90px;
+
+  outline: none;
+
+  background:
+    #171b21;
+
+  border:
+    1px solid
+    #2a313b;
+
+  border-radius:
+    8px;
+
+  box-shadow:
+    0 8px 28px
+    rgba(
+      0,
+      0,
+      0,
+      0.16
+    );
+
+  color:
+    #e6e9ee;
+
+  font-size:
+    16px;
+
+  line-height:
+    1.85;
+
+  caret-color:
+    #8fb7e3;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+
+/* ======================================================
+   Editor Focus
+   ====================================================== */
+
+.document-editor-content.ProseMirror-focused {
+  background:
+    #1b2027;
+
+  border-color:
+    #506078;
+
+  box-shadow:
+    0 10px 32px
+    rgba(
+      0,
+      0,
+      0,
+      0.2
+    ),
+    0 0 0 1px
+    rgba(
+      94,
+      126,
+      164,
+      0.16
+    );
+}
+
+
+/* ======================================================
+   Document Typography
+   ====================================================== */
+
+.document-editor-content
+> *:first-child {
+  margin-top: 0;
+}
+
+.document-editor-content p {
+  margin:
+    0 0 1em;
+}
+
+.document-editor-content h1 {
+  margin:
+    1.35em 0 0.55em;
+
+  font-size:
+    2em;
+
+  line-height:
+    1.25;
+}
+
+.document-editor-content h2 {
+  margin:
+    1.25em 0 0.5em;
+
+  font-size:
+    1.5em;
+
+  line-height:
+    1.3;
+}
+
+.document-editor-content h3 {
+  margin:
+    1.2em 0 0.45em;
+
+  font-size:
+    1.25em;
+}
+
+.document-editor-content ul,
+.document-editor-content ol {
+  margin:
+    0.7em 0 1em;
+
+  padding-left:
+    1.7em;
+}
+
+.document-editor-content li {
+  margin:
+    0.2em 0;
+}
+
+.document-editor-content blockquote {
+  margin:
+    1.2em 0;
+
+  padding:
+    3px 0 3px 16px;
+
+  border-left:
+    3px solid
+    #56677c;
+
+  color:
+    var(--color-text-secondary);
+}
+
+.document-editor-content code {
+  padding:
+    2px 5px;
+
+  border-radius:
+    4px;
+
+  background:
+    #1d222a;
+
+  font-size:
+    0.92em;
+}
+
+.document-editor-content pre {
+  margin:
+    1.2em 0;
+
+  padding:
+    14px 16px;
+
+  overflow-x:
+    auto;
+
+  border:
+    1px solid
+    var(--color-border);
+
+  border-radius:
+    7px;
+
+  background:
+    #0d1015;
+}
+
+.document-editor-content pre code {
+  padding: 0;
+
+  background:
+    transparent;
+}
+
+
+/* ======================================================
+   Placeholder
+   ====================================================== */
+
+.document-editor-content
+p.is-editor-empty:first-child::before {
+  content:
+    attr(data-placeholder);
+
+  height: 0;
+
+  float: left;
+
+  color:
+    #6f7885;
+
+  pointer-events:
+    none;
+
+  font-style:
+    italic;
+}
+
+
+/* ======================================================
+   Selection
+   ====================================================== */
+
+.document-editor-content::selection,
+.document-editor-content
+*::selection {
+  background:
+    rgba(
+      79,
+      143,
+      216,
+      0.32
+    );
+}
+
+
+/* ======================================================
+   Status Bar
+   ====================================================== */
+
+.document-editor-statusbar {
+  width: 100%;
+
+  min-height: 34px;
+
+  box-sizing:
+    border-box;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding:
+    5px 9px;
+
+  border-top:
+    1px solid
+    var(--color-border);
+
+  color:
+    var(--color-text-dim);
+
+  font-size:
+    11px;
+}
+
+.document-save-state {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 6px;
+
+  white-space:
+    nowrap;
+}
+
+.document-save-state-dot {
+  width: 6px;
+  height: 6px;
+
+  flex-shrink: 0;
+
+  border-radius:
+    999px;
+
+  background:
+    #707985;
+}
+
+.document-save-state.state-dirty
+.document-save-state-dot {
+  background:
+    #b89a61;
+}
+
+.document-save-state.state-saving
+.document-save-state-dot {
+  background:
+    #7795b8;
+}
+
+.document-save-state.state-saved
+.document-save-state-dot {
+  background:
+    #6f9d7b;
+}
+
+.document-save-state.state-error
+.document-save-state-dot {
+  background:
+    #c87575;
+}
+
+.document-save-error {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color:
+    #cf8181;
+
+  white-space:
+    nowrap;
+
+  text-overflow:
+    ellipsis;
+}
+
+.document-editor-status-spacer {
+  flex: 1;
+}
+
+.document-editor-loading {
+  padding:
+    40px 20px;
+
+  color:
+    var(--color-text-dim);
+
+  text-align:
+    center;
+}
+
+
+/* ======================================================
+   Mobile / Narrow Screen
+   ====================================================== */
+
+@media (max-width: 760px) {
+  .document-editor {
+    width: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow: hidden;
+  }
+
+
+  /* ====================================================
+     Shared Mobile Width
+     ==================================================== */
+
+  .document-editor-toolbar,
+  .document-editor-content,
+  .document-editor-statusbar {
+    box-sizing: border-box;
+  }
+
+
+  /* ====================================================
+     Toolbar
+     ==================================================== */
+
+  .document-editor-toolbar {
+    width: auto;
+
+    min-height: 44px;
+
+    margin:
+      0 10px 8px;
+
+    padding:
+      6px 8px;
+
+    gap: 4px;
+
+    background:
+      #14181e;
+
+    border:
+      1px solid
+      #2a313b;
+
+    border-radius:
+      6px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scrollbar-width: thin;
+
+    -webkit-overflow-scrolling:
+      touch;
+  }
+
+  .document-editor-toolbar-group {
+    flex-shrink: 0;
+  }
+
+  .document-editor-tool {
+    min-width: 32px;
+    height: 32px;
+
+    flex-shrink: 0;
+
+    padding:
+      0 7px;
+
+    font-size:
+      12px;
+  }
+
+  .document-editor-toolbar-divider {
+    height: 20px;
+
+    margin:
+      0 2px;
+  }
+
+  .document-editor-toolbar-spacer {
+    min-width: 4px;
+  }
+
+
+  /* ====================================================
+     Editor Scroll Area
+     ==================================================== */
+
+  .document-editor-scroll {
+    min-width: 0;
+    min-height: 0;
+
+    flex: 1;
+
+    padding:
+      8px 10px 16px;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    background:
+      var(--color-bg);
+
+    overscroll-behavior:
+      contain;
+
+    -webkit-overflow-scrolling:
+      touch;
+  }
+
+
+  /* ====================================================
+     Editing Surface
+     ==================================================== */
+
+  .document-editor-content {
+    width: 100%;
+
+    min-height: 340px;
+
+    margin: 0;
+
+    padding:
+      22px 16px 60px;
+
+    outline: none;
+
+    background:
+      #171b21;
+
+    border:
+      1px solid
+      #2d3540;
+
+    border-radius:
+      7px;
+
+    box-shadow:
+      0 5px 18px
+      rgba(
+        0,
+        0,
+        0,
+        0.14
+      );
+
+    color:
+      #e6e9ee;
+
+    font-size:
+      15px;
+
+    line-height:
+      1.78;
+
+    caret-color:
+      #8fb7e3;
+
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .document-editor-content.ProseMirror-focused {
+    background:
+      #1b2027;
+
+    border-color:
+      #506078;
+
+    box-shadow:
+      0 6px 22px
+      rgba(
+        0,
+        0,
+        0,
+        0.18
+      ),
+      0 0 0 1px
+      rgba(
+        94,
+        126,
+        164,
+        0.14
+      );
+  }
+
+
+  /* ====================================================
+     Status Bar
+     ==================================================== */
+
+  .document-editor-statusbar {
+    width: auto;
+
+    min-height: 32px;
+
+    margin:
+      0 10px;
+
+    padding:
+      6px 4px;
+
+    gap: 7px;
+
+    border-top:
+      1px solid
+      var(--color-border);
+
+    font-size:
+      10px;
+  }
+
+  .document-save-state {
+    gap: 5px;
+  }
+
+  .document-save-state-dot {
+    width: 5px;
+    height: 5px;
+  }
+
+  .document-save-error {
+    display: none;
+  }
+
+  .document-editor-statusbar
+  > span:last-child {
+    display: none;
+  }
+
+
+  /* ====================================================
+     Document Preview Alignment
+     ==================================================== */
+
+  .document-preview-toolbar {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .document-preview-footer {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+
+  /* ====================================================
+     Mobile Typography
+     ==================================================== */
+
+  .document-editor-content h1 {
+    font-size: 1.6em;
+  }
+
+  .document-editor-content h2 {
+    font-size: 1.3em;
+  }
+
+  .document-editor-content h3 {
+    font-size: 1.15em;
+  }
+
+  .document-editor-content ul,
+  .document-editor-content ol {
+    padding-left: 1.4em;
+  }
+
+  .document-editor-content blockquote {
+    padding-left: 12px;
+  }
+
+
+  /* ====================================================
+     Extra Small Phones
+     ==================================================== */
+
+  @media (max-width: 420px) {
+    .document-editor-toolbar {
+      margin-left: 8px;
+      margin-right: 8px;
+    }
+
+    .document-editor-scroll {
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    .document-editor-statusbar {
+      margin-left: 8px;
+      margin-right: 8px;
+    }
+
+    .document-preview-toolbar,
+    .document-preview-footer {
+      margin-left: 8px;
+      margin-right: 8px;
+    }
+
+    .document-editor-content {
+      min-height: 320px;
+
+      padding:
+        20px 14px 54px;
+
+      font-size:
+        14.5px;
+    }
+  }
+}

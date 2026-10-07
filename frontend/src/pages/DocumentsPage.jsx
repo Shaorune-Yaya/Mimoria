@@ -26,6 +26,8 @@ import {
 } from "@dnd-kit/modifiers";
 
 import WorldLayout from "../components/WorldLayout";
+import DocumentEditor from "../components/DocumentEditor";
+
 import { API_URL } from "../config/api";
 
 
@@ -58,6 +60,20 @@ function DocumentTreeRow({
     activeNodeId ===
     node._id;
 
+  const isFolder =
+    node.kind ===
+    "folder";
+
+  const isSelected =
+    !isFolder &&
+    selectedDocumentId ===
+      node.documentId?._id;
+
+  const isRenaming =
+    editingNodeId ===
+    node._id;
+
+
   const {
     attributes,
     listeners,
@@ -69,14 +85,9 @@ function DocumentTreeRow({
       node._id,
 
     disabled:
-      editingNodeId ===
-      node._id,
+      isRenaming,
   });
 
-
-  // ====================================================
-  // Three Independent Drop Zones
-  // ====================================================
 
   const {
     setNodeRef:
@@ -91,11 +102,6 @@ function DocumentTreeRow({
     disabled:
       isActive,
   });
-
-
-  const isFolder =
-    node.kind ===
-    "folder";
 
 
   const {
@@ -129,29 +135,15 @@ function DocumentTreeRow({
   });
 
 
-  // ====================================================
-  // Display
-  // ====================================================
-
   const style = {
     paddingLeft:
-      `${
-        8 +
-        depth * 16
-      }px`,
+      `${8 + depth * 16}px`,
 
     opacity:
       isDragging
-        ? 0.45
+        ? 0.2
         : 1,
   };
-
-
-  const displayName =
-    node.name ||
-    t(
-      "documents.untitled"
-    );
 
 
   const icon =
@@ -160,15 +152,11 @@ function DocumentTreeRow({
       : "▤";
 
 
-  const isSelected =
-    !isFolder &&
-    selectedDocumentId ===
-      node.documentId?._id;
-
-
-  const isRenaming =
-    editingNodeId ===
-    node._id;
+  const displayName =
+    node.name ||
+    t(
+      "documents.untitled"
+    );
 
 
   const rowClassName = [
@@ -207,16 +195,15 @@ function DocumentTreeRow({
           style
         }
         {...attributes}
-        onContextMenu={
-          (event) =>
-            onContextMenu(
-              event,
-              node
-            )
+        onContextMenu={(
+          event
+        ) =>
+          onContextMenu(
+            event,
+            node
+          )
         }
       >
-        {/* Drop above this node. */}
-
         <div
           ref={
             setBeforeDropRef
@@ -224,8 +211,6 @@ function DocumentTreeRow({
           className="explorer-drop-zone explorer-drop-zone-before"
         />
 
-
-        {/* Drop inside folders only. */}
 
         {isFolder && (
           <div
@@ -237,8 +222,6 @@ function DocumentTreeRow({
         )}
 
 
-        {/* Drop below this node. */}
-
         <div
           ref={
             setAfterDropRef
@@ -247,24 +230,22 @@ function DocumentTreeRow({
         />
 
 
-        {/* Expand / collapse */}
-
         <button
           type="button"
           className="explorer-toggle"
-          onClick={
-            (event) => {
-              event.stopPropagation();
+          onClick={(
+            event
+          ) => {
+            event.stopPropagation();
 
-              if (
-                isFolder
-              ) {
-                onToggle(
-                  node._id
-                );
-              }
+            if (
+              isFolder
+            ) {
+              onToggle(
+                node._id
+              );
             }
-          }
+          }}
           aria-label={
             expanded
               ? t(
@@ -275,17 +256,13 @@ function DocumentTreeRow({
                 )
           }
         >
-          {
-            isFolder
-              ? expanded
-                ? "⌄"
-                : "›"
-              : ""
-          }
+          {isFolder
+            ? expanded
+              ? "⌄"
+              : "›"
+            : ""}
         </button>
 
-
-        {/* Inline rename */}
 
         {isRenaming ? (
           <div className="explorer-rename-wrap">
@@ -299,69 +276,68 @@ function DocumentTreeRow({
               value={
                 editingName
               }
-              onChange={
-                (event) =>
-                  onEditingNameChange(
-                    event.target.value
-                  )
+              onChange={(
+                event
+              ) =>
+                onEditingNameChange(
+                  event.target.value
+                )
               }
-              onClick={
-                (event) =>
-                  event
-                    .stopPropagation()
+              onClick={(
+                event
+              ) =>
+                event.stopPropagation()
               }
-              onDoubleClick={
-                (event) =>
-                  event
-                    .stopPropagation()
+              onDoubleClick={(
+                event
+              ) =>
+                event.stopPropagation()
               }
               onBlur={
                 onRenameCancel
               }
-              onKeyDown={
-                (event) => {
-                  if (
-                    event.key ===
-                    "Enter"
-                  ) {
-                    event.preventDefault();
+              onKeyDown={(
+                event
+              ) => {
+                if (
+                  event.key ===
+                  "Enter"
+                ) {
+                  event.preventDefault();
 
-                    onRenameSubmit(
-                      node
-                    );
-                  }
-
-                  if (
-                    event.key ===
-                    "Escape"
-                  ) {
-                    event.preventDefault();
-
-                    onRenameCancel();
-                  }
+                  onRenameSubmit(
+                    node
+                  );
                 }
-              }
+
+                if (
+                  event.key ===
+                  "Escape"
+                ) {
+                  event.preventDefault();
+
+                  onRenameCancel();
+                }
+              }}
             />
           </div>
         ) : (
           <button
             type="button"
             className="explorer-node-main"
-            onClick={
-              () => {
-                if (
-                  isFolder
-                ) {
-                  onToggle(
-                    node._id
-                  );
-                } else {
-                  onSelectDocument(
-                    node
-                  );
-                }
+            onClick={() => {
+              if (
+                isFolder
+              ) {
+                onToggle(
+                  node._id
+                );
+              } else {
+                onSelectDocument(
+                  node
+                );
               }
-            }
+            }}
           >
             <span className="explorer-icon">
               {icon}
@@ -381,19 +357,8 @@ function DocumentTreeRow({
             <button
               type="button"
               className="explorer-add-child"
-              onClick={
-                (event) => {
-                  event
-                    .stopPropagation();
-
-                  if (
-                    isFolder
-                  ) {
-                    onCreateDocument(
-                      node._id
-                    );
-                  }
-                }
+              disabled={
+                !isFolder
               }
               title={
                 isFolder
@@ -409,9 +374,19 @@ function DocumentTreeRow({
                     )
                   : ""
               }
-              disabled={
-                !isFolder
-              }
+              onClick={(
+                event
+              ) => {
+                event.stopPropagation();
+
+                if (
+                  isFolder
+                ) {
+                  onCreateDocument(
+                    node._id
+                  );
+                }
+              }}
             >
               {isFolder
                 ? "+"
@@ -422,23 +397,22 @@ function DocumentTreeRow({
             <button
               type="button"
               className="explorer-context-button"
-              onClick={
-                (event) => {
-                  event
-                    .stopPropagation();
-
-                  onContextMenu(
-                    event,
-                    node
-                  );
-                }
-              }
               title={t(
                 "documents.moreActions"
               )}
               aria-label={t(
                 "documents.moreActions"
               )}
+              onClick={(
+                event
+              ) => {
+                event.stopPropagation();
+
+                onContextMenu(
+                  event,
+                  node
+                );
+              }}
             >
               ⋯
             </button>
@@ -471,6 +445,7 @@ function DocumentTreeRow({
     </>
   );
 }
+
 
 // ======================================================
 // Root Drop Zone
@@ -522,6 +497,7 @@ function DocumentsPage() {
   const menuRef =
     useRef(null);
 
+
   // ====================================================
   // Base Data
   // ====================================================
@@ -545,6 +521,7 @@ function DocumentsPage() {
     error,
     setError,
   ] = useState("");
+
 
   // ====================================================
   // Document Workspace
@@ -570,6 +547,7 @@ function DocumentsPage() {
     setDocumentParentId,
   ] = useState(null);
 
+
   // ====================================================
   // Explorer
   // ====================================================
@@ -587,13 +565,14 @@ function DocumentsPage() {
   ] = useState(null);
 
   const activeDocumentNode =
-  activeNodeId
-    ? treeNodes.find(
-        (node) =>
-          node._id ===
-          activeNodeId
-      )
-    : null;
+    activeNodeId
+      ? treeNodes.find(
+          (node) =>
+            node._id ===
+            activeNodeId
+        )
+      : null;
+
 
   // ====================================================
   // Folder Creation
@@ -613,6 +592,7 @@ function DocumentsPage() {
     folderParentId,
     setFolderParentId,
   ] = useState(null);
+
 
   // ====================================================
   // Rename / Delete / Context Menu
@@ -643,8 +623,9 @@ function DocumentsPage() {
     setActionError,
   ] = useState("");
 
+
   // ====================================================
-  // Initial Loading
+  // Loading
   // ====================================================
 
   useEffect(() => {
@@ -652,6 +633,7 @@ function DocumentsPage() {
   }, [
     worldId,
   ]);
+
 
   useEffect(() => {
     function handleOutsideClick(
@@ -682,26 +664,30 @@ function DocumentsPage() {
     };
   }, []);
 
+
   async function loadPage() {
     try {
       setLoading(
         true
       );
 
-      setError("");
+      setError(
+        ""
+      );
 
       const [
         worldResponse,
         treeResponse,
-      ] = await Promise.all([
-        fetch(
-          `${API_URL.worlds}/${worldId}`
-        ),
+      ] =
+        await Promise.all([
+          fetch(
+            `${API_URL.worlds}/${worldId}`
+          ),
 
-        fetch(
-          `${API_URL.documentTree}/world/${worldId}`
-        ),
-      ]);
+          fetch(
+            `${API_URL.documentTree}/world/${worldId}`
+          ),
+        ]);
 
       if (
         !worldResponse.ok
@@ -729,7 +715,7 @@ function DocumentsPage() {
       const treeData =
         await treeResponse.json();
 
-      const safeTreeData =
+      const safeTree =
         Array.isArray(
           treeData
         )
@@ -741,36 +727,24 @@ function DocumentsPage() {
       );
 
       setTreeNodes(
-        safeTreeData
+        safeTree
       );
 
       setExpandedFolders(
-        (current) => {
-          const next =
-            new Set(
-              current
-            );
-
-          for (
-            const node of
-            safeTreeData
-          ) {
-            if (
-              node.kind ===
-              "folder"
-            ) {
-              next.add(
+        new Set(
+          safeTree
+            .filter(
+              (node) =>
+                node.kind ===
+                "folder"
+            )
+            .map(
+              (node) =>
                 node._id
-              );
-            }
-          }
-
-          return next;
-        }
+            )
+        )
       );
-    } catch (
-      loadError
-    ) {
+    } catch (loadError) {
       console.error(
         "Failed to load Documents:",
         loadError
@@ -788,6 +762,7 @@ function DocumentsPage() {
       );
     }
   }
+
 
   async function refreshTree(
     preferredDocumentId =
@@ -823,13 +798,11 @@ function DocumentsPage() {
         safeData
       );
 
-      const targetDocumentId =
+      const currentId =
         preferredDocumentId ||
         selectedDocument?._id;
 
-      if (
-        !targetDocumentId
-      ) {
+      if (!currentId) {
         return;
       }
 
@@ -839,14 +812,32 @@ function DocumentsPage() {
             item.kind ===
               "document" &&
             item.documentId?._id ===
-              targetDocumentId
+              currentId
         );
 
       if (
         node?.documentId
       ) {
         setSelectedDocument(
-          node.documentId
+          (current) => {
+            /*
+             * Do not overwrite newer editor data
+             * with an older tree snapshot.
+             */
+            if (
+              current?._id ===
+              node.documentId._id &&
+              (current.contentVersion ??
+                0) >
+                (node.documentId
+                  .contentVersion ??
+                  0)
+            ) {
+              return current;
+            }
+
+            return node.documentId;
+          }
         );
       } else {
         setSelectedDocument(
@@ -869,6 +860,7 @@ function DocumentsPage() {
       );
     }
   }
+
 
   // ====================================================
   // Tree Helpers
@@ -896,43 +888,6 @@ function DocumentsPage() {
     return node.parentId;
   }
 
-  function getChildren(
-    parentId = null
-  ) {
-    return treeNodes
-      .filter(
-        (node) => {
-          const nodeParentId =
-            getParentId(
-              node
-            );
-
-          if (
-            parentId ===
-            null
-          ) {
-            return (
-              nodeParentId ===
-              null
-            );
-          }
-
-          return (
-            String(
-              nodeParentId
-            ) ===
-            String(
-              parentId
-            )
-          );
-        }
-      )
-      .sort(
-        (a, b) =>
-          (a.order ?? 0) -
-          (b.order ?? 0)
-      );
-  }
 
   const nodesByParent =
     useMemo(() => {
@@ -967,7 +922,9 @@ function DocumentsPage() {
         }
 
         map
-          .get(key)
+          .get(
+            key
+          )
           .push(
             node
           );
@@ -979,10 +936,8 @@ function DocumentsPage() {
       ) {
         children.sort(
           (a, b) =>
-            (a.order ??
-              0) -
-            (b.order ??
-              0)
+            (a.order ?? 0) -
+            (b.order ?? 0)
         );
       }
 
@@ -990,6 +945,25 @@ function DocumentsPage() {
     }, [
       treeNodes,
     ]);
+
+
+  function getChildren(
+    parentId = null
+  ) {
+    const key =
+      parentId
+        ? String(
+            parentId
+          )
+        : "root";
+
+    return (
+      nodesByParent.get(
+        key
+      ) || []
+    );
+  }
+
 
   function toggleFolder(
     folderId
@@ -1020,7 +994,8 @@ function DocumentsPage() {
     );
   }
 
-  function selectDocument(
+
+  async function selectDocument(
     node
   ) {
     if (
@@ -1030,20 +1005,15 @@ function DocumentsPage() {
       return;
     }
 
-    if (
-      !node.documentId ||
-      typeof node.documentId !==
-        "object"
-    ) {
+    const documentId =
+      node.documentId?._id;
+
+    if (!documentId) {
       return;
     }
 
     setShowCreateDocument(
       false
-    );
-
-    setSelectedDocument(
-      node.documentId
     );
 
     setContextMenu(
@@ -1053,7 +1023,50 @@ function DocumentsPage() {
     setDeleteTarget(
       null
     );
+
+    setActionError(
+      ""
+    );
+
+    /*
+     * Open immediately from the populated tree data,
+     * then refresh the document directly so the editor
+     * always receives the newest content.
+     */
+    setSelectedDocument(
+      node.documentId
+    );
+
+    try {
+      const response =
+        await fetch(
+          `${API_URL.documents}/${documentId}`
+        );
+
+      if (
+        !response.ok
+      ) {
+        return;
+      }
+
+      const freshDocument =
+        await response.json();
+
+      setSelectedDocument(
+        (current) =>
+          current?._id ===
+          freshDocument._id
+            ? freshDocument
+            : current
+      );
+    } catch (loadError) {
+      console.error(
+        "Failed to refresh selected document:",
+        loadError
+      );
+    }
   }
+
 
   // ====================================================
   // Drag & Drop
@@ -1127,9 +1140,7 @@ function DocumentsPage() {
       }
 
       await refreshTree();
-    } catch (
-      moveError
-    ) {
+    } catch (moveError) {
       console.error(
         "Failed to move document node:",
         moveError
@@ -1143,6 +1154,7 @@ function DocumentsPage() {
       );
     }
   }
+
 
   function calculateInsertIndex(
     draggedId,
@@ -1181,23 +1193,17 @@ function DocumentsPage() {
       };
     }
 
-    if (
-      position ===
-      "before"
-    ) {
-      return {
-        parentId,
-        index:
-          targetIndex,
-      };
-    }
-
     return {
       parentId,
+
       index:
-        targetIndex + 1,
+        position ===
+        "before"
+          ? targetIndex
+          : targetIndex + 1,
     };
   }
+
 
   async function handleDragEnd(
     event
@@ -1297,15 +1303,9 @@ function DocumentsPage() {
           targetNodeId
       );
 
-    if (
-      !targetNode
-    ) {
+    if (!targetNode) {
       return;
     }
-
-    // --------------------------------------------------
-    // Drop Inside Folder
-    // --------------------------------------------------
 
     if (
       position ===
@@ -1336,10 +1336,6 @@ function DocumentsPage() {
       return;
     }
 
-    // --------------------------------------------------
-    // Drop Before / After
-    // --------------------------------------------------
-
     const destination =
       calculateInsertIndex(
         draggedId,
@@ -1353,6 +1349,7 @@ function DocumentsPage() {
       destination.index
     );
   }
+
 
   function handleDragStart(
     event
@@ -1368,11 +1365,13 @@ function DocumentsPage() {
     );
   }
 
+
   function handleDragCancel() {
     setActiveNodeId(
       null
     );
   }
+
 
   // ====================================================
   // Create Document
@@ -1429,6 +1428,7 @@ function DocumentsPage() {
     }
   }
 
+
   function closeCreateDocument() {
     setShowCreateDocument(
       false
@@ -1442,6 +1442,7 @@ function DocumentsPage() {
       null
     );
   }
+
 
   async function createDocument(
     event
@@ -1532,9 +1533,7 @@ function DocumentsPage() {
       await refreshTree(
         newDocument._id
       );
-    } catch (
-      createError
-    ) {
+    } catch (createError) {
       console.error(
         "Failed to create document:",
         createError
@@ -1548,6 +1547,7 @@ function DocumentsPage() {
       );
     }
   }
+
 
   // ====================================================
   // Folder Creation
@@ -1592,6 +1592,7 @@ function DocumentsPage() {
     }
   }
 
+
   function closeFolderForm() {
     setShowFolderForm(
       false
@@ -1605,6 +1606,7 @@ function DocumentsPage() {
       null
     );
   }
+
 
   async function createFolder(
     event
@@ -1693,9 +1695,7 @@ function DocumentsPage() {
       closeFolderForm();
 
       await refreshTree();
-    } catch (
-      createError
-    ) {
+    } catch (createError) {
       console.error(
         "Failed to create document folder:",
         createError
@@ -1710,6 +1710,7 @@ function DocumentsPage() {
     }
   }
 
+
   // ====================================================
   // Rename
   // ====================================================
@@ -1722,7 +1723,7 @@ function DocumentsPage() {
     );
 
     setEditingName(
-      node.name
+      node.name || ""
     );
 
     setContextMenu(
@@ -1738,6 +1739,7 @@ function DocumentsPage() {
     );
   }
 
+
   function cancelRename() {
     setEditingNodeId(
       null
@@ -1748,21 +1750,20 @@ function DocumentsPage() {
     );
   }
 
-  async function submitRename(
+
+  async function renameNode(
     node
   ) {
     const name =
       editingName.trim();
 
     if (!name) {
+      cancelRename();
+
       return;
     }
 
     try {
-      setActionError(
-        ""
-      );
-
       let response;
 
       if (
@@ -1791,9 +1792,7 @@ function DocumentsPage() {
         const documentId =
           node.documentId?._id;
 
-        if (
-          !documentId
-        ) {
+        if (!documentId) {
           return;
         }
 
@@ -1836,14 +1835,32 @@ function DocumentsPage() {
         );
       }
 
+      const updated =
+        await response.json();
+
       cancelRename();
 
+      if (
+        node.kind ===
+          "document" &&
+        selectedDocument?._id ===
+          node.documentId?._id
+      ) {
+        setSelectedDocument(
+          (current) => ({
+            ...current,
+
+            title:
+              updated.title ||
+              name,
+          })
+        );
+      }
+
       await refreshTree();
-    } catch (
-      renameError
-    ) {
+    } catch (renameError) {
       console.error(
-        "Failed to rename document node:",
+        "Failed to rename document item:",
         renameError
       );
 
@@ -1855,6 +1872,7 @@ function DocumentsPage() {
       );
     }
   }
+
 
   // ====================================================
   // Delete
@@ -1876,36 +1894,29 @@ function DocumentsPage() {
     );
   }
 
+
   function cancelDelete() {
     setDeleteTarget(
       null
     );
   }
 
+
   async function confirmDelete() {
-    if (
-      !deleteTarget
-    ) {
+    if (!deleteTarget) {
       return;
     }
 
-    const node =
-      deleteTarget;
-
     try {
-      setActionError(
-        ""
-      );
-
       let response;
 
       if (
-        node.kind ===
+        deleteTarget.kind ===
         "folder"
       ) {
         response =
           await fetch(
-            `${API_URL.documentTree}/${node._id}`,
+            `${API_URL.documentTree}/${deleteTarget._id}`,
             {
               method:
                 "DELETE",
@@ -1913,11 +1924,10 @@ function DocumentsPage() {
           );
       } else {
         const documentId =
-          node.documentId?._id;
+          deleteTarget
+            .documentId?._id;
 
-        if (
-          !documentId
-        ) {
+        if (!documentId) {
           return;
         }
 
@@ -1950,10 +1960,11 @@ function DocumentsPage() {
       }
 
       if (
-        node.kind ===
+        deleteTarget.kind ===
           "document" &&
         selectedDocument?._id ===
-          node.documentId?._id
+          deleteTarget
+            .documentId?._id
       ) {
         setSelectedDocument(
           null
@@ -1965,11 +1976,9 @@ function DocumentsPage() {
       );
 
       await refreshTree();
-    } catch (
-      deleteError
-    ) {
+    } catch (deleteError) {
       console.error(
-        "Failed to delete document node:",
+        "Failed to delete document item:",
         deleteError
       );
 
@@ -1982,6 +1991,7 @@ function DocumentsPage() {
     }
   }
 
+
   // ====================================================
   // Context Menu
   // ====================================================
@@ -1991,136 +2001,167 @@ function DocumentsPage() {
     node
   ) {
     event.preventDefault();
-    event.stopPropagation();
 
     const menuWidth =
-      200;
+      210;
 
     const menuHeight =
       node.kind ===
       "folder"
-        ? 210
-        : 130;
+        ? 190
+        : 110;
 
     const x =
-      Math.max(
-        8,
-        Math.min(
-          event.clientX,
-          window.innerWidth -
-            menuWidth -
-            8
-        )
+      Math.min(
+        event.clientX,
+        window.innerWidth -
+          menuWidth -
+          8
       );
 
     const y =
-      Math.max(
-        8,
-        Math.min(
-          event.clientY,
-          window.innerHeight -
-            menuHeight -
-            8
-        )
+      Math.min(
+        event.clientY,
+        window.innerHeight -
+          menuHeight -
+          8
       );
 
     setContextMenu({
+      x:
+        Math.max(
+          8,
+          x
+        ),
+
+      y:
+        Math.max(
+          8,
+          y
+        ),
+
       node,
-      x,
-      y,
     });
   }
 
+
   // ====================================================
-  // Tree Render
+  // Editor Save Callback
+  // ====================================================
+
+  function handleDocumentSaved(
+    savedDocument
+  ) {
+    setSelectedDocument(
+      (current) =>
+        current?._id ===
+        savedDocument._id
+          ? savedDocument
+          : current
+    );
+
+    setTreeNodes(
+      (currentNodes) =>
+        currentNodes.map(
+          (node) => {
+            if (
+              node.kind !==
+                "document" ||
+              node.documentId?._id !==
+                savedDocument._id
+            ) {
+              return node;
+            }
+
+            return {
+              ...node,
+
+              name:
+                savedDocument.title,
+
+              documentId:
+                savedDocument,
+            };
+          }
+        )
+    );
+  }
+
+
+  // ====================================================
+  // Render Tree
   // ====================================================
 
   function renderTree(
     parentId = null,
     depth = 0
   ) {
-    const key =
-      parentId
-        ? String(
-            parentId
-          )
-        : "root";
-
     const children =
-      nodesByParent.get(
-        key
-      ) || [];
+      getChildren(
+        parentId
+      );
 
     return children.map(
-      (node) => {
-        const isFolder =
-          node.kind ===
-          "folder";
-
-        const expanded =
-          isFolder &&
-          expandedFolders.has(
+      (node) => (
+        <DocumentTreeRow
+          key={
             node._id
-          );
-
-        return (
-          <DocumentTreeRow
-            key={
+          }
+          node={
+            node
+          }
+          depth={
+            depth
+          }
+          expanded={
+            expandedFolders.has(
               node._id
-            }
-            node={
-              node
-            }
-            depth={
-              depth
-            }
-            expanded={
-              expanded
-            }
-            selectedDocumentId={
-              selectedDocument?._id
-            }
-            activeNodeId={
-              activeNodeId
-            }
-            onToggle={
-              toggleFolder
-            }
-            onSelectDocument={
-              selectDocument
-            }
-            onCreateDocument={
-              openCreateDocument
-            }
-            onContextMenu={
-              openContextMenu
-            }
-            editingNodeId={
-              editingNodeId
-            }
-            editingName={
-              editingName
-            }
-            onEditingNameChange={
-              setEditingName
-            }
-            onRenameSubmit={
-              submitRename
-            }
-            onRenameCancel={
-              cancelRename
-            }
-            t={
-              t
-            }
-            renderChildren={
-              renderTree
-            }
-          />
-        );
-      }
+            )
+          }
+          selectedDocumentId={
+            selectedDocument?._id
+          }
+          activeNodeId={
+            activeNodeId
+          }
+          onToggle={
+            toggleFolder
+          }
+          onSelectDocument={
+            selectDocument
+          }
+          onCreateDocument={
+            openCreateDocument
+          }
+          onContextMenu={
+            openContextMenu
+          }
+          editingNodeId={
+            editingNodeId
+          }
+          editingName={
+            editingName
+          }
+          onEditingNameChange={
+            setEditingName
+          }
+          onRenameSubmit={
+            renameNode
+          }
+          onRenameCancel={
+            cancelRename
+          }
+          t={
+            t
+          }
+          renderChildren={
+            renderTree
+          }
+        />
+      )
     );
   }
+
 
   // ====================================================
   // Explorer Sidebar
@@ -2164,10 +2205,11 @@ function DocumentsPage() {
               title={t(
                 "documents.newFolder"
               )}
+              aria-label={t(
+                "documents.newFolder"
+              )}
             >
-              <span aria-hidden="true">
-                📁
-              </span>
+              📁
             </button>
 
             <button
@@ -2181,11 +2223,15 @@ function DocumentsPage() {
               title={t(
                 "documents.newDocument"
               )}
+              aria-label={t(
+                "documents.newDocument"
+              )}
             >
               +
             </button>
           </div>
         </div>
+
 
         {showFolderForm && (
           <form
@@ -2224,9 +2270,6 @@ function DocumentsPage() {
 
               <button
                 type="submit"
-                disabled={
-                  !folderName.trim()
-                }
                 aria-label={t(
                   "documents.confirm"
                 )}
@@ -2249,6 +2292,7 @@ function DocumentsPage() {
           </form>
         )}
 
+
         {deleteTarget && (
           <div className="documents-delete-confirm">
             <div className="documents-delete-confirm-title">
@@ -2263,10 +2307,6 @@ function DocumentsPage() {
             </div>
 
             <div className="documents-delete-target">
-              {deleteTarget.kind ===
-              "folder"
-                ? "📁"
-                : "▤"}{" "}
               {
                 deleteTarget.name
               }
@@ -2300,6 +2340,7 @@ function DocumentsPage() {
           </div>
         )}
 
+
         {actionError && (
           <div className="documents-action-error">
             {
@@ -2308,11 +2349,13 @@ function DocumentsPage() {
           </div>
         )}
 
+
         <DocumentRootDropZone
           t={
             t
           }
         />
+
 
         <div className="entity-tree">
           {loading && (
@@ -2326,7 +2369,9 @@ function DocumentsPage() {
           {!loading &&
             error && (
               <div className="documents-explorer-message error">
-                {error}
+                {
+                  error
+                }
               </div>
             )}
 
@@ -2346,37 +2391,44 @@ function DocumentsPage() {
             renderTree()}
         </div>
       </aside>
-        <DragOverlay
-          dropAnimation={null}
-        >
-          {activeDocumentNode ? (
-            <div className="explorer-drag-overlay">
-              <span className="explorer-toggle">
-                {activeDocumentNode.kind ===
+
+
+      <DragOverlay
+        dropAnimation={
+          null
+        }
+      >
+        {activeDocumentNode ? (
+          <div className="explorer-drag-overlay">
+            <span className="explorer-toggle">
+              {activeDocumentNode
+                .kind ===
+              "folder"
+                ? "›"
+                : ""}
+            </span>
+
+            <div className="explorer-node-main">
+              <span className="explorer-icon">
+                {activeDocumentNode
+                  .kind ===
                 "folder"
-                  ? "›"
-                  : ""}
+                  ? "📁"
+                  : "▤"}
               </span>
 
-              <div className="explorer-node-main">
-                <span className="explorer-icon">
-                  {activeDocumentNode.kind ===
-                  "folder"
-                    ? "📁"
-                    : "▤"}
-                </span>
-
-                <span className="explorer-name">
-                  {
-                    activeDocumentNode.name
-                  }
-                </span>
-              </div>
+              <span className="explorer-name">
+                {
+                  activeDocumentNode.name
+                }
+              </span>
             </div>
-          ) : null}
-        </DragOverlay>
+          </div>
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
+
 
   // ====================================================
   // Workspace
@@ -2388,6 +2440,7 @@ function DocumentsPage() {
       .contentVersion >
       selectedDocument
         .syncedVersion;
+
 
   function closeMobileWorkspace() {
     if (
@@ -2403,6 +2456,7 @@ function DocumentsPage() {
     );
   }
 
+
   if (
     loading &&
     !world
@@ -2415,6 +2469,7 @@ function DocumentsPage() {
       </div>
     );
   }
+
 
   return (
     <>
@@ -2462,6 +2517,7 @@ function DocumentsPage() {
             </p>
           </div>
 
+
           {!showCreateDocument &&
             !selectedDocument && (
               <button
@@ -2479,6 +2535,7 @@ function DocumentsPage() {
               </button>
             )}
 
+
           <button
             type="button"
             className="mobile-sheet-close documents-mobile-close"
@@ -2492,6 +2549,7 @@ function DocumentsPage() {
             ×
           </button>
         </div>
+
 
         {showCreateDocument && (
           <div className="create-panel documents-create-panel">
@@ -2529,6 +2587,7 @@ function DocumentsPage() {
                 }
               />
 
+
               {documentParentId && (
                 <div className="documents-create-location">
                   {t(
@@ -2536,6 +2595,7 @@ function DocumentsPage() {
                   )}
                 </div>
               )}
+
 
               <div className="form-buttons">
                 <button
@@ -2565,6 +2625,7 @@ function DocumentsPage() {
             </form>
           </div>
         )}
+
 
         {!showCreateDocument &&
           selectedDocument && (
@@ -2604,27 +2665,28 @@ function DocumentsPage() {
                 </button>
               </div>
 
-              <div className="document-preview-body">
-                {selectedDocument.plainText ? (
-                  <p className="document-preview-text">
-                    {
-                      selectedDocument.plainText
-                    }
-                  </p>
-                ) : (
-                  <p className="document-preview-placeholder">
-                    {t(
-                      "documents.emptyDocument"
-                    )}
-                  </p>
-                )}
-              </div>
+
+              <DocumentEditor
+                key={
+                  selectedDocument._id
+                }
+                document={
+                  selectedDocument
+                }
+                onSaved={
+                  handleDocumentSaved
+                }
+              />
+
 
               <footer className="document-preview-footer">
                 <span>
                   {t(
-                    "documents.saved"
-                  )}
+                    "documents.version"
+                  )}{" "}
+                  {
+                    selectedDocument.contentVersion
+                  }
                 </span>
 
                 <span>
@@ -2639,6 +2701,7 @@ function DocumentsPage() {
               </footer>
             </div>
           )}
+
 
         {!showCreateDocument &&
           !selectedDocument && (
@@ -2657,6 +2720,7 @@ function DocumentsPage() {
             </div>
           )}
       </WorldLayout>
+
 
       {contextMenu && (
         <div
@@ -2714,6 +2778,7 @@ function DocumentsPage() {
             </>
           )}
 
+
           <button
             type="button"
             onClick={() =>
@@ -2727,7 +2792,9 @@ function DocumentsPage() {
             )}
           </button>
 
+
           <div className="documents-context-divider" />
+
 
           <button
             type="button"
@@ -2747,5 +2814,6 @@ function DocumentsPage() {
     </>
   );
 }
+
 
 export default DocumentsPage;

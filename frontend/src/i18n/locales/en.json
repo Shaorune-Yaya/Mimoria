@@ -7,21 +7,15 @@
     "title": "Your Worlds",
     "subtitle": "Create and manage your worlds here.",
     "newWorld": "+ New World",
-
     "createTitle": "Create a New World",
-
     "name": "World Name",
     "namePlaceholder": "What should this world be called?",
-
     "description": "World Description",
     "descriptionPlaceholder": "What is this world like?",
-
     "cancel": "Cancel",
     "create": "Create World",
-
     "emptyTitle": "No Worlds Yet",
     "emptyDescription": "Create your first world to get started.",
-
     "noDescription": "No description yet.",
     "updated": "Updated"
   },
@@ -29,19 +23,14 @@
   "workspace": {
     "loading": "Loading world...",
     "notFound": "World not found.",
-
     "library": "Library",
-
     "home": "Home",
     "entityTypes": "Entity Types",
     "entities": "Entities",
     "documents": "Documents",
-
     "timeline": "Timeline",
     "graph": "Graph",
-
     "settings": "Settings",
-
     "startMessage": "Your world workspace is ready. Start building your lore here.",
     "secondaryWorkspace": "Secondary Workspace",
     "closeSecondary": "Close secondary workspace"
@@ -50,24 +39,16 @@
   "entityTypes": {
     "title": "Entity Types",
     "subtitle": "Define the kinds of information that exist in this world.",
-
     "newType": "+ New Entity Type",
-
     "createTitle": "Create Entity Type",
-
     "name": "Name",
     "namePlaceholder": "Character, Location, Faction...",
-
     "icon": "Icon",
     "setEmoji": "📄Supports emoji icons, etc.",
-
     "description": "Description",
     "descriptionPlaceholder": "What kind of information does this type represent?",
-
     "create": "Create Entity Type",
-
     "noDescription": "No description yet.",
-
     "emptyTitle": "No Entity Types Yet",
     "emptyDescription": "Create an entity type to start organizing your world."
   },
@@ -75,31 +56,22 @@
   "schema": {
     "fields": "Fields",
     "help": "Fields define the information stored by every entity of this type.",
-
     "addField": "+ Add Field",
     "createField": "Create Field",
-
     "fieldName": "Field Name",
     "fieldNamePlaceholder": "Age, Population, Faction...",
-
     "fieldType": "Field Type",
-
     "referenceType": "Allowed Entity Type",
     "anyEntityType": "Any Entity Type",
-
     "requiredField": "This field is required",
     "required": "Required",
-
     "nameField": "Name",
-
     "empty": "No custom fields yet. Add a field to define this entity type.",
-
     "edit": "Edit",
     "delete": "Delete",
     "editField": "Edit Field",
     "saveChanges": "Save Changes",
     "deleteConfirm": "Are you sure you want to delete this field?",
-
     "options": "Dropdown Options",
     "option": "Option",
     "addOption": "+ Add Option"
@@ -118,32 +90,22 @@
   "entities": {
     "title": "Entities",
     "subtitle": "Create and manage the people, places, objects, events, and other information in your world.",
-
     "newEntity": "+ New Entity",
     "createTitle": "Create Entity",
     "createDescription": "Select an entity type and fill in its defined fields.",
-
     "entityType": "Entity Type",
     "selectType": "Select an entity type...",
-
     "create": "Create Entity",
-
     "selectOption": "Select an option...",
     "selectEntity": "Select an entity...",
-
     "yes": "Yes",
     "no": "No",
-
     "emptyTitle": "No Entities Yet",
     "emptyDescription": "Create your first entity to start building this world.",
-
     "noEntitiesInType": "No entities",
-
     "browserTitle": "Entity Browser",
     "browserDescription": "Use the explorer on the left to organize and browse your world. Select an entity to view its details.",
-
     "noCustomFields": "This entity has no custom fields.",
-
     "lastUpdated": "Last updated",
     "edit": "Edit",
     "editTitle": "Edit Entity",
@@ -165,7 +127,6 @@
     "loadError": "Failed to load Documents.",
 
     "root": "Root",
-
     "emptyTree": "No documents yet.",
 
     "newDocument": "+ New Document",
@@ -203,10 +164,29 @@
     "syncComingSoon": "Story Sync will be added after the editor and block system are complete.",
 
     "saved": "Saved",
+    "unsaved": "Unsaved changes",
+    "saving": "Saving...",
+    "saveError": "Save failed",
+    "saveFailed": "Failed to save document.",
+    "autoSaveEnabled": "Auto-save enabled",
+
+    "editorLoading": "Loading editor...",
+    "editorPlaceholder": "Start writing your story...",
+
+    "toolbarBold": "Bold",
+    "toolbarItalic": "Italic",
+    "toolbarStrike": "Strikethrough",
+    "toolbarParagraph": "Paragraph",
+    "toolbarHeading1": "Heading 1",
+    "toolbarHeading2": "Heading 2",
+    "toolbarBulletList": "Bullet List",
+    "toolbarOrderedList": "Numbered List",
+    "toolbarQuote": "Quote",
+    "toolbarUndo": "Undo",
+    "toolbarRedo": "Redo",
 
     "rename": "Rename",
     "delete": "Delete",
-
     "moreActions": "More actions",
 
     "expand": "Expand",
