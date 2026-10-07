@@ -152,5 +152,63 @@
     "folderName": "文件夹名称……",
     "createAtRoot": "在根目录创建",
     "createInside": "在当前节点内创建"
+  },
+
+  "documents": {
+    "moreActions": "更多操作",
+
+    "newDocumentInside": "在此新建文档",
+    "newFolderInside": "在此新建文件夹",
+
+    "createFailed": "创建文档失败。",
+    "createFolderFailed": "创建文件夹失败。",
+    "renameFailed": "重命名失败。",
+    "deleteFailed": "删除失败。",
+
+    "deleteDocumentConfirm": "确定要删除这个文档吗？",
+    "deleteFolderConfirm": "确定要删除这个文件夹吗？其中的内容会被移动到上一级目录。",
+
+    "syncComingSoon": "故事同步将在编辑器和段落系统完成后加入。",
+    "title": "文档",
+    "subtitle": "故事创作与世界设定",
+
+    "loading": "正在加载……",
+    "loadError": "加载文档失败。",
+
+    "emptyTree": "暂无文档。",
+
+    "selectTitle": "文档",
+    "selectDescription": "从左侧资源管理器选择一个文档即可打开。",
+
+    "comingSoon": "后续将加入富文本编辑、自动保存、实体链接、故事同步以及设定一致性检查。",
+
+    "untitled": "未命名文档",
+    "emptyDocument": "这个文档目前是空的。",
+
+    "version": "版本",
+
+    "storySynced": "故事数据已同步",
+    "storyOutOfSync": "故事数据尚未同步",
+
+    "sync": "同步",
+    "syncPending": "故事同步待处理",
+    "syncUpToDate": "故事同步已是最新",
+
+    "saved": "已保存",
+
+    "newDocument": "新建文档",
+    "newFolder": "新建文件夹",
+
+    "createDocument": "创建文档",
+    "createFolder": "创建文件夹",
+
+    "rename": "重命名",
+    "delete": "删除",
+
+    "documentName": "文档名称",
+    "folderName": "文件夹名称",
+
+    "expand": "展开",
+    "collapse": "折叠"
   }
 }

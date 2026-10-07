@@ -8,6 +8,8 @@ const worldRoutes = require("./routes/worldRoutes");
 const entityTypeRoutes = require("./routes/entityTypeRoutes");
 const entityRoutes = require("./routes/entityRoutes");
 const treeRoutes = require("./routes/treeRoutes");
+const documentRoutes = require("./routes/documentRoutes");
+const documentTreeRoutes = require("./routes/documentTreeRoutes");
 
 // Load environment variables before starting the application.
 dotenv.config();
@@ -38,6 +40,12 @@ app.use("/api/worlds", worldRoutes);
 app.use("/api/entity-types", entityTypeRoutes);
 app.use("/api/entities", entityRoutes);
 app.use("/api/tree", treeRoutes);
+
+app.use("/api/documents", documentRoutes);
+app.use(
+  "/api/document-tree",
+  documentTreeRoutes
+);
 
 // ======================================================
 // Health Check

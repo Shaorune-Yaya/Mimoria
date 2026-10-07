@@ -9,6 +9,7 @@ import WorldWorkspace from "./pages/WorldWorkspace";
 import EntityTypesPage from "./pages/EntityTypesPage";
 import EntityTypeEditor from "./pages/EntityTypeEditor";
 import EntitiesPage from "./pages/EntitiesPage";
+import DocumentsPage from "./pages/DocumentsPage";
 
 import "./styles/index.css";
 
@@ -39,6 +40,11 @@ function App() {
         <Route
           path="/world/:worldId/entities"
           element={<EntitiesPage />}
+        />
+
+        <Route
+          path="/world/:worldId/documents"
+          element={<DocumentsPage />}
         />
       </Routes>
     </BrowserRouter>

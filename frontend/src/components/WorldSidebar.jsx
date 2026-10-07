@@ -3,25 +3,16 @@ import {
   useNavigate,
 } from "react-router-dom";
 
-import {
-  useTranslation,
-} from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 function WorldSidebar({
   worldId,
-  variant = "desktop",
-  onNavigate = null,
-  onDockDragStart = null,
 }) {
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const location =
-    useLocation();
-
-  const {
-    t,
-  } = useTranslation();
+  const { t } =
+    useTranslation();
 
   const basePath =
     `/world/${worldId}`;
@@ -41,101 +32,45 @@ function WorldSidebar({
     );
   }
 
-  function go(path) {
-    navigate(path);
-
-    if (onNavigate) {
-      onNavigate();
-    }
-  }
-
-  function handleDockDragStart(
-    event,
-    view
-  ) {
-    event.dataTransfer.effectAllowed =
-      "move";
-
-    event.dataTransfer.setData(
-      "application/x-mimoria-workspace",
-      view
-    );
-
-    event.dataTransfer.setData(
-      "text/plain",
-      view
-    );
-
-    if (onDockDragStart) {
-      onDockDragStart(view);
-    }
-  }
-
-  const className =
-    variant === "drawer"
-      ? "workspace-sidebar workspace-sidebar--drawer"
-      : "workspace-sidebar workspace-sidebar--desktop";
-
   return (
-    <aside className={className}>
+    <aside className="workspace-sidebar">
       <div className="sidebar-section-title">
-        {t(
-          "workspace.library"
-        )}
+        {t("workspace.library")}
       </div>
 
       <button
-        type="button"
         className={
           isExact(basePath)
             ? "sidebar-item active"
             : "sidebar-item"
         }
         onClick={() =>
-          go(basePath)
+          navigate(basePath)
         }
       >
-        {t(
-          "workspace.home"
-        )}
+        {t("workspace.home")}
       </button>
 
       <button
-        type="button"
-        draggable={
-          variant ===
-          "desktop"
-        }
         className={
           isSection(
             `${basePath}/entity-types`
           )
-            ? "sidebar-item active dockable-sidebar-item"
-            : "sidebar-item dockable-sidebar-item"
+            ? "sidebar-item active"
+            : "sidebar-item"
         }
         onClick={() =>
-          go(
+          navigate(
             `${basePath}/entity-types`
-          )
-        }
-        onDragStart={(event) =>
-          handleDockDragStart(
-            event,
-            "entity-types"
           )
         }
       >
         {t(
           "workspace.entityTypes"
         )}
-
-        <span className="sidebar-dock-hint">
-          ⋮⋮
-        </span>
       </button>
 
       <button
-        type="button"
         className={
           isSection(
             `${basePath}/entities`
@@ -144,7 +79,7 @@ function WorldSidebar({
             : "sidebar-item"
         }
         onClick={() =>
-          go(
+          navigate(
             `${basePath}/entities`
           )
         }
@@ -155,80 +90,47 @@ function WorldSidebar({
       </button>
 
       <button
-        type="button"
-        draggable={
-          variant ===
-          "desktop"
+        className={
+          isSection(
+            `${basePath}/documents`
+          )
+            ? "sidebar-item active"
+            : "sidebar-item"
         }
-        className="sidebar-item dockable-sidebar-item"
-        onDragStart={(event) =>
-          handleDockDragStart(
-            event,
-            "documents"
+        onClick={() =>
+          navigate(
+            `${basePath}/documents`
           )
         }
       >
         {t(
           "workspace.documents"
         )}
-
-        <span className="sidebar-dock-hint">
-          ⋮⋮
-        </span>
       </button>
 
       <div className="sidebar-divider" />
 
       <button
-        type="button"
-        draggable={
-          variant ===
-          "desktop"
-        }
-        className="sidebar-item dockable-sidebar-item"
-        onDragStart={(event) =>
-          handleDockDragStart(
-            event,
-            "timeline"
-          )
-        }
+        className="sidebar-item"
+        disabled
       >
         {t(
           "workspace.timeline"
         )}
-
-        <span className="sidebar-dock-hint">
-          ⋮⋮
-        </span>
       </button>
 
       <button
-        type="button"
-        draggable={
-          variant ===
-          "desktop"
-        }
-        className="sidebar-item dockable-sidebar-item"
-        onDragStart={(event) =>
-          handleDockDragStart(
-            event,
-            "graph"
-          )
-        }
+        className="sidebar-item"
+        disabled
       >
         {t(
           "workspace.graph"
         )}
-
-        <span className="sidebar-dock-hint">
-          ⋮⋮
-        </span>
       </button>
 
       <div className="sidebar-spacer" />
 
       <button
-        type="button"
         className="sidebar-item"
         disabled
       >

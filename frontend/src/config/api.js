@@ -7,6 +7,10 @@ export const API_URL = {
   entityTypes: `${API_BASE_URL}/api/entity-types`,
   entities: `${API_BASE_URL}/api/entities`,
   tree: `${API_BASE_URL}/api/tree`,
+
+  documents: `${API_BASE_URL}/api/documents`,
+  documentTree: `${API_BASE_URL}/api/document-tree`,
+
   health: `${API_BASE_URL}/api/health`,
 };
 
