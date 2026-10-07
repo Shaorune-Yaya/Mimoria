@@ -11,6 +11,10 @@ import SecondaryWorkspacePane from "./SecondaryWorkspacePane";
 const MIN_SPLIT_PERCENT = 25;
 const MAX_SPLIT_PERCENT = 75;
 
+const DEFAULT_MOBILE_SHEET_HEIGHT = 36;
+const MIN_MOBILE_SHEET_HEIGHT = 28;
+const MAX_MOBILE_SHEET_HEIGHT = 92;
+
 function WorldLayout({
   worldId,
   worldName,
@@ -22,10 +26,18 @@ function WorldLayout({
   const workspaceSplitRef =
     useRef(null);
 
+  // ======================================================
+  // Mobile Navigation Drawer
+  // ======================================================
+
   const [
     mobileMenuOpen,
     setMobileMenuOpen,
   ] = useState(false);
+
+  // ======================================================
+  // Desktop / Ultrawide Splitter
+  // ======================================================
 
   const [
     splitPercent,
@@ -56,6 +68,26 @@ function WorldLayout({
     setIsResizing,
   ] = useState(false);
 
+  // ======================================================
+  // Mobile Bottom Sheet
+  // ======================================================
+
+  const [
+    mobileSheetHeight,
+    setMobileSheetHeight,
+  ] = useState(
+    DEFAULT_MOBILE_SHEET_HEIGHT
+  );
+
+  const [
+    isMobileSheetResizing,
+    setIsMobileSheetResizing,
+  ] = useState(false);
+
+  // ======================================================
+  // Secondary Workspace
+  // ======================================================
+
   const [
     dockTargetActive,
     setDockTargetActive,
@@ -78,6 +110,10 @@ function WorldLayout({
     setSecondaryPaneOpen,
   ] = useState(true);
 
+  // ======================================================
+  // Layout Classes
+  // ======================================================
+
   const bodyClassName = [
     "workspace-body",
 
@@ -92,16 +128,26 @@ function WorldLayout({
     .filter(Boolean)
     .join(" ");
 
+  // ======================================================
+  // Mobile Drawer
+  // ======================================================
+
   function closeMobileMenu() {
     setMobileMenuOpen(
       false
     );
   }
 
+  // ======================================================
+  // Secondary Workspace View
+  // ======================================================
+
   function setWorkspaceView(
     view
   ) {
-    setSecondaryView(view);
+    setSecondaryView(
+      view
+    );
 
     if (view) {
       localStorage.setItem(
@@ -115,10 +161,18 @@ function WorldLayout({
     }
   }
 
-  function beginResize(event) {
+  // ======================================================
+  // Desktop Split Resize
+  // ======================================================
+
+  function beginResize(
+    event
+  ) {
     event.preventDefault();
 
-    setIsResizing(true);
+    setIsResizing(
+      true
+    );
   }
 
   useEffect(() => {
@@ -161,7 +215,9 @@ function WorldLayout({
     }
 
     function handlePointerUp() {
-      setIsResizing(false);
+      setIsResizing(
+        false
+      );
 
       localStorage.setItem(
         "mimoria-workspace-split",
@@ -204,6 +260,123 @@ function WorldLayout({
     isResizing,
     splitPercent,
   ]);
+
+  // ======================================================
+  // Mobile Bottom Sheet Resize
+  // ======================================================
+
+  function beginMobileSheetResize(
+    event
+  ) {
+    if (
+      window.innerWidth >
+      760
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    setIsMobileSheetResizing(
+      true
+    );
+  }
+
+  useEffect(() => {
+    if (
+      !isMobileSheetResizing
+    ) {
+      return;
+    }
+
+    function handlePointerMove(
+      event
+    ) {
+      const viewportHeight =
+        window.innerHeight;
+
+      if (
+        viewportHeight <= 0
+      ) {
+        return;
+      }
+
+      const rawHeight =
+        ((viewportHeight -
+          event.clientY) /
+          viewportHeight) *
+        100;
+
+      const nextHeight =
+        Math.min(
+          MAX_MOBILE_SHEET_HEIGHT,
+          Math.max(
+            MIN_MOBILE_SHEET_HEIGHT,
+            rawHeight
+          )
+        );
+
+      setMobileSheetHeight(
+        nextHeight
+      );
+    }
+
+    function handlePointerUp() {
+      setIsMobileSheetResizing(
+        false
+      );
+    }
+
+    window.addEventListener(
+      "pointermove",
+      handlePointerMove,
+      {
+        passive: false,
+      }
+    );
+
+    window.addEventListener(
+      "pointerup",
+      handlePointerUp
+    );
+
+    window.addEventListener(
+      "pointercancel",
+      handlePointerUp
+    );
+
+    document.body.classList.add(
+      "mobile-sheet-is-resizing"
+    );
+
+    return () => {
+      window.removeEventListener(
+        "pointermove",
+        handlePointerMove
+      );
+
+      window.removeEventListener(
+        "pointerup",
+        handlePointerUp
+      );
+
+      window.removeEventListener(
+        "pointercancel",
+        handlePointerUp
+      );
+
+      document.body.classList.remove(
+        "mobile-sheet-is-resizing"
+      );
+    };
+  }, [
+    isMobileSheetResizing,
+  ]);
+
+  // ======================================================
+  // Docking
+  // ======================================================
 
   function handleDockDragOver(
     event
@@ -263,8 +436,13 @@ function WorldLayout({
       return;
     }
 
-    setWorkspaceView(view);
-    setSecondaryPaneOpen(true);
+    setWorkspaceView(
+      view
+    );
+
+    setSecondaryPaneOpen(
+      true
+    );
   }
 
   function closeSecondaryPane() {
@@ -278,6 +456,10 @@ function WorldLayout({
       true
     );
   }
+
+  // ======================================================
+  // Render
+  // ======================================================
 
   return (
     <div className="workspace">
@@ -304,7 +486,9 @@ function WorldLayout({
         >
           <div
             className="mobile-drawer"
-            onClick={(event) =>
+            onClick={(
+              event
+            ) =>
               event.stopPropagation()
             }
           >
@@ -346,8 +530,27 @@ function WorldLayout({
           style={{
             "--primary-pane-percent":
               `${splitPercent}%`,
+
+            "--mobile-sheet-height":
+              `${mobileSheetHeight}dvh`,
           }}
         >
+          <div
+            className={
+              isMobileSheetResizing
+                ? "mobile-sheet-resize-handle active"
+                : "mobile-sheet-resize-handle"
+            }
+            onPointerDown={
+              beginMobileSheetResize
+            }
+            role="separator"
+            aria-orientation="horizontal"
+            aria-label="Resize panel"
+          >
+            <div className="mobile-sheet-resize-pill" />
+          </div>
+
           <main className="workspace-main workspace-primary-pane">
             {children}
           </main>

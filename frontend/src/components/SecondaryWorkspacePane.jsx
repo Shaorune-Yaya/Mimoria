@@ -13,21 +13,25 @@ import {
 
 function SecondaryWorkspacePane({
   worldId,
-  activeView,
-  onChangeView,
   onClose,
 }) {
-  const {
-    t,
-  } = useTranslation();
+  const { t } =
+    useTranslation();
 
   const [
     entityTypes,
     setEntityTypes,
   ] = useState([]);
 
+  const [
+    loading,
+    setLoading,
+  ] = useState(true);
+
   async function fetchEntityTypes() {
     try {
+      setLoading(true);
+
       const response =
         await fetch(
           `${API_URL.entityTypes}/world/${worldId}`
@@ -42,83 +46,78 @@ function SecondaryWorkspacePane({
       const data =
         await response.json();
 
-      setEntityTypes(data);
+      setEntityTypes(
+        Array.isArray(data)
+          ? data
+          : []
+      );
     } catch (error) {
       console.error(
         "Failed to load entity types:",
         error
       );
+
+      setEntityTypes([]);
+    } finally {
+      setLoading(false);
     }
   }
 
   useEffect(() => {
-    if (
-      activeView ===
-      "entity-types"
-    ) {
-      fetchEntityTypes();
-    }
-  }, [
-    activeView,
-    worldId,
-  ]);
+    fetchEntityTypes();
+  }, [worldId]);
 
-  const titleMap = {
-    "entity-types":
-      t(
-        "workspace.entityTypes"
-      ),
-
-    documents:
-      t(
-        "workspace.documents"
-      ),
-
-    timeline:
-      t(
-        "workspace.timeline"
-      ),
-
-    graph:
-      t(
-        "workspace.graph"
-      ),
-  };
-
-  function renderContent() {
-    if (
-      !activeView
-    ) {
-      return (
-        <div className="secondary-pane-empty">
-          <strong>
-            Dock another view here
-          </strong>
-
-          <p>
-            Drag a workspace tool
-            from the navigation
-            sidebar into this pane.
-          </p>
+  return (
+    <section className="workspace-secondary-pane">
+      <div className="secondary-pane-header">
+        <div className="secondary-pane-title">
+          {t(
+            "workspace.entityTypes"
+          )}
         </div>
-      );
-    }
 
-    if (
-      activeView ===
-      "entity-types"
-    ) {
-      return (
-        <div className="secondary-entity-type-list">
-          {entityTypes.length ===
+        <div className="secondary-pane-header-actions">
+          <div className="secondary-pane-fixed-view">
+            {t(
+              "workspace.secondaryWorkspace"
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="secondary-pane-close"
+            onClick={
+              onClose
+            }
+            aria-label={t(
+              "workspace.closeSecondary"
+            )}
+            title={t(
+              "workspace.closeSecondary"
+            )}
+          >
+            ×
+          </button>
+        </div>
+      </div>
+
+      <div className="secondary-pane-content">
+        {loading ? (
+          <div className="secondary-pane-empty">
+            {t(
+              "workspace.loading"
+            )}
+          </div>
+        ) : entityTypes.length ===
           0 ? (
-            <div className="secondary-pane-empty">
-              {t(
-                "entityTypes.emptyTitle"
-              )}
-            </div>
-          ) : (
-            entityTypes.map(
+          <div className="secondary-pane-empty">
+            {t(
+              "entityTypes.emptyTitle"
+            )}
+          </div>
+        ) : (
+          <div className="secondary-entity-type-list">
+            {entityTypes.map(
               (type) => (
                 <div
                   className="secondary-entity-type-item"
@@ -133,7 +132,9 @@ function SecondaryWorkspacePane({
 
                   <div>
                     <strong>
-                      {type.name}
+                      {
+                        type.name
+                      }
                     </strong>
 
                     {type.description && (
@@ -146,148 +147,9 @@ function SecondaryWorkspacePane({
                   </div>
                 </div>
               )
-            )
-          )}
-        </div>
-      );
-    }
-
-    if (
-      activeView ===
-      "timeline"
-    ) {
-      return (
-        <div className="secondary-pane-placeholder">
-          <div className="secondary-pane-placeholder-icon">
-            ◷
-          </div>
-
-          <h3>
-            {t(
-              "workspace.timeline"
             )}
-          </h3>
-
-          <p>
-            Timeline workspace
-            will appear here.
-          </p>
-        </div>
-      );
-    }
-
-    if (
-      activeView ===
-      "graph"
-    ) {
-      return (
-        <div className="secondary-pane-placeholder">
-          <div className="secondary-pane-placeholder-icon">
-            ◉
           </div>
-
-          <h3>
-            {t(
-              "workspace.graph"
-            )}
-          </h3>
-
-          <p>
-            Relationship graph
-            will appear here.
-          </p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="secondary-pane-placeholder">
-        <div className="secondary-pane-placeholder-icon">
-          ▤
-        </div>
-
-        <h3>
-          {t(
-            "workspace.documents"
-          )}
-        </h3>
-
-        <p>
-          Document workspace
-          will appear here.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <section className="workspace-secondary-pane">
-      <div className="secondary-pane-header">
-        <div className="secondary-pane-title">
-          {activeView
-            ? titleMap[
-                activeView
-              ]
-            : "Secondary Workspace"}
-        </div>
-
-        <div className="secondary-pane-header-actions">
-          <select
-            className="secondary-pane-view-select"
-            value={
-              activeView || ""
-            }
-            onChange={(event) =>
-              onChangeView(
-                event.target.value ||
-                  null
-              )
-            }
-          >
-            <option value="">
-              Empty
-            </option>
-
-            <option value="entity-types">
-              {t(
-                "workspace.entityTypes"
-              )}
-            </option>
-
-            <option value="documents">
-              {t(
-                "workspace.documents"
-              )}
-            </option>
-
-            <option value="timeline">
-              {t(
-                "workspace.timeline"
-              )}
-            </option>
-
-            <option value="graph">
-              {t(
-                "workspace.graph"
-              )}
-            </option>
-          </select>
-
-          <button
-            type="button"
-            className="secondary-pane-close"
-            onClick={
-              onClose
-            }
-            aria-label="Close secondary pane"
-          >
-            ×
-          </button>
-        </div>
-      </div>
-
-      <div className="secondary-pane-content">
-        {renderContent()}
+        )}
       </div>
     </section>
   );

@@ -1,5 +1,6 @@
 /* ======================================================
    Explorer Sidebar
+   Shared by Entity Explorer and Documents Explorer
    ====================================================== */
 
 .entity-tree-sidebar {
@@ -9,26 +10,35 @@
 
   min-height: 0;
 
+  display: flex;
+  flex-direction: column;
+
   background: #111419;
 
   border-right:
     1px solid
     var(--color-border);
 
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  overscroll-behavior:
-    contain;
+  /*
+   * The sidebar itself must not scroll.
+   * Only .entity-tree scrolls.
+   */
+  overflow: hidden;
 }
 
-.entity-tree-header {
-  position: sticky;
-  top: 0;
 
-  z-index: 10;
+/* ======================================================
+   Explorer Header
+   ====================================================== */
+
+.entity-tree-header {
+  position: relative;
+
+  z-index: 30;
 
   min-height: 46px;
+
+  flex-shrink: 0;
 
   display: flex;
   align-items: center;
@@ -66,16 +76,16 @@
   align-items: center;
   justify-content: center;
 
-  gap: 2px;
-
   padding: 0 7px;
 
   border:
-    1px solid transparent;
+    1px solid
+    transparent;
 
   border-radius: 5px;
 
-  background: transparent;
+  background:
+    transparent;
 
   color:
     var(--color-text-secondary);
@@ -93,24 +103,33 @@
   border-color:
     var(--color-border-light);
 
-  color: #ffffff;
+  color:
+    #ffffff;
 }
 
-.tree-add-symbol {
-  position: relative;
 
-  top: -1px;
-
-  font-size: 12px;
-  font-weight: 700;
-}
+/* ======================================================
+   Scrollable Tree Area
+   ====================================================== */
 
 .entity-tree {
   width: 100%;
 
+  min-width: 0;
+  min-height: 0;
+
+  flex: 1;
+
   padding: 6px 0;
 
   overflow-x: hidden;
+  overflow-y: auto;
+
+  overscroll-behavior:
+    contain;
+
+  scrollbar-gutter:
+    stable;
 }
 
 
@@ -119,6 +138,8 @@
    ====================================================== */
 
 .folder-create-form {
+  flex-shrink: 0;
+
   padding: 7px;
 
   border-bottom:
@@ -148,11 +169,15 @@
 
   padding: 6px 7px;
 
-  background: #101319;
-  color: #e4e7eb;
+  background:
+    #101319;
+
+  color:
+    #e4e7eb;
 
   border:
-    1px solid #3b424e;
+    1px solid
+    #3b424e;
 
   border-radius: 4px;
 
@@ -160,7 +185,8 @@
 }
 
 .folder-create-form input:focus {
-  border-color: #687483;
+  border-color:
+    #687483;
 }
 
 .folder-create-form button {
@@ -170,20 +196,24 @@
   flex-shrink: 0;
 
   border: none;
+
   border-radius: 4px;
 
   background:
     transparent;
 
-  color: #aab1bc;
+  color:
+    #aab1bc;
 
   cursor: pointer;
 }
 
 .folder-create-form button:hover {
-  background: #272c35;
+  background:
+    #272c35;
 
-  color: #ffffff;
+  color:
+    #ffffff;
 }
 
 
@@ -192,9 +222,11 @@
    ====================================================== */
 
 .tree-root-drop-zone {
+  flex-shrink: 0;
+
   margin: 5px 7px;
 
-  padding: 4px 7px;
+  padding: 5px 7px;
 
   border:
     1px dashed
@@ -202,29 +234,36 @@
 
   border-radius: 4px;
 
-  color: #535b67;
+  color:
+    #535b67;
 
   font-size: 10px;
 
   transition:
     background 0.12s ease,
-    border-color 0.12s ease;
+    border-color 0.12s ease,
+    color 0.12s ease;
 }
 
 .tree-root-drop-zone.active {
-  background: #222832;
+  background:
+    #25303c;
 
-  border-color: #657082;
+  border-color:
+    #7189a5;
 
-  color: #bcc3cc;
+  color:
+    #d3dce7;
 }
 
 
 /* ======================================================
-   Explorer Nodes
+   Explorer Row
    ====================================================== */
 
 .explorer-row {
+  position: relative;
+
   width: 100%;
   max-width: 100%;
 
@@ -235,13 +274,18 @@
 
   padding-right: 5px;
 
+  /*
+   * Prevent dragged/drop decoration from creating
+   * horizontal or vertical overflow.
+   */
   overflow: hidden;
 
   border:
     1px solid
     transparent;
 
-  color: #bec4cd;
+  color:
+    #bec4cd;
 
   user-select: none;
 }
@@ -255,16 +299,150 @@
   background:
     var(--color-bg-selected);
 
-  color: #ffffff;
+  color:
+    #ffffff;
 }
 
-.explorer-row.drop-target {
-  background: #25303c;
 
-  border-color: #566577;
+/* ======================================================
+   Invisible Drop Zones
+   ====================================================== */
+
+.explorer-drop-zone {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  z-index: 5;
+
+  pointer-events: none;
 }
+
+
+/*
+ * Top 30%:
+ * Insert before this node.
+ */
+
+.explorer-drop-zone-before {
+  top: 0;
+
+  height: 30%;
+}
+
+
+/*
+ * Middle 40%:
+ * Make the dragged node a child.
+ */
+
+.explorer-drop-zone-inside {
+  top: 30%;
+
+  height: 40%;
+}
+
+
+/*
+ * Bottom 30%:
+ * Insert after this node.
+ */
+
+.explorer-drop-zone-after {
+  bottom: 0;
+
+  height: 30%;
+}
+
+
+/* ======================================================
+   Drop Inside
+   ====================================================== */
+
+.explorer-row.drop-inside-target {
+  background:
+    #25303c;
+
+  border-color:
+    #657890;
+
+  box-shadow:
+    inset
+    0 0 0 1px
+    rgba(
+      126,
+      160,
+      200,
+      0.25
+    );
+}
+
+
+/* ======================================================
+   Drop Before / After Blue Line
+   ====================================================== */
+
+.explorer-row.drop-before::before,
+.explorer-row.drop-after::after {
+  content: "";
+
+  position: absolute;
+
+  left: 5px;
+  right: 5px;
+
+  z-index: 20;
+
+  height: 3px;
+
+  border-radius:
+    999px;
+
+  background: #3794ff;
+
+  box-shadow:
+    0 0 0 1px
+    rgba(
+      79,
+      143,
+      216,
+      0.35
+    ),
+    0 0 8px
+    rgba(
+      79,
+      143,
+      216,
+      0.75
+    );
+
+  pointer-events: none;
+}
+
+/*
+ * Keep the line inside the row so overflow:hidden
+ * does not clip it.
+ */
+
+.explorer-row.drop-before::before {
+  top: 0;
+}
+
+.explorer-row.drop-after::after {
+  bottom: 0;
+}
+
+
+/* ======================================================
+   Toggle
+   ====================================================== */
 
 .explorer-toggle {
+  position: relative;
+
+  z-index: 10;
+
   width: 17px;
   height: 28px;
 
@@ -278,13 +456,25 @@
 
   border: none;
 
-  background: transparent;
-  color: #747d89;
+  background:
+    transparent;
+
+  color:
+    #747d89;
 
   cursor: pointer;
 }
 
+
+/* ======================================================
+   Main Node Button
+   ====================================================== */
+
 .explorer-node-main {
+  position: relative;
+
+  z-index: 10;
+
   min-width: 0;
   max-width: 100%;
 
@@ -303,8 +493,11 @@
 
   border: none;
 
-  background: transparent;
-  color: inherit;
+  background:
+    transparent;
+
+  color:
+    inherit;
 
   text-align: left;
 
@@ -334,17 +527,92 @@
 
 
 /* ======================================================
+   Drag Overlay
+   ====================================================== */
+
+.explorer-drag-overlay {
+  width:
+    var(--explorer-width);
+
+  min-height: 30px;
+
+  display: flex;
+  align-items: center;
+
+  padding:
+    0 5px 0 8px;
+
+  overflow: hidden;
+
+  background:
+    rgba(
+      37,
+      43,
+      53,
+      0.58
+    );
+
+  border:
+    1px dashed
+    rgba(
+      126,
+      160,
+      200,
+      0.72
+    );
+
+  color:
+    #ffffff;
+
+  box-shadow:
+    0 6px 18px
+    rgba(
+      0,
+      0,
+      0,
+      0.22
+    );
+
+  pointer-events:
+    none;
+
+  opacity:
+    0.82;
+
+  backdrop-filter:
+    blur(1px);
+}
+
+.explorer-drag-overlay
+.explorer-toggle {
+  cursor: default;
+}
+
+.explorer-drag-overlay
+.explorer-node-main {
+  cursor: default;
+}
+
+
+/* ======================================================
    Explorer Row Actions
    ====================================================== */
 
 .explorer-add-child,
+.explorer-context-button,
 .explorer-drag-handle {
+  position: relative;
+
+  z-index: 10;
+
   flex-shrink: 0;
 
   border: none;
+
   border-radius: 4px;
 
-  background: transparent;
+  background:
+    transparent;
 
   cursor: pointer;
 }
@@ -353,15 +621,29 @@
   width: 22px;
   height: 24px;
 
-  color: transparent;
+  color:
+    transparent;
 
   font-size: 15px;
 }
 
+.explorer-context-button {
+  width: 24px;
+  height: 24px;
+
+  color:
+    transparent;
+
+  font-size: 16px;
+  line-height: 1;
+}
+
 .explorer-drag-handle {
   width: 22px;
+  height: 24px;
 
-  color: transparent;
+  color:
+    transparent;
 
   font-size: 12px;
 
@@ -370,16 +652,26 @@
 
 .explorer-row:hover
 .explorer-add-child {
-  color: #747d89;
+  color:
+    #747d89;
+}
+
+.explorer-row:hover
+.explorer-context-button {
+  color:
+    #77808d;
 }
 
 .explorer-row:hover
 .explorer-drag-handle {
-  color: #67707d;
+  color:
+    #67707d;
 }
 
-.explorer-add-child:hover {
-  background: #303640;
+.explorer-add-child:hover,
+.explorer-context-button:hover {
+  background:
+    #303640;
 
   color:
     #ffffff !important;
@@ -391,88 +683,102 @@
 
 
 /* ======================================================
-   Legacy Tree Styles
+   Inline Rename
    ====================================================== */
 
-.tree-type {
-  width: 100%;
-}
+.explorer-rename-wrap {
+  position: relative;
 
-.tree-type-row {
-  width: 100%;
-  height: 31px;
+  z-index: 10;
+
+  min-width: 0;
+  height: 28px;
+
+  flex: 1;
 
   display: flex;
   align-items: center;
 
-  padding: 0 8px;
-
-  border: none;
-
-  background: transparent;
-  color: #c1c6cf;
-
-  cursor: pointer;
-
-  text-align: left;
+  gap: 5px;
 }
 
-.tree-type-row:hover {
-  background:
-    var(--color-bg-hover-soft);
-}
+.explorer-rename-input {
+  min-width: 0;
+  height: 24px;
 
-.tree-arrow {
-  width: 16px;
-
-  color: #7f8794;
-
-  font-size: 17px;
-
-  text-align: center;
-}
-
-.tree-type-icon {
-  width: 24px;
-
-  font-size: 15px;
-
-  text-align: center;
-}
-
-.tree-type-name {
   flex: 1;
 
-  overflow: hidden;
+  padding: 2px 6px;
+
+  border:
+    1px solid
+    #66778d;
+
+  border-radius:
+    3px;
+
+  outline: none;
+
+  background:
+    #101318;
+
+  color:
+    #ffffff;
 
   font-size: 13px;
-
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
-.tree-count {
-  margin-left: 8px;
-
-  color: #626a76;
-
-  font-size: 11px;
+.explorer-rename-input:focus {
+  border-color:
+    #7f94ad;
 }
 
-.tree-children {
-  margin-left: 16px;
 
-  padding-left: 12px;
+/* ======================================================
+   Context Menu
+   ====================================================== */
 
-  border-left:
-    1px solid #343942;
+.explorer-context-menu {
+  position: fixed;
+
+  z-index: 3000;
+
+  width: 190px;
+
+  padding: 5px;
+
+  background:
+    #1b1f26;
+
+  border:
+    1px solid
+    #343b46;
+
+  border-radius: 7px;
+
+  box-shadow:
+    0 10px 28px
+    rgba(
+      0,
+      0,
+      0,
+      0.42
+    );
 }
 
-.tree-entity-row {
+.explorer-context-item {
   width: 100%;
-  height: 29px;
+  height: 32px;
 
-  display: flex;
+  display: grid;
+
+  grid-template-columns:
+    22px
+    minmax(
+      0,
+      1fr
+    );
+
   align-items: center;
 
   gap: 6px;
@@ -481,45 +787,50 @@
 
   border: none;
 
-  background: transparent;
+  border-radius: 4px;
+
+  background:
+    transparent;
 
   color:
-    var(--color-text-secondary);
+    #c8cdd6;
 
   cursor: pointer;
 
-  font-size: 13px;
-
   text-align: left;
+
+  font-size: 12px;
 }
 
-.tree-entity-row:hover {
-  background:
-    var(--color-bg-hover-soft);
-
-  color: #ffffff;
-}
-
-.tree-entity-row.selected {
+.explorer-context-item:hover {
   background:
     var(--color-bg-selected);
 
-  color: #ffffff;
+  color:
+    #ffffff;
 }
 
-.tree-file-mark {
-  width: 10px;
-
-  color: #59616d;
+.explorer-context-item.danger {
+  color:
+    #d99a9a;
 }
 
-.tree-empty {
-  padding: 6px 10px 8px;
+.explorer-context-item.danger:hover {
+  background:
+    #3a2427;
 
-  color: #5f6772;
+  color:
+    #ffd3d3;
+}
 
-  font-size: 11px;
-  font-style: italic;
+.explorer-context-divider {
+  height: 1px;
+
+  margin:
+    4px 5px;
+
+  background:
+    var(--color-border);
 }
 
 
@@ -535,7 +846,8 @@
 
     height: 100%;
 
-    border-right: none;
+    border-right:
+      none;
   }
 
   .entity-tree-header {
@@ -546,50 +858,70 @@
   }
 
   .explorer-row {
-    min-height: 42px;
+    min-height:
+      42px;
 
-    padding-right: 8px;
+    padding-right:
+      8px;
   }
 
   .explorer-toggle {
     width: 24px;
     height: 40px;
 
-    font-size: 17px;
+    font-size:
+      17px;
   }
 
   .explorer-node-main {
-    height: 40px;
+    height:
+      40px;
   }
 
   .explorer-icon {
     width: 24px;
 
-    font-size: 17px;
+    font-size:
+      17px;
   }
 
   .explorer-name {
-    font-size: 14px;
+    font-size:
+      14px;
   }
 
-  .explorer-add-child {
+  .explorer-add-child,
+  .explorer-context-button {
     width: 32px;
     height: 34px;
 
-    color: #737c89;
+    color:
+      #737c89;
+  }
+
+  .explorer-context-menu {
+    width:
+      min(
+        210px,
+        calc(
+          100vw -
+          16px
+        )
+      );
   }
 
   /*
-   * Dragging tree nodes with touch gestures conflicts
-   * with scrolling, so the drag handle is hidden in
-   * mobile mode for now.
+   * Touch dragging is intentionally disabled.
+   * Vertical drag gestures interfere with scrolling.
    */
 
   .explorer-drag-handle {
-    display: none;
+    display:
+      none;
   }
 
   .tree-root-drop-zone {
-    display: none;
+    display:
+      none;
   }
 }

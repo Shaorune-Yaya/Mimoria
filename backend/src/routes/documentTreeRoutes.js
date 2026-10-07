@@ -1,6 +1,9 @@
 const express = require("express");
 
-const DocumentNode = require("../models/DocumentNode");
+const Document = require("../models/Document");
+const DocumentNode = require(
+  "../models/DocumentNode"
+);
 
 const {
   getDevUser,
@@ -9,549 +12,1057 @@ const {
 
 const router = express.Router();
 
-/*
- * Normalize sibling order.
- */
-async function normalizeOrder(
-  worldId,
-  parentId
-) {
-  const nodes = await DocumentNode.find({
-    worldId,
-    parentId: parentId || null,
-  }).sort({
-    order: 1,
-    createdAt: 1,
-  });
 
-  const operations = nodes.map(
-    (node, index) => ({
-      updateOne: {
-        filter: {
-          _id: node._id,
-        },
+// ======================================================
+// Helpers
+// ======================================================
 
-        update: {
-          $set: {
-            order: index,
-          },
-        },
-      },
-    })
-  );
-
-  if (operations.length > 0) {
-    await DocumentNode.bulkWrite(
-      operations
-    );
-  }
-}
-
-/*
- * Check whether moving a folder would create a cycle.
- */
-async function wouldCreateCycle(
-  nodeId,
-  parentId
-) {
+function normalizeParentId(parentId) {
   if (!parentId) {
-    return false;
+    return null;
   }
 
   if (
-    String(nodeId) ===
-    String(parentId)
+    typeof parentId === "object" &&
+    parentId._id
   ) {
-    return true;
+    return parentId._id.toString();
   }
 
-  let currentId = parentId;
+  return parentId.toString();
+}
+
+
+async function normalizeSiblingOrders(
+  worldId,
+  parentId
+) {
+  const siblings =
+    await DocumentNode.find({
+      worldId,
+      parentId:
+        parentId || null,
+    }).sort({
+      order: 1,
+      createdAt: 1,
+    });
+
+  if (
+    siblings.length === 0
+  ) {
+    return;
+  }
+
+  await DocumentNode.bulkWrite(
+    siblings.map(
+      (node, index) => ({
+        updateOne: {
+          filter: {
+            _id: node._id,
+          },
+
+          update: {
+            $set: {
+              order: index,
+            },
+          },
+        },
+      })
+    )
+  );
+}
+
+
+// Create DocumentNodes for Documents that existed
+// before the document tree system was added.
+async function syncMissingDocumentNodes(
+  worldId
+) {
+  const documents =
+    await Document.find({
+      worldId,
+    }).select(
+      "_id title"
+    );
+
+  if (
+    documents.length === 0
+  ) {
+    return;
+  }
+
+  const documentIds =
+    documents.map(
+      (document) =>
+        document._id
+    );
+
+  const existingNodes =
+    await DocumentNode.find({
+      worldId,
+
+      kind: "document",
+
+      documentId: {
+        $in:
+          documentIds,
+      },
+    }).select(
+      "documentId"
+    );
+
+  const existingDocumentIds =
+    new Set(
+      existingNodes.map(
+        (node) =>
+          node.documentId.toString()
+      )
+    );
+
+  const missingDocuments =
+    documents.filter(
+      (document) =>
+        !existingDocumentIds.has(
+          document._id.toString()
+        )
+    );
+
+  if (
+    missingDocuments.length ===
+    0
+  ) {
+    return;
+  }
+
+  const rootCount =
+    await DocumentNode.countDocuments({
+      worldId,
+      parentId: null,
+    });
+
+  const newNodes =
+    missingDocuments.map(
+      (document, index) => ({
+        worldId,
+
+        kind: "document",
+
+        name:
+          document.title,
+
+        documentId:
+          document._id,
+
+        parentId: null,
+
+        order:
+          rootCount +
+          index,
+      })
+    );
+
+  try {
+    await DocumentNode.insertMany(
+      newNodes,
+      {
+        ordered: false,
+      }
+    );
+  } catch (error) {
+    if (
+      error.code !== 11000
+    ) {
+      throw error;
+    }
+  }
+}
+
+
+// Check whether possibleDescendantId is
+// somewhere inside nodeId.
+async function isDescendant(
+  nodeId,
+  possibleDescendantId
+) {
+  let currentId =
+    possibleDescendantId;
 
   while (currentId) {
     const current =
       await DocumentNode.findById(
         currentId
+      ).select(
+        "parentId"
       );
 
     if (!current) {
-      break;
+      return false;
     }
 
     if (
-      String(current._id) ===
-      String(nodeId)
+      current._id.toString() ===
+      nodeId.toString()
     ) {
       return true;
     }
 
-    currentId = current.parentId;
+    currentId =
+      current.parentId;
   }
 
   return false;
 }
 
-/*
- * Get the complete Documents Explorer tree.
- */
-router.get("/world/:worldId", async (req, res) => {
-  try {
-    const user = await getDevUser();
 
-    const world = await getOwnedWorld(
-      req.params.worldId,
-      user._id
-    );
+// ======================================================
+// Get Document Tree
+// GET /api/document-tree/world/:worldId
+// ======================================================
 
-    if (!world) {
-      return res.status(404).json({
-        message: "World not found.",
-      });
-    }
+router.get(
+  "/world/:worldId",
+  async (req, res) => {
+    try {
+      const user =
+        await getDevUser();
 
-    const nodes = await DocumentNode.find({
-      worldId: world._id,
-    })
-      .populate("documentId")
-      .sort({
-        parentId: 1,
-        order: 1,
-        createdAt: 1,
-      });
+      const world =
+        await getOwnedWorld(
+          req.params.worldId,
+          user._id
+        );
 
-    res.json(nodes);
-  } catch (error) {
-    console.error(
-      "Failed to load document tree:",
-      error
-    );
-
-    res.status(500).json({
-      message:
-        "Failed to load document tree.",
-    });
-  }
-});
-
-/*
- * Create a folder.
- */
-router.post("/folders", async (req, res) => {
-  try {
-    const user = await getDevUser();
-
-    const {
-      worldId,
-      name,
-      parentId = null,
-    } = req.body;
-
-    const world = await getOwnedWorld(
-      worldId,
-      user._id
-    );
-
-    if (!world) {
-      return res.status(404).json({
-        message: "World not found.",
-      });
-    }
-
-    if (
-      typeof name !== "string" ||
-      !name.trim()
-    ) {
-      return res.status(400).json({
-        message: "Folder name is required.",
-      });
-    }
-
-    let parentNode = null;
-
-    if (parentId) {
-      parentNode =
-        await DocumentNode.findOne({
-          _id: parentId,
-          worldId: world._id,
-          kind: "folder",
-        });
-
-      if (!parentNode) {
-        return res.status(400).json({
-          message: "Invalid parent folder.",
-        });
-      }
-    }
-
-    const siblingCount =
-      await DocumentNode.countDocuments({
-        worldId: world._id,
-        parentId: parentId || null,
-      });
-
-    const folder =
-      await DocumentNode.create({
-        worldId: world._id,
-        kind: "folder",
-        name: name.trim(),
-        parentId: parentNode
-          ? parentNode._id
-          : null,
-        order: siblingCount,
-      });
-
-    res.status(201).json(folder);
-  } catch (error) {
-    console.error(
-      "Failed to create document folder:",
-      error
-    );
-
-    res.status(500).json({
-      message:
-        "Failed to create document folder.",
-    });
-  }
-});
-
-/*
- * Rename a folder.
- */
-router.put("/:nodeId/name", async (req, res) => {
-  try {
-    const user = await getDevUser();
-
-    const node =
-      await DocumentNode.findById(
-        req.params.nodeId
-      );
-
-    if (!node) {
-      return res.status(404).json({
-        message: "Document node not found.",
-      });
-    }
-
-    const world = await getOwnedWorld(
-      node.worldId,
-      user._id
-    );
-
-    if (!world) {
-      return res.status(403).json({
-        message:
-          "You do not have access to this node.",
-      });
-    }
-
-    if (node.kind !== "folder") {
-      return res.status(400).json({
-        message:
-          "Only folders can be renamed through this endpoint.",
-      });
-    }
-
-    const name =
-      typeof req.body.name === "string"
-        ? req.body.name.trim()
-        : "";
-
-    if (!name) {
-      return res.status(400).json({
-        message: "Folder name is required.",
-      });
-    }
-
-    node.name = name;
-
-    await node.save();
-
-    res.json(node);
-  } catch (error) {
-    console.error(
-      "Failed to rename document folder:",
-      error
-    );
-
-    res.status(500).json({
-      message:
-        "Failed to rename document folder.",
-    });
-  }
-});
-
-/*
- * Move/reorder a node.
- *
- * parentId:
- *   null -> root
- *   folder id -> inside that folder
- *
- * index:
- *   desired sibling position
- */
-router.put("/:nodeId/move", async (req, res) => {
-  try {
-    const user = await getDevUser();
-
-    const node =
-      await DocumentNode.findById(
-        req.params.nodeId
-      );
-
-    if (!node) {
-      return res.status(404).json({
-        message: "Document node not found.",
-      });
-    }
-
-    const world = await getOwnedWorld(
-      node.worldId,
-      user._id
-    );
-
-    if (!world) {
-      return res.status(403).json({
-        message:
-          "You do not have access to this node.",
-      });
-    }
-
-    const oldParentId =
-      node.parentId || null;
-
-    const requestedParentId =
-      req.body.parentId || null;
-
-    let newParentId = null;
-
-    if (requestedParentId) {
-      const parent =
-        await DocumentNode.findOne({
-          _id: requestedParentId,
-          worldId: world._id,
-          kind: "folder",
-        });
-
-      if (!parent) {
-        return res.status(400).json({
-          message:
-            "Invalid destination folder.",
-        });
+      if (!world) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "World not found",
+          });
       }
 
-      newParentId = parent._id;
-    }
-
-    if (
-      node.kind === "folder" &&
-      (await wouldCreateCycle(
-        node._id,
-        newParentId
-      ))
-    ) {
-      return res.status(400).json({
-        message:
-          "Cannot move a folder inside itself or one of its descendants.",
-      });
-    }
-
-    node.parentId = newParentId;
-
-    await node.save();
-
-    await normalizeOrder(
-      world._id,
-      oldParentId
-    );
-
-    let siblings =
-      await DocumentNode.find({
-        worldId: world._id,
-        parentId: newParentId,
-        _id: {
-          $ne: node._id,
-        },
-      }).sort({
-        order: 1,
-        createdAt: 1,
-      });
-
-    let index = Number.isInteger(
-      req.body.index
-    )
-      ? req.body.index
-      : siblings.length;
-
-    index = Math.max(
-      0,
-      Math.min(index, siblings.length)
-    );
-
-    siblings.splice(index, 0, node);
-
-    const operations = siblings.map(
-      (sibling, siblingIndex) => ({
-        updateOne: {
-          filter: {
-            _id: sibling._id,
-          },
-
-          update: {
-            $set: {
-              parentId: newParentId,
-              order: siblingIndex,
-            },
-          },
-        },
-      })
-    );
-
-    if (operations.length > 0) {
-      await DocumentNode.bulkWrite(
-        operations
+      await syncMissingDocumentNodes(
+        world._id
       );
+
+      const nodes =
+        await DocumentNode.find({
+          worldId:
+            world._id,
+        })
+          .populate(
+            "documentId"
+          )
+          .sort({
+            order: 1,
+            createdAt: 1,
+          });
+
+      res.json(nodes);
+    } catch (error) {
+      console.error(
+        "Failed to get document tree:",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Failed to get document tree",
+
+        error:
+          error.message,
+      });
     }
-
-    const updatedNode =
-      await DocumentNode.findById(
-        node._id
-      ).populate("documentId");
-
-    res.json(updatedNode);
-  } catch (error) {
-    console.error(
-      "Failed to move document node:",
-      error
-    );
-
-    res.status(500).json({
-      message:
-        "Failed to move document node.",
-    });
   }
-});
+);
 
-/*
- * Delete a folder.
- *
- * Children are promoted to the deleted folder's parent.
- * Documents themselves are NOT deleted.
- */
-router.delete("/:nodeId", async (req, res) => {
-  try {
-    const user = await getDevUser();
 
-    const node =
-      await DocumentNode.findById(
-        req.params.nodeId
-      );
+// ======================================================
+// Create Folder
+// POST /api/document-tree/folders
+// ======================================================
 
-    if (!node) {
-      return res.status(404).json({
-        message: "Document node not found.",
-      });
-    }
+router.post(
+  "/folders",
+  async (req, res) => {
+    try {
+      const user =
+        await getDevUser();
 
-    const world = await getOwnedWorld(
-      node.worldId,
-      user._id
-    );
-
-    if (!world) {
-      return res.status(403).json({
-        message:
-          "You do not have access to this node.",
-      });
-    }
-
-    if (node.kind !== "folder") {
-      return res.status(400).json({
-        message:
-          "Delete document nodes through the document API.",
-      });
-    }
-
-    const parentId =
-      node.parentId || null;
-
-    const children =
-      await DocumentNode.find({
-        worldId: world._id,
-        parentId: node._id,
-      }).sort({
-        order: 1,
-        createdAt: 1,
-      });
-
-    const existingSiblings =
-      await DocumentNode.find({
-        worldId: world._id,
+      const {
+        worldId,
+        name,
         parentId,
-        _id: {
-          $ne: node._id,
-        },
-      }).sort({
-        order: 1,
-        createdAt: 1,
+      } = req.body;
+
+      if (!worldId) {
+        return res
+          .status(400)
+          .json({
+            message:
+              "worldId is required",
+          });
+      }
+
+      if (
+        !name ||
+        !name.trim()
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              "Folder name is required",
+          });
+      }
+
+      const world =
+        await getOwnedWorld(
+          worldId,
+          user._id
+        );
+
+      if (!world) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "World not found",
+          });
+      }
+
+      if (parentId) {
+        const parent =
+          await DocumentNode.findById(
+            parentId
+          );
+
+        if (!parent) {
+          return res
+            .status(404)
+            .json({
+              message:
+                "Parent node not found",
+            });
+        }
+
+        if (
+          parent.worldId.toString() !==
+          world._id.toString()
+        ) {
+          return res
+            .status(400)
+            .json({
+              message:
+                "Parent node belongs to another world",
+            });
+        }
+
+        if (
+          parent.kind !==
+          "folder"
+        ) {
+          return res
+            .status(400)
+            .json({
+              message:
+                "Documents cannot contain child nodes",
+            });
+        }
+      }
+
+      const siblingCount =
+        await DocumentNode.countDocuments({
+          worldId:
+            world._id,
+
+          parentId:
+            parentId ||
+            null,
+        });
+
+      const folder =
+        await DocumentNode.create({
+          worldId:
+            world._id,
+
+          kind:
+            "folder",
+
+          name:
+            name.trim(),
+
+          documentId:
+            null,
+
+          parentId:
+            parentId ||
+            null,
+
+          order:
+            siblingCount,
+        });
+
+      res
+        .status(201)
+        .json(folder);
+    } catch (error) {
+      console.error(
+        "Failed to create document folder:",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Failed to create folder",
+
+        error:
+          error.message,
       });
+    }
+  }
+);
 
-    const insertionIndex = Math.max(
-      0,
-      Math.min(
-        node.order,
-        existingSiblings.length
-      )
-    );
 
-    existingSiblings.splice(
-      insertionIndex,
-      0,
-      ...children
-    );
+// ======================================================
+// Rename Folder
+// PUT /api/document-tree/:nodeId/name
+// ======================================================
 
-    const operations =
-      existingSiblings.map(
-        (sibling, index) => ({
-          updateOne: {
-            filter: {
-              _id: sibling._id,
+router.put(
+  "/:nodeId/name",
+  async (req, res) => {
+    try {
+      const user =
+        await getDevUser();
+
+      const node =
+        await DocumentNode.findById(
+          req.params.nodeId
+        );
+
+      if (!node) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "Document node not found",
+          });
+      }
+
+      const world =
+        await getOwnedWorld(
+          node.worldId,
+          user._id
+        );
+
+      if (!world) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "Document node not found",
+          });
+      }
+
+      if (
+        node.kind !==
+        "folder"
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              "Only folders can be renamed from the tree",
+          });
+      }
+
+      const {
+        name,
+      } = req.body;
+
+      if (
+        !name ||
+        !name.trim()
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              "Folder name is required",
+          });
+      }
+
+      node.name =
+        name.trim();
+
+      await node.save();
+
+      res.json(node);
+    } catch (error) {
+      console.error(
+        "Failed to rename document folder:",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Failed to rename folder",
+
+        error:
+          error.message,
+      });
+    }
+  }
+);
+
+
+// ======================================================
+// Move / Reorder Node
+//
+// PUT /api/document-tree/:nodeId/move
+//
+// body:
+//
+// {
+//   parentId: null | "...",
+//   index: 0
+// }
+//
+// index is the final position after the dragged node
+// has been removed from its previous sibling list.
+// ======================================================
+
+router.put(
+  "/:nodeId/move",
+  async (req, res) => {
+    try {
+      const user =
+        await getDevUser();
+
+      const {
+        nodeId,
+      } = req.params;
+
+      const {
+        parentId,
+        index,
+      } = req.body;
+
+      const node =
+        await DocumentNode.findById(
+          nodeId
+        );
+
+      if (!node) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "Document node not found",
+          });
+      }
+
+      const world =
+        await getOwnedWorld(
+          node.worldId,
+          user._id
+        );
+
+      if (!world) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "Document node not found",
+          });
+      }
+
+      const destinationParentId =
+        parentId ||
+        null;
+
+      // --------------------------------------------------
+      // Validate destination parent
+      // --------------------------------------------------
+
+      if (
+        destinationParentId
+      ) {
+        if (
+          nodeId.toString() ===
+          destinationParentId.toString()
+        ) {
+          return res
+            .status(400)
+            .json({
+              message:
+                "A node cannot be its own parent",
+            });
+        }
+
+        const parent =
+          await DocumentNode.findById(
+            destinationParentId
+          );
+
+        if (!parent) {
+          return res
+            .status(404)
+            .json({
+              message:
+                "Target folder not found",
+            });
+        }
+
+        if (
+          parent.worldId.toString() !==
+          world._id.toString()
+        ) {
+          return res
+            .status(400)
+            .json({
+              message:
+                "Cannot move between different worlds",
+            });
+        }
+
+        if (
+          parent.kind !==
+          "folder"
+        ) {
+          return res
+            .status(400)
+            .json({
+              message:
+                "Documents cannot contain child nodes",
+            });
+        }
+
+        const createsCycle =
+          await isDescendant(
+            nodeId,
+            destinationParentId
+          );
+
+        if (
+          createsCycle
+        ) {
+          return res
+            .status(400)
+            .json({
+              message:
+                "Cannot move a folder inside its own descendant",
+            });
+        }
+      }
+
+      const sourceParentId =
+        normalizeParentId(
+          node.parentId
+        );
+
+      const destinationId =
+        normalizeParentId(
+          destinationParentId
+        );
+
+      // --------------------------------------------------
+      // Same Parent Reorder
+      // --------------------------------------------------
+
+      if (
+        sourceParentId ===
+        destinationId
+      ) {
+        const siblings =
+          await DocumentNode.find({
+            worldId:
+              world._id,
+
+            parentId:
+              destinationParentId,
+
+            _id: {
+              $ne:
+                node._id,
             },
+          }).sort({
+            order: 1,
+            createdAt: 1,
+          });
 
-            update: {
-              $set: {
-                parentId,
-                order: index,
+        const requestedIndex =
+          Number.isInteger(
+            index
+          )
+            ? index
+            : siblings.length;
+
+        const insertIndex =
+          Math.max(
+            0,
+            Math.min(
+              requestedIndex,
+              siblings.length
+            )
+          );
+
+        siblings.splice(
+          insertIndex,
+          0,
+          node
+        );
+
+        await DocumentNode.bulkWrite(
+          siblings.map(
+            (
+              sibling,
+              siblingIndex
+            ) => ({
+              updateOne: {
+                filter: {
+                  _id:
+                    sibling._id,
+                },
+
+                update: {
+                  $set: {
+                    parentId:
+                      destinationParentId,
+
+                    order:
+                      siblingIndex,
+                  },
+                },
+              },
+            })
+          )
+        );
+
+        const updatedNode =
+          await DocumentNode.findById(
+            node._id
+          ).populate(
+            "documentId"
+          );
+
+        return res.json(
+          updatedNode
+        );
+      }
+
+      // --------------------------------------------------
+      // Different Parent
+      // --------------------------------------------------
+
+      const oldSiblings =
+        await DocumentNode.find({
+          worldId:
+            world._id,
+
+          parentId:
+            node.parentId ||
+            null,
+
+          _id: {
+            $ne:
+              node._id,
+          },
+        }).sort({
+          order: 1,
+          createdAt: 1,
+        });
+
+      if (
+        oldSiblings.length >
+        0
+      ) {
+        await DocumentNode.bulkWrite(
+          oldSiblings.map(
+            (
+              sibling,
+              siblingIndex
+            ) => ({
+              updateOne: {
+                filter: {
+                  _id:
+                    sibling._id,
+                },
+
+                update: {
+                  $set: {
+                    order:
+                      siblingIndex,
+                  },
+                },
+              },
+            })
+          )
+        );
+      }
+
+      const destinationSiblings =
+        await DocumentNode.find({
+          worldId:
+            world._id,
+
+          parentId:
+            destinationParentId,
+
+          _id: {
+            $ne:
+              node._id,
+          },
+        }).sort({
+          order: 1,
+          createdAt: 1,
+        });
+
+      const requestedIndex =
+        Number.isInteger(
+          index
+        )
+          ? index
+          : destinationSiblings.length;
+
+      const insertIndex =
+        Math.max(
+          0,
+          Math.min(
+            requestedIndex,
+            destinationSiblings.length
+          )
+        );
+
+      destinationSiblings.splice(
+        insertIndex,
+        0,
+        node
+      );
+
+      await DocumentNode.bulkWrite(
+        destinationSiblings.map(
+          (
+            sibling,
+            siblingIndex
+          ) => ({
+            updateOne: {
+              filter: {
+                _id:
+                  sibling._id,
+              },
+
+              update: {
+                $set: {
+                  parentId:
+                    destinationParentId,
+
+                  order:
+                    siblingIndex,
+                },
               },
             },
-          },
-        })
+          })
+        )
       );
 
-    if (operations.length > 0) {
-      await DocumentNode.bulkWrite(
-        operations
+      const updatedNode =
+        await DocumentNode.findById(
+          node._id
+        ).populate(
+          "documentId"
+        );
+
+      res.json(
+        updatedNode
       );
+    } catch (error) {
+      console.error(
+        "Failed to move document node:",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Failed to move document node",
+
+        error:
+          error.message,
+      });
     }
-
-    await DocumentNode.deleteOne({
-      _id: node._id,
-    });
-
-    res.json({
-      message:
-        "Folder deleted and children promoted.",
-    });
-  } catch (error) {
-    console.error(
-      "Failed to delete document folder:",
-      error
-    );
-
-    res.status(500).json({
-      message:
-        "Failed to delete document folder.",
-    });
   }
-});
+);
+
+
+// ======================================================
+// Delete Folder
+//
+// Children are promoted to the deleted folder's parent.
+// Their relative order is preserved.
+// ======================================================
+
+router.delete(
+  "/:nodeId",
+  async (req, res) => {
+    try {
+      const user =
+        await getDevUser();
+
+      const node =
+        await DocumentNode.findById(
+          req.params.nodeId
+        );
+
+      if (!node) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "Document node not found",
+          });
+      }
+
+      const world =
+        await getOwnedWorld(
+          node.worldId,
+          user._id
+        );
+
+      if (!world) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "Document node not found",
+          });
+      }
+
+      if (
+        node.kind !==
+        "folder"
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              "Document nodes cannot be deleted from this endpoint",
+          });
+      }
+
+      const parentId =
+        node.parentId ||
+        null;
+
+      const siblings =
+        await DocumentNode.find({
+          worldId:
+            world._id,
+
+          parentId,
+
+          _id: {
+            $ne:
+              node._id,
+          },
+        }).sort({
+          order: 1,
+          createdAt: 1,
+        });
+
+      const children =
+        await DocumentNode.find({
+          worldId:
+            world._id,
+
+          parentId:
+            node._id,
+        }).sort({
+          order: 1,
+          createdAt: 1,
+        });
+
+      const insertionIndex =
+        Math.max(
+          0,
+          Math.min(
+            node.order ||
+              0,
+
+            siblings.length
+          )
+        );
+
+      const finalNodes = [
+        ...siblings.slice(
+          0,
+          insertionIndex
+        ),
+
+        ...children,
+
+        ...siblings.slice(
+          insertionIndex
+        ),
+      ];
+
+      if (
+        finalNodes.length >
+        0
+      ) {
+        await DocumentNode.bulkWrite(
+          finalNodes.map(
+            (
+              childNode,
+              childIndex
+            ) => ({
+              updateOne: {
+                filter: {
+                  _id:
+                    childNode._id,
+                },
+
+                update: {
+                  $set: {
+                    parentId,
+
+                    order:
+                      childIndex,
+                  },
+                },
+              },
+            })
+          )
+        );
+      }
+
+      await node.deleteOne();
+
+      await normalizeSiblingOrders(
+        world._id,
+        parentId
+      );
+
+      res.json({
+        message:
+          "Folder deleted",
+      });
+    } catch (error) {
+      console.error(
+        "Failed to delete document folder:",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Failed to delete folder",
+
+        error:
+          error.message,
+      });
+    }
+  }
+);
+
 
 module.exports = router;

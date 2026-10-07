@@ -478,4 +478,127 @@ router.put("/:id", async (req, res) => {
     });
   }
 });
+
+// Delete an Entity.
+// Any child TreeNodes are promoted to the deleted Entity node's parent.
+router.delete("/:id", async (req, res) => {
+  try {
+    const user = await getDevUser();
+
+    const entity =
+      await Entity.findById(
+        req.params.id
+      );
+
+    if (!entity) {
+      return res.status(404).json({
+        message: "Entity not found",
+      });
+    }
+
+    const world =
+      await getOwnedWorld(
+        entity.worldId,
+        user._id
+      );
+
+    if (!world) {
+      return res.status(404).json({
+        message: "Entity not found",
+      });
+    }
+
+    const treeNode =
+      await TreeNode.findOne({
+        worldId: world._id,
+        kind: "entity",
+        entityId: entity._id,
+      });
+
+    if (treeNode) {
+      const siblings =
+        await TreeNode.find({
+          worldId: world._id,
+          parentId:
+            treeNode.parentId || null,
+          _id: {
+            $ne: treeNode._id,
+          },
+        }).sort({
+          order: 1,
+          createdAt: 1,
+        });
+
+      const children =
+        await TreeNode.find({
+          worldId: world._id,
+          parentId: treeNode._id,
+        }).sort({
+          order: 1,
+          createdAt: 1,
+        });
+
+      const insertionIndex =
+        Math.max(
+          0,
+          Math.min(
+            treeNode.order || 0,
+            siblings.length
+          )
+        );
+
+      const finalNodes = [
+        ...siblings.slice(
+          0,
+          insertionIndex
+        ),
+        ...children,
+        ...siblings.slice(
+          insertionIndex
+        ),
+      ];
+
+      if (finalNodes.length > 0) {
+        await TreeNode.bulkWrite(
+          finalNodes.map(
+            (node, index) => ({
+              updateOne: {
+                filter: {
+                  _id: node._id,
+                },
+                update: {
+                  $set: {
+                    parentId:
+                      treeNode.parentId || null,
+                    order: index,
+                  },
+                },
+              },
+            })
+          )
+        );
+      }
+
+      await treeNode.deleteOne();
+    }
+
+    await entity.deleteOne();
+
+    res.json({
+      message: "Entity deleted",
+    });
+  } catch (error) {
+    console.error(
+      "Failed to delete entity:",
+      error
+    );
+
+    res.status(500).json({
+      message:
+        "Failed to delete entity",
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;

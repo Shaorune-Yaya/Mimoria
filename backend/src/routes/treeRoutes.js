@@ -10,24 +10,38 @@ const {
 
 const router = express.Router();
 
-// Create TreeNodes for Entities created before the tree system existed.
-async function syncMissingEntityNodes(worldId) {
-  const entities = await Entity.find({
-    worldId,
-  }).select("_id");
 
-  const entityIds = entities.map(
-    (entity) => entity._id
-  );
+// ======================================================
+// Helpers
+// ======================================================
 
-  if (entityIds.length === 0) {
+// Create TreeNodes for Entities created before
+// the tree system existed.
+async function syncMissingEntityNodes(
+  worldId
+) {
+  const entities =
+    await Entity.find({
+      worldId,
+    }).select("_id");
+
+  const entityIds =
+    entities.map(
+      (entity) => entity._id
+    );
+
+  if (
+    entityIds.length === 0
+  ) {
     return;
   }
 
   const existingNodes =
     await TreeNode.find({
       worldId,
+
       kind: "entity",
+
       entityId: {
         $in: entityIds,
       },
@@ -35,8 +49,9 @@ async function syncMissingEntityNodes(worldId) {
 
   const existingEntityIds =
     new Set(
-      existingNodes.map((node) =>
-        node.entityId.toString()
+      existingNodes.map(
+        (node) =>
+          node.entityId.toString()
       )
     );
 
@@ -48,7 +63,9 @@ async function syncMissingEntityNodes(worldId) {
         )
     );
 
-  if (missingEntities.length === 0) {
+  if (
+    missingEntities.length === 0
+  ) {
     return;
   }
 
@@ -62,10 +79,16 @@ async function syncMissingEntityNodes(worldId) {
     missingEntities.map(
       (entity, index) => ({
         worldId,
+
         kind: "entity",
-        entityId: entity._id,
+
+        entityId:
+          entity._id,
+
         parentId: null,
-        order: rootCount + index,
+
+        order:
+          rootCount + index,
       })
     );
 
@@ -77,175 +100,19 @@ async function syncMissingEntityNodes(worldId) {
       }
     );
   } catch (error) {
-    // Duplicate nodes may occur if simultaneous requests
-    // try to synchronize the tree at the same time.
-    if (error.code !== 11000) {
+    // Duplicate nodes may occur if simultaneous
+    // requests try to synchronize the tree.
+    if (
+      error.code !== 11000
+    ) {
       throw error;
     }
   }
 }
 
-// Get the complete tree for a World.
-router.get(
-  "/world/:worldId",
-  async (req, res) => {
-    try {
-      const user = await getDevUser();
 
-      const world = await getOwnedWorld(
-        req.params.worldId,
-        user._id
-      );
-
-      if (!world) {
-        return res.status(404).json({
-          message: "World not found",
-        });
-      }
-
-      await syncMissingEntityNodes(
-        world._id
-      );
-
-      const nodes =
-        await TreeNode.find({
-          worldId: world._id,
-        })
-          .populate({
-            path: "entityId",
-
-            populate: {
-              path: "entityTypeId",
-              select: "name icon",
-            },
-          })
-          .sort({
-            order: 1,
-            createdAt: 1,
-          });
-
-      res.json(nodes);
-    } catch (error) {
-      console.error(
-        "Failed to get tree:",
-        error
-      );
-
-      res.status(500).json({
-        message:
-          "Failed to get tree",
-        error: error.message,
-      });
-    }
-  }
-);
-
-// Create a folder.
-router.post(
-  "/folders",
-  async (req, res) => {
-    try {
-      const user = await getDevUser();
-
-      const {
-        worldId,
-        name,
-        parentId,
-      } = req.body;
-
-      if (!worldId) {
-        return res.status(400).json({
-          message:
-            "worldId is required",
-        });
-      }
-
-      if (!name || !name.trim()) {
-        return res.status(400).json({
-          message:
-            "Folder name is required",
-        });
-      }
-
-      const world = await getOwnedWorld(
-        worldId,
-        user._id
-      );
-
-      if (!world) {
-        return res.status(404).json({
-          message: "World not found",
-        });
-      }
-
-      // If a parent is provided, verify that it belongs to this World.
-      if (parentId) {
-        const parent =
-          await TreeNode.findById(
-            parentId
-          );
-
-        if (!parent) {
-          return res.status(404).json({
-            message:
-              "Parent node not found",
-          });
-        }
-
-        if (
-          parent.worldId.toString() !==
-          world._id.toString()
-        ) {
-          return res.status(400).json({
-            message:
-              "Parent node belongs to another world",
-          });
-        }
-      }
-
-      const siblingCount =
-        await TreeNode.countDocuments({
-          worldId: world._id,
-          parentId:
-            parentId || null,
-        });
-
-      const folder =
-        new TreeNode({
-          worldId: world._id,
-
-          kind: "folder",
-
-          name: name.trim(),
-
-          parentId:
-            parentId || null,
-
-          order: siblingCount,
-        });
-
-      const savedFolder =
-        await folder.save();
-
-      res
-        .status(201)
-        .json(savedFolder);
-    } catch (error) {
-      console.error(
-        "Failed to create folder:",
-        error
-      );
-
-      res.status(500).json({
-        message:
-          "Failed to create folder",
-        error: error.message,
-      });
-    }
-  }
-);
-
-// Check whether a target node is inside another node's descendants.
+// Check whether a target node is inside
+// another node's descendants.
 async function isDescendant(
   nodeId,
   possibleDescendantId
@@ -257,7 +124,9 @@ async function isDescendant(
     const current =
       await TreeNode.findById(
         currentId
-      ).select("parentId");
+      ).select(
+        "parentId"
+      );
 
     if (!current) {
       return false;
@@ -277,13 +146,308 @@ async function isDescendant(
   return false;
 }
 
-// Move a node.
-// parentId = null moves it to the tree root.
-router.put(
-  "/:nodeId/move",
+
+// Return true when two parent IDs
+// represent the same parent.
+function sameParentId(
+  firstParentId,
+  secondParentId
+) {
+  const first =
+    firstParentId
+      ? firstParentId.toString()
+      : null;
+
+  const second =
+    secondParentId
+      ? secondParentId.toString()
+      : null;
+
+  return first === second;
+}
+
+
+// Normalize sibling order under one parent.
+async function normalizeSiblingOrder(
+  worldId,
+  parentId
+) {
+  const siblings =
+    await TreeNode.find({
+      worldId,
+
+      parentId:
+        parentId || null,
+    }).sort({
+      order: 1,
+      createdAt: 1,
+    });
+
+  if (
+    siblings.length === 0
+  ) {
+    return;
+  }
+
+  await TreeNode.bulkWrite(
+    siblings.map(
+      (
+        sibling,
+        index
+      ) => ({
+        updateOne: {
+          filter: {
+            _id:
+              sibling._id,
+          },
+
+          update: {
+            $set: {
+              order: index,
+            },
+          },
+        },
+      })
+    )
+  );
+}
+
+
+// ======================================================
+// Get Tree
+// ======================================================
+
+router.get(
+  "/world/:worldId",
+
   async (req, res) => {
     try {
-      const user = await getDevUser();
+      const user =
+        await getDevUser();
+
+      const world =
+        await getOwnedWorld(
+          req.params.worldId,
+          user._id
+        );
+
+      if (!world) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "World not found",
+          });
+      }
+
+      await syncMissingEntityNodes(
+        world._id
+      );
+
+      const nodes =
+        await TreeNode.find({
+          worldId:
+            world._id,
+        })
+          .populate({
+            path:
+              "entityId",
+
+            populate: {
+              path:
+                "entityTypeId",
+
+              select:
+                "name icon",
+            },
+          })
+          .sort({
+            order: 1,
+            createdAt: 1,
+          });
+
+      res.json(nodes);
+    } catch (error) {
+      console.error(
+        "Failed to get tree:",
+        error
+      );
+
+      res
+        .status(500)
+        .json({
+          message:
+            "Failed to get tree",
+
+          error:
+            error.message,
+        });
+    }
+  }
+);
+
+
+// ======================================================
+// Create Folder
+// ======================================================
+
+router.post(
+  "/folders",
+
+  async (req, res) => {
+    try {
+      const user =
+        await getDevUser();
+
+      const {
+        worldId,
+        name,
+        parentId,
+      } = req.body;
+
+      if (!worldId) {
+        return res
+          .status(400)
+          .json({
+            message:
+              "worldId is required",
+          });
+      }
+
+      if (
+        !name ||
+        !name.trim()
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              "Folder name is required",
+          });
+      }
+
+      const world =
+        await getOwnedWorld(
+          worldId,
+          user._id
+        );
+
+      if (!world) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "World not found",
+          });
+      }
+
+      // Verify the parent belongs
+      // to the same World.
+      if (parentId) {
+        const parent =
+          await TreeNode.findById(
+            parentId
+          );
+
+        if (!parent) {
+          return res
+            .status(404)
+            .json({
+              message:
+                "Parent node not found",
+            });
+        }
+
+        if (
+          parent.worldId
+            .toString() !==
+          world._id
+            .toString()
+        ) {
+          return res
+            .status(400)
+            .json({
+              message:
+                "Parent node belongs to another world",
+            });
+        }
+      }
+
+      const siblingCount =
+        await TreeNode.countDocuments({
+          worldId:
+            world._id,
+
+          parentId:
+            parentId ||
+            null,
+        });
+
+      const folder =
+        new TreeNode({
+          worldId:
+            world._id,
+
+          kind:
+            "folder",
+
+          name:
+            name.trim(),
+
+          parentId:
+            parentId ||
+            null,
+
+          order:
+            siblingCount,
+        });
+
+      const savedFolder =
+        await folder.save();
+
+      res
+        .status(201)
+        .json(
+          savedFolder
+        );
+    } catch (error) {
+      console.error(
+        "Failed to create folder:",
+        error
+      );
+
+      res
+        .status(500)
+        .json({
+          message:
+            "Failed to create folder",
+
+          error:
+            error.message,
+        });
+    }
+  }
+);
+
+
+// ======================================================
+// Move / Reorder Node
+//
+// parentId:
+// null = root
+//
+// index:
+// null = append to end
+// number = destination sibling index
+// ======================================================
+
+router.put(
+  "/:nodeId/move",
+
+  async (req, res) => {
+    try {
+      const user =
+        await getDevUser();
 
       const {
         nodeId,
@@ -291,6 +455,7 @@ router.put(
 
       const {
         parentId,
+        index,
       } = req.body;
 
       const node =
@@ -299,131 +464,286 @@ router.put(
         );
 
       if (!node) {
-        return res.status(404).json({
-          message:
-            "Tree node not found",
-        });
+        return res
+          .status(404)
+          .json({
+            message:
+              "Tree node not found",
+          });
       }
 
-      const world = await getOwnedWorld(
-        node.worldId,
-        user._id
-      );
+      const world =
+        await getOwnedWorld(
+          node.worldId,
+          user._id
+        );
 
       if (!world) {
-        return res.status(404).json({
-          message:
-            "Tree node not found",
-        });
-      }
-
-      // Move the node back to the root.
-      if (!parentId) {
-        const rootCount =
-          await TreeNode.countDocuments({
-            worldId: world._id,
-            parentId: null,
-            _id: {
-              $ne: node._id,
-            },
+        return res
+          .status(404)
+          .json({
+            message:
+              "Tree node not found",
           });
-
-        node.parentId = null;
-        node.order = rootCount;
-
-        await node.save();
-
-        return res.json(node);
       }
 
-      // A node cannot be placed inside itself.
-      if (
-        nodeId.toString() ===
-        parentId.toString()
-      ) {
-        return res.status(400).json({
-          message:
-            "A node cannot be its own parent",
-        });
+      const oldParentId =
+        node.parentId ||
+        null;
+
+      let destinationParentId =
+        null;
+
+
+      // ==================================================
+      // Validate Destination Parent
+      // ==================================================
+
+      if (parentId) {
+        if (
+          nodeId.toString() ===
+          parentId.toString()
+        ) {
+          return res
+            .status(400)
+            .json({
+              message:
+                "A node cannot be its own parent",
+            });
+        }
+
+        const parent =
+          await TreeNode.findById(
+            parentId
+          );
+
+        if (!parent) {
+          return res
+            .status(404)
+            .json({
+              message:
+                "Target node not found",
+            });
+        }
+
+        if (
+          parent.worldId
+            .toString() !==
+          world._id
+            .toString()
+        ) {
+          return res
+            .status(400)
+            .json({
+              message:
+                "Cannot move between different worlds",
+            });
+        }
+
+        const createsCycle =
+          await isDescendant(
+            nodeId,
+            parentId
+          );
+
+        if (createsCycle) {
+          return res
+            .status(400)
+            .json({
+              message:
+                "Cannot move a node inside its own descendant",
+            });
+        }
+
+        destinationParentId =
+          parent._id;
       }
 
-      const parent =
-        await TreeNode.findById(
-          parentId
-        );
 
-      if (!parent) {
-        return res.status(404).json({
-          message:
-            "Target node not found",
-        });
-      }
+      // ==================================================
+      // Load Destination Siblings
+      // ==================================================
 
-      if (
-        parent.worldId.toString() !==
-        world._id.toString()
-      ) {
-        return res.status(400).json({
-          message:
-            "Cannot move between different worlds",
-        });
-      }
+      const destinationSiblings =
+        await TreeNode.find({
+          worldId:
+            world._id,
 
-      // Prevent circular tree structures.
-      const createsCycle =
-        await isDescendant(
-          nodeId,
-          parentId
-        );
-
-      if (createsCycle) {
-        return res.status(400).json({
-          message:
-            "Cannot move a node inside its own descendant",
-        });
-      }
-
-      const siblingCount =
-        await TreeNode.countDocuments({
-          worldId: world._id,
-
-          parentId: parent._id,
+          parentId:
+            destinationParentId ||
+            null,
 
           _id: {
-            $ne: node._id,
+            $ne:
+              node._id,
           },
+        }).sort({
+          order: 1,
+          createdAt: 1,
         });
 
+
+      // ==================================================
+      // Calculate Destination Index
+      // ==================================================
+
+      let insertionIndex =
+        destinationSiblings
+          .length;
+
+      if (
+        index !== undefined &&
+        index !== null
+      ) {
+        const parsedIndex =
+          Number(index);
+
+        if (
+          !Number.isInteger(
+            parsedIndex
+          )
+        ) {
+          return res
+            .status(400)
+            .json({
+              message:
+                "index must be an integer",
+            });
+        }
+
+        insertionIndex =
+          Math.max(
+            0,
+
+            Math.min(
+              parsedIndex,
+
+              destinationSiblings
+                .length
+            )
+          );
+      }
+
+
+      // ==================================================
+      // Move Node
+      // ==================================================
+
       node.parentId =
-        parent._id;
+        destinationParentId;
 
       node.order =
-        siblingCount;
+        insertionIndex;
 
       await node.save();
 
-      res.json(node);
+
+      // ==================================================
+      // Rebuild Destination Order
+      // ==================================================
+
+      const reorderedDestination = [
+        ...destinationSiblings.slice(
+          0,
+          insertionIndex
+        ),
+
+        node,
+
+        ...destinationSiblings.slice(
+          insertionIndex
+        ),
+      ];
+
+      if (
+        reorderedDestination
+          .length > 0
+      ) {
+        await TreeNode.bulkWrite(
+          reorderedDestination.map(
+            (
+              sibling,
+              siblingIndex
+            ) => ({
+              updateOne: {
+                filter: {
+                  _id:
+                    sibling._id,
+                },
+
+                update: {
+                  $set: {
+                    parentId:
+                      destinationParentId ||
+                      null,
+
+                    order:
+                      siblingIndex,
+                  },
+                },
+              },
+            })
+          )
+        );
+      }
+
+
+      // ==================================================
+      // Normalize Previous Parent
+      // ==================================================
+
+      if (
+        !sameParentId(
+          oldParentId,
+          destinationParentId
+        )
+      ) {
+        await normalizeSiblingOrder(
+          world._id,
+          oldParentId
+        );
+      }
+
+
+      const updatedNode =
+        await TreeNode.findById(
+          node._id
+        );
+
+      res.json(
+        updatedNode
+      );
     } catch (error) {
       console.error(
         "Failed to move tree node:",
         error
       );
 
-      res.status(500).json({
-        message:
-          "Failed to move tree node",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message:
+            "Failed to move tree node",
+
+          error:
+            error.message,
+        });
     }
   }
 );
 
-// Rename a folder.
+
+// ======================================================
+// Rename Folder
+// ======================================================
+
 router.put(
   "/:nodeId",
+
   async (req, res) => {
     try {
-      const user = await getDevUser();
+      const user =
+        await getDevUser();
 
       const {
         name,
@@ -435,38 +755,51 @@ router.put(
         );
 
       if (!node) {
-        return res.status(404).json({
-          message:
-            "Tree node not found",
-        });
+        return res
+          .status(404)
+          .json({
+            message:
+              "Tree node not found",
+          });
       }
 
-      const world = await getOwnedWorld(
-        node.worldId,
-        user._id
-      );
+      const world =
+        await getOwnedWorld(
+          node.worldId,
+          user._id
+        );
 
       if (!world) {
-        return res.status(404).json({
-          message:
-            "Tree node not found",
-        });
+        return res
+          .status(404)
+          .json({
+            message:
+              "Tree node not found",
+          });
       }
 
       if (
-        node.kind !== "folder"
+        node.kind !==
+        "folder"
       ) {
-        return res.status(400).json({
-          message:
-            "Only folders can be renamed from the tree",
-        });
+        return res
+          .status(400)
+          .json({
+            message:
+              "Only folders can be renamed from the tree",
+          });
       }
 
-      if (!name || !name.trim()) {
-        return res.status(400).json({
-          message:
-            "Folder name is required",
-        });
+      if (
+        !name ||
+        !name.trim()
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              "Folder name is required",
+          });
       }
 
       node.name =
@@ -481,22 +814,34 @@ router.put(
         error
       );
 
-      res.status(500).json({
-        message:
-          "Failed to rename folder",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message:
+            "Failed to rename folder",
+
+          error:
+            error.message,
+        });
     }
   }
 );
 
-// Delete a folder.
-// Child nodes are moved one level up instead of being deleted.
+
+// ======================================================
+// Delete Folder
+//
+// Children are promoted one level.
+// Entities are not deleted.
+// ======================================================
+
 router.delete(
   "/:nodeId",
+
   async (req, res) => {
     try {
-      const user = await getDevUser();
+      const user =
+        await getDevUser();
 
       const node =
         await TreeNode.findById(
@@ -504,46 +849,144 @@ router.delete(
         );
 
       if (!node) {
-        return res.status(404).json({
-          message:
-            "Tree node not found",
-        });
+        return res
+          .status(404)
+          .json({
+            message:
+              "Tree node not found",
+          });
       }
 
-      const world = await getOwnedWorld(
-        node.worldId,
-        user._id
-      );
+      const world =
+        await getOwnedWorld(
+          node.worldId,
+          user._id
+        );
 
       if (!world) {
-        return res.status(404).json({
-          message:
-            "Tree node not found",
-        });
+        return res
+          .status(404)
+          .json({
+            message:
+              "Tree node not found",
+          });
       }
 
       if (
-        node.kind !== "folder"
+        node.kind !==
+        "folder"
       ) {
-        return res.status(400).json({
-          message:
-            "Entity nodes cannot be deleted from this endpoint",
-        });
+        return res
+          .status(400)
+          .json({
+            message:
+              "Entity nodes cannot be deleted from this endpoint",
+          });
       }
 
-      // Move all children to the deleted folder's parent.
-      await TreeNode.updateMany(
-        {
-          worldId: world._id,
-          parentId: node._id,
-        },
-        {
-          $set: {
-            parentId:
-              node.parentId || null,
+
+      // ==================================================
+      // Load Current Siblings
+      // ==================================================
+
+      const siblings =
+        await TreeNode.find({
+          worldId:
+            world._id,
+
+          parentId:
+            node.parentId ||
+            null,
+
+          _id: {
+            $ne:
+              node._id,
           },
-        }
-      );
+        }).sort({
+          order: 1,
+          createdAt: 1,
+        });
+
+
+      // ==================================================
+      // Load Folder Children
+      // ==================================================
+
+      const children =
+        await TreeNode.find({
+          worldId:
+            world._id,
+
+          parentId:
+            node._id,
+        }).sort({
+          order: 1,
+          createdAt: 1,
+        });
+
+
+      // ==================================================
+      // Insert Children Where Folder Used To Be
+      // ==================================================
+
+      const insertionIndex =
+        Math.max(
+          0,
+
+          Math.min(
+            node.order ||
+              0,
+
+            siblings.length
+          )
+        );
+
+      const finalNodes = [
+        ...siblings.slice(
+          0,
+          insertionIndex
+        ),
+
+        ...children,
+
+        ...siblings.slice(
+          insertionIndex
+        ),
+      ];
+
+
+      if (
+        finalNodes.length >
+        0
+      ) {
+        await TreeNode.bulkWrite(
+          finalNodes.map(
+            (
+              childNode,
+              index
+            ) => ({
+              updateOne: {
+                filter: {
+                  _id:
+                    childNode._id,
+                },
+
+                update: {
+                  $set: {
+                    parentId:
+                      node.parentId ||
+                      null,
+
+                    order:
+                      index,
+                  },
+                },
+              },
+            })
+          )
+        );
+      }
+
 
       await node.deleteOne();
 
@@ -557,13 +1000,18 @@ router.delete(
         error
       );
 
-      res.status(500).json({
-        message:
-          "Failed to delete folder",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message:
+            "Failed to delete folder",
+
+          error:
+            error.message,
+        });
     }
   }
 );
+
 
 module.exports = router;

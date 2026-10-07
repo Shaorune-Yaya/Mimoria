@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -9,12 +10,13 @@ import {
 
 import {
   DndContext,
+  DragOverlay,
+  pointerWithin,
   useDraggable,
   useDroppable,
 } from "@dnd-kit/core";
 
 import {
-  restrictToParentElement,
   restrictToVerticalAxis,
 } from "@dnd-kit/modifiers";
 
@@ -24,6 +26,101 @@ import {
 
 import WorldLayout from "../components/WorldLayout";
 import { API_URL } from "../config/api";
+
+
+// ======================================================
+// Local UI State Helpers
+// ======================================================
+
+function getExpandedStorageKey(
+  worldId
+) {
+  return `mimoria:world:${worldId}:expanded-nodes`;
+}
+
+function getSelectedEntityStorageKey(
+  worldId
+) {
+  return `mimoria:world:${worldId}:selected-entity`;
+}
+
+function getExplorerScrollStorageKey(
+  worldId
+) {
+  return `mimoria:world:${worldId}:explorer-scroll`;
+}
+
+function loadExpandedNodes(
+  worldId
+) {
+  try {
+    const saved =
+      localStorage.getItem(
+        getExpandedStorageKey(
+          worldId
+        )
+      );
+
+    if (!saved) {
+      return {};
+    }
+
+    const parsed =
+      JSON.parse(saved);
+
+    if (
+      !parsed ||
+      typeof parsed !==
+        "object" ||
+      Array.isArray(parsed)
+    ) {
+      return {};
+    }
+
+    return parsed;
+  } catch (error) {
+    console.error(
+      "Failed to load expanded tree state:",
+      error
+    );
+
+    return {};
+  }
+}
+
+function loadSelectedEntityId(
+  worldId
+) {
+  return (
+    localStorage.getItem(
+      getSelectedEntityStorageKey(
+        worldId
+      )
+    ) || null
+  );
+}
+
+function loadExplorerScroll(
+  worldId
+) {
+  const saved =
+    Number(
+      localStorage.getItem(
+        getExplorerScrollStorageKey(
+          worldId
+        )
+      )
+    );
+
+  if (
+    !Number.isFinite(saved) ||
+    saved < 0
+  ) {
+    return 0;
+  }
+
+  return saved;
+}
 
 
 // ======================================================
@@ -38,57 +135,119 @@ function TreeRow({
   onToggle,
   onEntityClick,
   onCreateFolder,
+  onContextMenu,
   selectedEntityId,
   renderChildren,
+
+  renamingNodeId,
+  renameValue,
+  onRenameValueChange,
+  onRenameSubmit,
+  onRenameCancel,
+
+  activeNodeId,
 }) {
+  const isActive =
+    activeNodeId ===
+    node._id;
+
   const {
     attributes,
     listeners,
-    setNodeRef: setDragRef,
-    transform,
+    setNodeRef:
+      setDragRef,
     isDragging,
   } = useDraggable({
-    id: node._id,
+    id:
+      node._id,
+
+    disabled:
+      renamingNodeId ===
+      node._id,
   });
+
+
+  // ====================================================
+  // Three Independent Drop Zones
+  // ====================================================
 
   const {
-    setNodeRef: setDropRef,
-    isOver,
+    setNodeRef:
+      setBeforeDropRef,
+
+    isOver:
+      isBeforeOver,
   } = useDroppable({
-    id: node._id,
+    id:
+      `before:${node._id}`,
+
+    disabled:
+      isActive,
   });
 
-  function setRefs(element) {
-    setDragRef(element);
-    setDropRef(element);
-  }
+
+  const {
+    setNodeRef:
+      setInsideDropRef,
+
+    isOver:
+      isInsideOver,
+  } = useDroppable({
+    id:
+      `inside:${node._id}`,
+
+    disabled:
+      isActive,
+  });
+
+
+  const {
+    setNodeRef:
+      setAfterDropRef,
+
+    isOver:
+      isAfterOver,
+  } = useDroppable({
+    id:
+      `after:${node._id}`,
+
+    disabled:
+      isActive,
+  });
+
+
+  // ====================================================
+  // Display
+  // ====================================================
 
   const style = {
     paddingLeft:
-      `${8 + depth * 16}px`,
+      `${
+        8 +
+        depth * 16
+      }px`,
 
     opacity:
       isDragging
-        ? 0.45
+        ? 0.35
         : 1,
-
-    transform:
-      transform
-        ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
-        : undefined,
   };
 
+
   const isFolder =
-    node.kind === "folder";
+    node.kind ===
+    "folder";
 
   const entity =
     node.entityId;
+
 
   const displayName =
     isFolder
       ? node.name
       : entity?.name ||
         "Missing Entity";
+
 
   const icon =
     isFolder
@@ -98,100 +257,275 @@ function TreeRow({
           ?.icon ||
         "📄";
 
+
   const isSelected =
     !isFolder &&
     selectedEntityId ===
       entity?._id;
 
+
+  const isRenaming =
+    isFolder &&
+    renamingNodeId ===
+      node._id;
+
+
+  const rowClassName = [
+    "explorer-row",
+
+    isSelected
+      ? "selected"
+      : "",
+
+    isBeforeOver
+      ? "drop-before"
+      : "",
+
+    isInsideOver
+      ? "drop-inside-target"
+      : "",
+
+    isAfterOver
+      ? "drop-after"
+      : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+
   return (
     <>
       <div
-        ref={setRefs}
+        ref={
+          setDragRef
+        }
         className={
-          isOver
-            ? "explorer-row drop-target"
-            : isSelected
-              ? "explorer-row selected"
-              : "explorer-row"
+          rowClassName
         }
         style={style}
         {...attributes}
+        onContextMenu={
+          (event) =>
+            onContextMenu(
+              event,
+              node
+            )
+        }
       >
+        {/* Drop above this node. */}
+
+        <div
+          ref={
+            setBeforeDropRef
+          }
+          className="explorer-drop-zone explorer-drop-zone-before"
+        />
+
+
+        {/* Drop inside this node. */}
+
+        <div
+          ref={
+            setInsideDropRef
+          }
+          className="explorer-drop-zone explorer-drop-zone-inside"
+        />
+
+
+        {/* Drop below this node. */}
+
+        <div
+          ref={
+            setAfterDropRef
+          }
+          className="explorer-drop-zone explorer-drop-zone-after"
+        />
+
+
+        {/* Expand / collapse */}
+
         <button
           type="button"
           className="explorer-toggle"
-          onClick={(event) => {
-            event.stopPropagation();
+          onClick={
+            (event) => {
+              event.stopPropagation();
 
-            if (hasChildren) {
-              onToggle(
-                node._id
-              );
+              if (
+                hasChildren
+              ) {
+                onToggle(
+                  node._id
+                );
+              }
             }
-          }}
+          }
           aria-label={
             expanded
               ? "Collapse"
               : "Expand"
           }
         >
-          {hasChildren
-            ? expanded
-              ? "⌄"
-              : "›"
-            : ""}
+          {
+            hasChildren
+              ? expanded
+                ? "⌄"
+                : "›"
+              : ""
+          }
         </button>
 
-        <button
-          type="button"
-          className="explorer-node-main"
-          onClick={() => {
-            if (isFolder) {
-              onToggle(
-                node._id
-              );
-            } else {
-              onEntityClick(
-                entity
-              );
+
+        {/* Inline rename */}
+
+        {isRenaming ? (
+          <div className="explorer-rename-wrap">
+            <span className="explorer-icon">
+              {icon}
+            </span>
+
+            <input
+              autoFocus
+              className="explorer-rename-input"
+              value={
+                renameValue
+              }
+              onChange={
+                (event) =>
+                  onRenameValueChange(
+                    event.target
+                      .value
+                  )
+              }
+              onClick={
+                (event) =>
+                  event
+                    .stopPropagation()
+              }
+              onDoubleClick={
+                (event) =>
+                  event
+                    .stopPropagation()
+              }
+              onBlur={
+                onRenameCancel
+              }
+              onKeyDown={
+                (event) => {
+                  if (
+                    event.key ===
+                    "Enter"
+                  ) {
+                    event
+                      .preventDefault();
+
+                    onRenameSubmit(
+                      node._id
+                    );
+                  }
+
+                  if (
+                    event.key ===
+                    "Escape"
+                  ) {
+                    event
+                      .preventDefault();
+
+                    onRenameCancel();
+                  }
+                }
+              }
+            />
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="explorer-node-main"
+            onClick={
+              () => {
+                if (
+                  isFolder
+                ) {
+                  onToggle(
+                    node._id
+                  );
+                } else {
+                  onEntityClick(
+                    entity
+                  );
+                }
+              }
             }
-          }}
-        >
-          <span className="explorer-icon">
-            {icon}
-          </span>
+          >
+            <span className="explorer-icon">
+              {icon}
+            </span>
 
-          <span className="explorer-name">
-            {displayName}
-          </span>
-        </button>
+            <span className="explorer-name">
+              {
+                displayName
+              }
+            </span>
+          </button>
+        )}
 
-        <button
-          type="button"
-          className="explorer-add-child"
-          onClick={(event) => {
-            event.stopPropagation();
 
-            onCreateFolder(
-              node._id
-            );
-          }}
-          title="New Folder"
-          aria-label="Create folder inside this node"
-        >
-          +
-        </button>
+        {!isRenaming && (
+          <>
+            <button
+              type="button"
+              className="explorer-add-child"
+              onClick={
+                (event) => {
+                  event
+                    .stopPropagation();
 
-        <button
-          type="button"
-          className="explorer-drag-handle"
-          {...listeners}
-          title="Drag"
-          aria-label="Drag tree node"
-        >
-          ⋮⋮
-        </button>
+                  onCreateFolder(
+                    node._id
+                  );
+                }
+              }
+              title="New Folder"
+              aria-label="Create folder inside this node"
+            >
+              +
+            </button>
+
+
+            <button
+              type="button"
+              className="explorer-context-button"
+              onClick={
+                (event) => {
+                  event
+                    .stopPropagation();
+
+                  onContextMenu(
+                    event,
+                    node
+                  );
+                }
+              }
+              title="More Actions"
+              aria-label="More Actions"
+            >
+              ⋯
+            </button>
+
+
+            <button
+              type="button"
+              className="explorer-drag-handle"
+              {...listeners}
+              title="Drag"
+              aria-label="Drag tree node"
+            >
+              ⋮⋮
+            </button>
+          </>
+        )}
       </div>
+
 
       {expanded &&
         hasChildren &&
@@ -213,12 +547,16 @@ function RootDropZone() {
     setNodeRef,
     isOver,
   } = useDroppable({
-    id: "TREE_ROOT",
+    id:
+      "root:end",
   });
+
 
   return (
     <div
-      ref={setNodeRef}
+      ref={
+        setNodeRef
+      }
       className={
         isOver
           ? "tree-root-drop-zone active"
@@ -236,13 +574,32 @@ function RootDropZone() {
 // ======================================================
 
 function EntitiesPage() {
-  const { worldId } =
-    useParams();
+  const {
+    worldId,
+  } = useParams();
 
   const {
     t,
     i18n,
   } = useTranslation();
+
+
+  // ====================================================
+  // Refs
+  // ====================================================
+
+  const explorerSidebarRef =
+    useRef(null);
+
+  const explorerScrollRestoredRef =
+    useRef(false);
+
+  const desiredExplorerScrollRef =
+    useRef(
+      loadExplorerScroll(
+        worldId
+      )
+    );
 
 
   // ====================================================
@@ -307,7 +664,40 @@ function EntitiesPage() {
   const [
     expandedNodes,
     setExpandedNodes,
-  ] = useState({});
+  ] = useState(
+    () =>
+      loadExpandedNodes(
+        worldId
+      )
+  );
+
+  const [
+    activeNodeId,
+    setActiveNodeId,
+  ] = useState(null);
+
+  const activeTreeNode =
+    activeNodeId
+      ? treeNodes.find(
+          (node) =>
+            node._id ===
+            activeNodeId
+        )
+      : null;
+
+  // ====================================================
+  // Saved Selection
+  // ====================================================
+
+  const [
+    pendingSelectedEntityId,
+    setPendingSelectedEntityId,
+  ] = useState(
+    () =>
+      loadSelectedEntityId(
+        worldId
+      )
+  );
 
 
   // ====================================================
@@ -353,6 +743,26 @@ function EntitiesPage() {
     editValues,
     setEditValues,
   ] = useState({});
+
+
+  // ====================================================
+  // Context Menu / Rename
+  // ====================================================
+
+  const [
+    contextMenu,
+    setContextMenu,
+  ] = useState(null);
+
+  const [
+    renamingNodeId,
+    setRenamingNodeId,
+  ] = useState(null);
+
+  const [
+    renameFolderName,
+    setRenameFolderName,
+  ] = useState("");
 
 
   const selectedEntityType =
@@ -472,6 +882,233 @@ function EntitiesPage() {
 
 
   // ====================================================
+  // Explorer UI Persistence
+  // ====================================================
+
+  function handleExplorerScroll(
+    event
+  ) {
+    const scrollTop =
+      event.currentTarget
+        .scrollTop;
+
+    localStorage.setItem(
+      getExplorerScrollStorageKey(
+        worldId
+      ),
+      String(scrollTop)
+    );
+  }
+
+
+  // Reload saved state if the route changes
+  // from one World to another without remounting.
+  useEffect(() => {
+    const savedExpanded =
+      loadExpandedNodes(
+        worldId
+      );
+
+    const savedSelectedId =
+      loadSelectedEntityId(
+        worldId
+      );
+
+    const savedScroll =
+      loadExplorerScroll(
+        worldId
+      );
+
+
+    setExpandedNodes(
+      savedExpanded
+    );
+
+    setPendingSelectedEntityId(
+      savedSelectedId
+    );
+
+
+    setSelectedDetailEntity(
+      null
+    );
+
+    setIsEditingEntity(
+      false
+    );
+
+
+    desiredExplorerScrollRef.current =
+      savedScroll;
+
+    explorerScrollRestoredRef.current =
+      false;
+  }, [
+    worldId,
+  ]);
+
+
+  // Save expanded folder state.
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        getExpandedStorageKey(
+          worldId
+        ),
+        JSON.stringify(
+          expandedNodes
+        )
+      );
+    } catch (error) {
+      console.error(
+        "Failed to save expanded tree state:",
+        error
+      );
+    }
+  }, [
+    worldId,
+    expandedNodes,
+  ]);
+
+
+  // Restore the previously selected Entity
+  // after Entity data has loaded.
+  useEffect(() => {
+    if (
+      !pendingSelectedEntityId
+    ) {
+      return;
+    }
+
+    if (
+      entities.length ===
+      0
+    ) {
+      return;
+    }
+
+
+    const savedEntity =
+      entities.find(
+        (entity) =>
+          entity._id ===
+          pendingSelectedEntityId
+      );
+
+
+    if (savedEntity) {
+      setSelectedDetailEntity(
+        savedEntity
+      );
+    } else {
+      localStorage.removeItem(
+        getSelectedEntityStorageKey(
+          worldId
+        )
+      );
+    }
+
+
+    setPendingSelectedEntityId(
+      null
+    );
+  }, [
+    entities,
+    pendingSelectedEntityId,
+    worldId,
+  ]);
+
+
+  // Save current Entity selection.
+  useEffect(() => {
+    if (
+      selectedDetailEntity
+        ?._id
+    ) {
+      localStorage.setItem(
+        getSelectedEntityStorageKey(
+          worldId
+        ),
+        selectedDetailEntity._id
+      );
+
+      return;
+    }
+
+
+    // Do not remove the saved selection while
+    // we are still waiting for Entity data to load.
+    if (
+      pendingSelectedEntityId
+    ) {
+      return;
+    }
+
+
+    localStorage.removeItem(
+      getSelectedEntityStorageKey(
+        worldId
+      )
+    );
+  }, [
+    worldId,
+    selectedDetailEntity,
+    pendingSelectedEntityId,
+  ]);
+
+
+  // Restore Explorer scroll position once the
+  // tree has rendered.
+  useEffect(() => {
+    if (
+      explorerScrollRestoredRef
+        .current
+    ) {
+      return;
+    }
+
+    if (
+      treeNodes.length ===
+      0
+    ) {
+      return;
+    }
+
+
+    const element =
+      explorerSidebarRef.current;
+
+
+    if (!element) {
+      return;
+    }
+
+
+    const desiredScroll =
+      desiredExplorerScrollRef
+        .current;
+
+
+    requestAnimationFrame(
+      () => {
+        requestAnimationFrame(
+          () => {
+            element.scrollTop =
+              desiredScroll;
+
+            explorerScrollRestoredRef.current =
+              true;
+          }
+        );
+      }
+    );
+  }, [
+    treeNodes,
+    expandedNodes,
+  ]);
+
+
+  // ====================================================
   // Folder Creation
   // ====================================================
 
@@ -483,13 +1120,19 @@ function EntitiesPage() {
     );
 
     setFolderName("");
-    setShowFolderForm(true);
+
+    setShowFolderForm(
+      true
+    );
+
 
     if (parentId) {
       setExpandedNodes(
         (current) => ({
           ...current,
-          [parentId]: true,
+
+          [parentId]:
+            true,
         })
       );
     }
@@ -497,9 +1140,15 @@ function EntitiesPage() {
 
 
   function closeFolderForm() {
-    setShowFolderForm(false);
+    setShowFolderForm(
+      false
+    );
+
     setFolderName("");
-    setFolderParentId(null);
+
+    setFolderParentId(
+      null
+    );
   }
 
 
@@ -508,16 +1157,21 @@ function EntitiesPage() {
   ) {
     event.preventDefault();
 
-    if (!folderName.trim()) {
+
+    if (
+      !folderName.trim()
+    ) {
       return;
     }
+
 
     try {
       const response =
         await fetch(
           `${API_URL.tree}/folders`,
           {
-            method: "POST",
+            method:
+              "POST",
 
             headers: {
               "Content-Type":
@@ -537,6 +1191,7 @@ function EntitiesPage() {
           }
         );
 
+
       if (!response.ok) {
         const data =
           await response.json();
@@ -547,10 +1202,14 @@ function EntitiesPage() {
         );
       }
 
+
       const createdFolder =
         await response.json();
 
-      if (folderParentId) {
+
+      if (
+        folderParentId
+      ) {
         setExpandedNodes(
           (current) => ({
             ...current,
@@ -561,6 +1220,7 @@ function EntitiesPage() {
         );
       }
 
+
       setExpandedNodes(
         (current) => ({
           ...current,
@@ -569,6 +1229,7 @@ function EntitiesPage() {
             true,
         })
       );
+
 
       closeFolderForm();
 
@@ -579,25 +1240,138 @@ function EntitiesPage() {
         error
       );
 
-      alert(error.message);
+      alert(
+        error.message
+      );
     }
   }
 
 
   // ====================================================
-  // Tree Movement
+  // Context Menu
   // ====================================================
 
-  async function moveTreeNode(
-    nodeId,
-    parentId
+  function closeContextMenu() {
+    setContextMenu(
+      null
+    );
+  }
+
+
+  function openContextMenu(
+    event,
+    node
   ) {
+    event.preventDefault();
+    event.stopPropagation();
+
+
+    const menuWidth =
+      190;
+
+    const menuHeight =
+      140;
+
+
+    const x =
+      Math.min(
+        event.clientX,
+
+        window.innerWidth -
+          menuWidth -
+          8
+      );
+
+
+    const y =
+      Math.min(
+        event.clientY,
+
+        window.innerHeight -
+          menuHeight -
+          8
+      );
+
+
+    setContextMenu({
+      nodeId:
+        node._id,
+
+      x:
+        Math.max(
+          8,
+          x
+        ),
+
+      y:
+        Math.max(
+          8,
+          y
+        ),
+    });
+  }
+
+
+  // ====================================================
+  // Folder Rename
+  // ====================================================
+
+  function startRenameFolder(
+    node
+  ) {
+    if (
+      !node ||
+      node.kind !==
+        "folder"
+    ) {
+      return;
+    }
+
+
+    setRenamingNodeId(
+      node._id
+    );
+
+    setRenameFolderName(
+      node.name || ""
+    );
+
+    closeContextMenu();
+  }
+
+
+  function cancelRenameFolder() {
+    setRenamingNodeId(
+      null
+    );
+
+    setRenameFolderName(
+      ""
+    );
+  }
+
+
+  async function submitRenameFolder(
+    nodeId
+  ) {
+    const cleanedName =
+      renameFolderName.trim();
+
+
+    if (!cleanedName) {
+      cancelRenameFolder();
+
+      return;
+    }
+
+
     try {
       const response =
         await fetch(
-          `${API_URL.tree}/${nodeId}/move`,
+          `${API_URL.tree}/${nodeId}`,
           {
-            method: "PUT",
+            method:
+              "PUT",
 
             headers: {
               "Content-Type":
@@ -606,10 +1380,12 @@ function EntitiesPage() {
 
             body:
               JSON.stringify({
-                parentId,
+                name:
+                  cleanedName,
               }),
           }
         );
+
 
       if (!response.ok) {
         const data =
@@ -617,74 +1393,220 @@ function EntitiesPage() {
 
         throw new Error(
           data.message ||
-            "Failed to move node"
+            "Failed to rename folder"
         );
       }
 
-      if (parentId) {
-        setExpandedNodes(
-          (current) => ({
-            ...current,
 
-            [parentId]:
-              true,
-          })
-        );
-      }
+      cancelRenameFolder();
 
       await fetchTree();
     } catch (error) {
       console.error(
-        "Failed to move tree node:",
+        "Failed to rename folder:",
         error
       );
 
-      alert(error.message);
+      alert(
+        error.message
+      );
     }
   }
 
 
-  function handleDragEnd(
-    event
+  // ====================================================
+  // Delete Folder
+  // ====================================================
+
+  async function deleteFolder(
+    node
   ) {
-    const {
-      active,
-      over,
-    } = event;
-
-    if (!over) {
-      return;
-    }
-
-    const draggedId =
-      String(active.id);
-
-    const targetId =
-      String(over.id);
-
     if (
-      draggedId ===
-      targetId
+      !node ||
+      node.kind !==
+        "folder"
     ) {
       return;
     }
 
-    if (
-      targetId ===
-      "TREE_ROOT"
-    ) {
-      moveTreeNode(
-        draggedId,
-        null
+
+    closeContextMenu();
+
+
+    const confirmed =
+      window.confirm(
+        i18n.language.startsWith(
+          "zh"
+        )
+          ? `确定删除文件夹“${node.name}”吗？其中内容会移动到上一级，不会删除实体。`
+          : `Delete folder "${node.name}"? Its contents will move one level up.`
       );
 
+
+    if (!confirmed) {
       return;
     }
 
-    moveTreeNode(
-      draggedId,
-      targetId
-    );
+
+    try {
+      const response =
+        await fetch(
+          `${API_URL.tree}/${node._id}`,
+          {
+            method:
+              "DELETE",
+          }
+        );
+
+
+      if (!response.ok) {
+        const data =
+          await response.json();
+
+        throw new Error(
+          data.message ||
+            "Failed to delete folder"
+        );
+      }
+
+
+      setExpandedNodes(
+        (current) => {
+          const updated = {
+            ...current,
+          };
+
+          delete updated[
+            node._id
+          ];
+
+          return updated;
+        }
+      );
+
+
+      await fetchTree();
+    } catch (error) {
+      console.error(
+        "Failed to delete folder:",
+        error
+      );
+
+      alert(
+        error.message
+      );
+    }
+  }
+
+
+  // ====================================================
+  // Delete Entity
+  // ====================================================
+
+  async function deleteEntityNode(
+    node
+  ) {
+    const entity =
+      node?.entityId;
+
+
+    if (!entity?._id) {
+      return;
+    }
+
+
+    closeContextMenu();
+
+
+    const confirmed =
+      window.confirm(
+        i18n.language.startsWith(
+          "zh"
+        )
+          ? `确定删除实体“${entity.name}”吗？这个操作无法撤销。`
+          : `Delete entity "${entity.name}"? This cannot be undone.`
+      );
+
+
+    if (!confirmed) {
+      return;
+    }
+
+
+    try {
+      const response =
+        await fetch(
+          `${API_URL.entities}/${entity._id}`,
+          {
+            method:
+              "DELETE",
+          }
+        );
+
+
+      if (!response.ok) {
+        const data =
+          await response.json();
+
+        throw new Error(
+          data.message ||
+            "Failed to delete entity"
+        );
+      }
+
+
+      setEntities(
+        (current) =>
+          current.filter(
+            (item) =>
+              item._id !==
+              entity._id
+          )
+      );
+
+
+      if (
+        selectedDetailEntity
+          ?._id ===
+        entity._id
+      ) {
+        setSelectedDetailEntity(
+          null
+        );
+
+        setPendingSelectedEntityId(
+          null
+        );
+
+        localStorage.removeItem(
+          getSelectedEntityStorageKey(
+            worldId
+          )
+        );
+
+        setIsEditingEntity(
+          false
+        );
+
+        setEditName("");
+
+        setEditValues({});
+
+        setReferenceOptions({});
+      }
+
+
+      await fetchTree();
+    } catch (error) {
+      console.error(
+        "Failed to delete entity:",
+        error
+      );
+
+      alert(
+        error.message
+      );
+    }
   }
 
 
@@ -692,26 +1614,37 @@ function EntitiesPage() {
   // Tree Helpers
   // ====================================================
 
+  function getNodeParentId(
+    node
+  ) {
+    if (
+      !node?.parentId
+    ) {
+      return null;
+    }
+
+
+    return (
+      typeof node.parentId ===
+      "object"
+        ? node.parentId?._id ||
+          null
+        : node.parentId
+    );
+  }
+
+
   function getChildren(
     parentId
   ) {
     return treeNodes
-      .filter((node) => {
-        if (!parentId) {
-          return !node.parentId;
-        }
-
-        const nodeParentId =
-          typeof node.parentId ===
-          "object"
-            ? node.parentId?._id
-            : node.parentId;
-
-        return (
-          nodeParentId ===
+      .filter(
+        (node) =>
+          getNodeParentId(
+            node
+          ) ===
           parentId
-        );
-      })
+      )
       .sort(
         (a, b) =>
           (a.order || 0) -
@@ -728,18 +1661,308 @@ function EntitiesPage() {
         ...current,
 
         [nodeId]:
-          !current[nodeId],
+          !current[
+            nodeId
+          ],
       })
     );
   }
 
+
+  // ====================================================
+  // Move / Reorder Tree Node
+  // ====================================================
+
+  async function moveTreeNode(
+    nodeId,
+    parentId,
+    index = null
+  ) {
+    try {
+      const response =
+        await fetch(
+          `${API_URL.tree}/${nodeId}/move`,
+          {
+            method:
+              "PUT",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify({
+                parentId,
+                index,
+              }),
+          }
+        );
+
+
+      if (!response.ok) {
+        const data =
+          await response.json();
+
+        throw new Error(
+          data.message ||
+            "Failed to move node"
+        );
+      }
+
+
+      if (parentId) {
+        setExpandedNodes(
+          (current) => ({
+            ...current,
+
+            [parentId]:
+              true,
+          })
+        );
+      }
+
+
+      await fetchTree();
+    } catch (error) {
+      console.error(
+        "Failed to move tree node:",
+        error
+      );
+
+      alert(
+        error.message
+      );
+    }
+  }
+
+
+  // ====================================================
+  // Drag Start
+  // ====================================================
+
+  function handleDragStart(
+    event
+  ) {
+    setActiveNodeId(
+      String(
+        event.active.id
+      )
+    );
+
+    closeContextMenu();
+  }
+
+
+  // ====================================================
+  // Drag Cancel
+  // ====================================================
+
+  function handleDragCancel() {
+    setActiveNodeId(
+      null
+    );
+  }
+
+
+  // ====================================================
+  // Drag End
+  // ====================================================
+
+  function handleDragEnd(
+    event
+  ) {
+    const {
+      active,
+      over,
+    } = event;
+
+
+    setActiveNodeId(
+      null
+    );
+
+
+    if (!over) {
+      return;
+    }
+
+
+    const draggedId =
+      String(
+        active.id
+      );
+
+    const dropId =
+      String(
+        over.id
+      );
+
+
+    // ==================================================
+    // Drop into Root
+    // ==================================================
+
+    if (
+      dropId ===
+      "root:end"
+    ) {
+      moveTreeNode(
+        draggedId,
+        null,
+        null
+      );
+
+      return;
+    }
+
+
+    // ==================================================
+    // Parse Drop Zone
+    // ==================================================
+
+    const separatorIndex =
+      dropId.indexOf(
+        ":"
+      );
+
+
+    if (
+      separatorIndex ===
+      -1
+    ) {
+      return;
+    }
+
+
+    const mode =
+      dropId.substring(
+        0,
+        separatorIndex
+      );
+
+
+    const targetId =
+      dropId.substring(
+        separatorIndex + 1
+      );
+
+
+    if (
+      !targetId ||
+      draggedId ===
+        targetId
+    ) {
+      return;
+    }
+
+
+    const targetNode =
+      treeNodes.find(
+        (node) =>
+          node._id ===
+          targetId
+      );
+
+
+    if (!targetNode) {
+      return;
+    }
+
+
+    // ==================================================
+    // Drop Inside
+    // ==================================================
+
+    if (
+      mode ===
+      "inside"
+    ) {
+      moveTreeNode(
+        draggedId,
+        targetId,
+        null
+      );
+
+      return;
+    }
+
+
+    // ==================================================
+    // Drop Before / After
+    // ==================================================
+
+    if (
+      mode !==
+        "before" &&
+      mode !==
+        "after"
+    ) {
+      return;
+    }
+
+
+    const destinationParentId =
+      getNodeParentId(
+        targetNode
+      );
+
+
+    const destinationSiblings =
+      getChildren(
+        destinationParentId
+      ).filter(
+        (node) =>
+          node._id !==
+          draggedId
+      );
+
+
+    const targetIndex =
+      destinationSiblings
+        .findIndex(
+          (node) =>
+            node._id ===
+            targetId
+        );
+
+
+    if (
+      targetIndex ===
+      -1
+    ) {
+      return;
+    }
+
+
+    const insertionIndex =
+      mode ===
+      "after"
+        ? targetIndex + 1
+        : targetIndex;
+
+
+    moveTreeNode(
+      draggedId,
+      destinationParentId,
+      insertionIndex
+    );
+  }
+
+
+  // ====================================================
+  // Render Tree
+  // ====================================================
 
   function renderTreeNodes(
     parentId = null,
     depth = 0
   ) {
     const children =
-      getChildren(parentId);
+      getChildren(
+        parentId
+      );
+
 
     return children.map(
       (node) => {
@@ -748,20 +1971,29 @@ function EntitiesPage() {
             node._id
           );
 
+
         const hasChildren =
           nodeChildren.length >
           0;
+
 
         const expanded =
           expandedNodes[
             node._id
           ] || false;
 
+
         return (
           <TreeRow
-            key={node._id}
-            node={node}
-            depth={depth}
+            key={
+              node._id
+            }
+            node={
+              node
+            }
+            depth={
+              depth
+            }
             expanded={
               expanded
             }
@@ -777,12 +2009,33 @@ function EntitiesPage() {
             onCreateFolder={
               openFolderForm
             }
+            onContextMenu={
+              openContextMenu
+            }
             selectedEntityId={
               selectedDetailEntity
                 ?._id
             }
             renderChildren={
               renderTreeNodes
+            }
+            renamingNodeId={
+              renamingNodeId
+            }
+            renameValue={
+              renameFolderName
+            }
+            onRenameValueChange={
+              setRenameFolderName
+            }
+            onRenameSubmit={
+              submitRenameFolder
+            }
+            onRenameCancel={
+              cancelRenameFolder
+            }
+            activeNodeId={
+              activeNodeId
             }
           />
         );
@@ -805,8 +2058,10 @@ function EntitiesPage() {
       return;
     }
 
+
     try {
       let url;
+
 
       if (
         field.referenceEntityTypeId
@@ -818,8 +2073,12 @@ function EntitiesPage() {
           `${API_URL.entities}/world/${worldId}`;
       }
 
+
       const response =
-        await fetch(url);
+        await fetch(
+          url
+        );
+
 
       if (!response.ok) {
         throw new Error(
@@ -827,8 +2086,10 @@ function EntitiesPage() {
         );
       }
 
+
       const data =
         await response.json();
+
 
       setReferenceOptions(
         (current) => ({
@@ -848,7 +2109,7 @@ function EntitiesPage() {
 
 
   // ====================================================
-  // Entity Type Selection
+  // Select Entity Type
   // ====================================================
 
   function selectEntityType(
@@ -859,8 +2120,11 @@ function EntitiesPage() {
     );
 
     setName("");
+
     setValues({});
+
     setReferenceOptions({});
+
 
     const type =
       entityTypes.find(
@@ -869,9 +2133,11 @@ function EntitiesPage() {
           entityTypeId
       );
 
+
     if (!type) {
       return;
     }
+
 
     type.fields.forEach(
       (field) => {
@@ -889,7 +2155,7 @@ function EntitiesPage() {
 
 
   // ====================================================
-  // Create Entity Values
+  // Values
   // ====================================================
 
   function updateValue(
@@ -897,6 +2163,21 @@ function EntitiesPage() {
     value
   ) {
     setValues(
+      (current) => ({
+        ...current,
+
+        [fieldKey]:
+          value,
+      })
+    );
+  }
+
+
+  function updateEditValue(
+    fieldKey,
+    value
+  ) {
+    setEditValues(
       (current) => ({
         ...current,
 
@@ -916,22 +2197,22 @@ function EntitiesPage() {
   ) {
     event.preventDefault();
 
+
     if (
-      !selectedEntityTypeId
+      !selectedEntityTypeId ||
+      !name.trim()
     ) {
       return;
     }
 
-    if (!name.trim()) {
-      return;
-    }
 
     try {
       const response =
         await fetch(
           API_URL.entities,
           {
-            method: "POST",
+            method:
+              "POST",
 
             headers: {
               "Content-Type":
@@ -953,18 +2234,21 @@ function EntitiesPage() {
           }
         );
 
+
       if (!response.ok) {
-        const errorData =
+        const data =
           await response.json();
 
         throw new Error(
-          errorData.message ||
+          data.message ||
             "Failed to create entity"
         );
       }
 
+
       const newEntity =
         await response.json();
+
 
       setEntities(
         (current) => [
@@ -973,12 +2257,19 @@ function EntitiesPage() {
         ]
       );
 
-      // The backend automatically creates the TreeNode.
+
       await fetchTree();
+
 
       setSelectedDetailEntity(
         newEntity
       );
+
+
+      setPendingSelectedEntityId(
+        null
+      );
+
 
       closeCreateForm();
     } catch (error) {
@@ -987,7 +2278,9 @@ function EntitiesPage() {
         error
       );
 
-      alert(error.message);
+      alert(
+        error.message
+      );
     }
   }
 
@@ -997,11 +2290,16 @@ function EntitiesPage() {
       null
     );
 
+    setPendingSelectedEntityId(
+      null
+    );
+
     setIsEditingEntity(
       false
     );
 
     setEditName("");
+
     setEditValues({});
 
     setShowCreateForm(
@@ -1013,7 +2311,9 @@ function EntitiesPage() {
     );
 
     setName("");
+
     setValues({});
+
     setReferenceOptions({});
   }
 
@@ -1028,7 +2328,9 @@ function EntitiesPage() {
     );
 
     setName("");
+
     setValues({});
+
     setReferenceOptions({});
   }
 
@@ -1044,6 +2346,7 @@ function EntitiesPage() {
       return;
     }
 
+
     setShowCreateForm(
       false
     );
@@ -1053,6 +2356,7 @@ function EntitiesPage() {
     );
 
     setEditName("");
+
     setEditValues({});
 
     setSelectedEntityTypeId(
@@ -1060,12 +2364,20 @@ function EntitiesPage() {
     );
 
     setName("");
+
     setValues({});
+
     setReferenceOptions({});
+
+    setPendingSelectedEntityId(
+      null
+    );
 
     setSelectedDetailEntity(
       entity
     );
+
+    closeContextMenu();
   }
 
 
@@ -1076,11 +2388,15 @@ function EntitiesPage() {
       return null;
     }
 
+
     const entityTypeId =
       typeof entity.entityTypeId ===
       "object"
-        ? entity.entityTypeId?._id
+        ? entity
+            .entityTypeId
+            ?._id
         : entity.entityTypeId;
+
 
     return entityTypes.find(
       (type) =>
@@ -1097,6 +2413,7 @@ function EntitiesPage() {
       return "—";
     }
 
+
     const entity =
       entities.find(
         (item) =>
@@ -1104,9 +2421,12 @@ function EntitiesPage() {
           entityId
       );
 
-    return entity
-      ? entity.name
-      : "—";
+
+    return (
+      entity
+        ? entity.name
+        : "—"
+    );
   }
 
 
@@ -1115,32 +2435,44 @@ function EntitiesPage() {
     value
   ) {
     if (
-      value === undefined ||
+      value ===
+        undefined ||
       value === null ||
       value === ""
     ) {
       return "—";
     }
 
+
     if (
       field.type ===
       "boolean"
     ) {
       return value
-        ? t("entities.yes")
-        : t("entities.no");
+        ? t(
+            "entities.yes"
+          )
+        : t(
+            "entities.no"
+          );
     }
+
 
     if (
       field.type ===
       "entity-reference"
     ) {
-      return getReferencedEntityName(
-        value
+      return (
+        getReferencedEntityName(
+          value
+        )
       );
     }
 
-    return String(value);
+
+    return String(
+      value
+    );
   }
 
 
@@ -1148,31 +2480,60 @@ function EntitiesPage() {
   // Edit Entity
   // ====================================================
 
-  function startEditEntity() {
-    if (!selectedDetailEntity) {
+  function startEditEntity(
+    entityOverride = null
+  ) {
+    const targetEntity =
+      entityOverride ||
+      selectedDetailEntity;
+
+
+    if (!targetEntity) {
       return;
     }
 
+
     const type =
       getEntityTypeForEntity(
-        selectedDetailEntity
+        targetEntity
       );
 
-    setEditName(
-      selectedDetailEntity.name
+
+    setShowCreateForm(
+      false
     );
 
+    setPendingSelectedEntityId(
+      null
+    );
+
+    setSelectedDetailEntity(
+      targetEntity
+    );
+
+
+    setEditName(
+      targetEntity.name
+    );
+
+
     setEditValues(
-      selectedDetailEntity.values
+      targetEntity.values
         ? {
-            ...selectedDetailEntity.values,
+            ...targetEntity.values,
           }
         : {}
     );
 
+
     setReferenceOptions({});
 
-    setIsEditingEntity(true);
+    setIsEditingEntity(
+      true
+    );
+
+    closeContextMenu();
+
 
     if (type) {
       type.fields.forEach(
@@ -1192,40 +2553,15 @@ function EntitiesPage() {
 
 
   function cancelEditEntity() {
-    setIsEditingEntity(false);
+    setIsEditingEntity(
+      false
+    );
+
     setEditName("");
+
     setEditValues({});
+
     setReferenceOptions({});
-  }
-
-  function closeMobileSheet() {
-    if (showCreateForm) {
-      closeCreateForm();
-      return;
-    }
-
-    if (isEditingEntity) {
-      cancelEditEntity();
-      return;
-    }
-
-    setSelectedDetailEntity(
-      null
-    );
-  }
-
-  function updateEditValue(
-    fieldKey,
-    value
-  ) {
-    setEditValues(
-      (current) => ({
-        ...current,
-
-        [fieldKey]:
-          value,
-      })
-    );
   }
 
 
@@ -1234,6 +2570,7 @@ function EntitiesPage() {
   ) {
     event.preventDefault();
 
+
     if (
       !selectedDetailEntity ||
       !editName.trim()
@@ -1241,12 +2578,14 @@ function EntitiesPage() {
       return;
     }
 
+
     try {
       const response =
         await fetch(
           `${API_URL.entities}/${selectedDetailEntity._id}`,
           {
-            method: "PUT",
+            method:
+              "PUT",
 
             headers: {
               "Content-Type":
@@ -1264,22 +2603,26 @@ function EntitiesPage() {
           }
         );
 
+
       if (!response.ok) {
-        const errorData =
+        const data =
           await response.json();
 
         throw new Error(
-          errorData.message ||
+          data.message ||
             "Failed to update entity"
         );
       }
 
+
       const updatedEntity =
         await response.json();
+
 
       setSelectedDetailEntity(
         updatedEntity
       );
+
 
       setEntities(
         (current) =>
@@ -1292,12 +2635,18 @@ function EntitiesPage() {
           )
       );
 
-      setIsEditingEntity(false);
+
+      setIsEditingEntity(
+        false
+      );
+
       setEditName("");
+
       setEditValues({});
+
       setReferenceOptions({});
 
-      // Refresh the tree so renamed entities update immediately.
+
       await fetchTree();
     } catch (error) {
       console.error(
@@ -1305,8 +2654,300 @@ function EntitiesPage() {
         error
       );
 
-      alert(error.message);
+      alert(
+        error.message
+      );
     }
+  }
+
+
+  // ====================================================
+  // Mobile Sheet
+  // ====================================================
+
+  function closeMobileSheet() {
+    if (
+      showCreateForm
+    ) {
+      closeCreateForm();
+
+      return;
+    }
+
+
+    if (
+      isEditingEntity
+    ) {
+      cancelEditEntity();
+
+      return;
+    }
+
+
+    setPendingSelectedEntityId(
+      null
+    );
+
+    setSelectedDetailEntity(
+      null
+    );
+  }
+
+
+  // ====================================================
+  // Dynamic Form Field Renderer
+  // ====================================================
+
+  function renderDynamicField(
+    field,
+    currentValues,
+    updateFunction
+  ) {
+    const value =
+      currentValues[
+        field.key
+      ] ?? "";
+
+
+    if (
+      field.type ===
+      "text"
+    ) {
+      return (
+        <input
+          type="text"
+          value={
+            value
+          }
+          required={
+            field.required
+          }
+          onChange={
+            (event) =>
+              updateFunction(
+                field.key,
+                event.target
+                  .value
+              )
+          }
+        />
+      );
+    }
+
+
+    if (
+      field.type ===
+      "long-text"
+    ) {
+      return (
+        <textarea
+          value={
+            value
+          }
+          required={
+            field.required
+          }
+          onChange={
+            (event) =>
+              updateFunction(
+                field.key,
+                event.target
+                  .value
+              )
+          }
+        />
+      );
+    }
+
+
+    if (
+      field.type ===
+      "number"
+    ) {
+      return (
+        <input
+          type="number"
+          value={
+            value
+          }
+          required={
+            field.required
+          }
+          onChange={
+            (event) =>
+              updateFunction(
+                field.key,
+                event.target
+                  .value
+              )
+          }
+        />
+      );
+    }
+
+
+    if (
+      field.type ===
+      "date"
+    ) {
+      return (
+        <input
+          type="date"
+          value={
+            value
+          }
+          required={
+            field.required
+          }
+          onChange={
+            (event) =>
+              updateFunction(
+                field.key,
+                event.target
+                  .value
+              )
+          }
+        />
+      );
+    }
+
+
+    if (
+      field.type ===
+      "boolean"
+    ) {
+      return (
+        <label className="checkbox-row entity-checkbox">
+          <input
+            type="checkbox"
+            checked={
+              Boolean(
+                currentValues[
+                  field.key
+                ]
+              )
+            }
+            onChange={
+              (event) =>
+                updateFunction(
+                  field.key,
+                  event.target
+                    .checked
+                )
+            }
+          />
+
+          {t(
+            "entities.yes"
+          )}
+        </label>
+      );
+    }
+
+
+    if (
+      field.type ===
+      "select"
+    ) {
+      return (
+        <select
+          className="field-select"
+          value={
+            value
+          }
+          required={
+            field.required
+          }
+          onChange={
+            (event) =>
+              updateFunction(
+                field.key,
+                event.target
+                  .value
+              )
+          }
+        >
+          <option value="">
+            {t(
+              "entities.selectOption"
+            )}
+          </option>
+
+          {field.options?.map(
+            (option) => (
+              <option
+                key={
+                  option
+                }
+                value={
+                  option
+                }
+              >
+                {option}
+              </option>
+            )
+          )}
+        </select>
+      );
+    }
+
+
+    if (
+      field.type ===
+      "entity-reference"
+    ) {
+      const options =
+        referenceOptions[
+          field.key
+        ] || [];
+
+
+      return (
+        <select
+          className="field-select"
+          value={
+            value
+          }
+          required={
+            field.required
+          }
+          onChange={
+            (event) =>
+              updateFunction(
+                field.key,
+                event.target
+                  .value
+              )
+          }
+        >
+          <option value="">
+            {t(
+              "entities.selectEntity"
+            )}
+          </option>
+
+          {options.map(
+            (entity) => (
+              <option
+                key={
+                  entity._id
+                }
+                value={
+                  entity._id
+                }
+              >
+                {
+                  entity.name
+                }
+              </option>
+            )
+          )}
+        </select>
+      );
+    }
+
+
+    return null;
   }
 
 
@@ -1316,437 +2957,94 @@ function EntitiesPage() {
 
   useEffect(() => {
     fetchWorld();
+
     fetchEntityTypes();
+
     fetchEntities();
+
     fetchTree();
-  }, [worldId]);
+  }, [
+    worldId,
+  ]);
 
 
   // ====================================================
-  // Create Field Renderer
+  // Close Context Menu
   // ====================================================
 
-  function renderField(
-    field
-  ) {
-    const value =
-      values[field.key] ??
-      "";
-
-    if (
-      field.type ===
-      "text"
-    ) {
-      return (
-        <input
-          type="text"
-          value={value}
-          required={
-            field.required
-          }
-          onChange={(event) =>
-            updateValue(
-              field.key,
-              event.target.value
-            )
-          }
-        />
-      );
+  useEffect(() => {
+    if (!contextMenu) {
+      return undefined;
     }
 
-    if (
-      field.type ===
-      "long-text"
-    ) {
-      return (
-        <textarea
-          value={value}
-          required={
-            field.required
-          }
-          onChange={(event) =>
-            updateValue(
-              field.key,
-              event.target.value
-            )
-          }
-        />
-      );
+
+    function handlePointerDown() {
+      closeContextMenu();
     }
 
-    if (
-      field.type ===
-      "number"
+
+    function handleKeyDown(
+      event
     ) {
-      return (
-        <input
-          type="number"
-          value={value}
-          required={
-            field.required
-          }
-          onChange={(event) =>
-            updateValue(
-              field.key,
-              event.target.value
-            )
-          }
-        />
-      );
+      if (
+        event.key ===
+        "Escape"
+      ) {
+        closeContextMenu();
+      }
     }
 
-    if (
-      field.type ===
-      "date"
-    ) {
-      return (
-        <input
-          type="date"
-          value={value}
-          required={
-            field.required
-          }
-          onChange={(event) =>
-            updateValue(
-              field.key,
-              event.target.value
-            )
-          }
-        />
-      );
+
+    function handleViewportChange() {
+      closeContextMenu();
     }
 
-    if (
-      field.type ===
-      "boolean"
-    ) {
-      return (
-        <label className="checkbox-row entity-checkbox">
-          <input
-            type="checkbox"
-            checked={
-              Boolean(
-                values[
-                  field.key
-                ]
-              )
-            }
-            onChange={(event) =>
-              updateValue(
-                field.key,
-                event.target.checked
-              )
-            }
-          />
 
-          {t(
-            "entities.yes"
-          )}
-        </label>
+    window.addEventListener(
+      "pointerdown",
+      handlePointerDown
+    );
+
+    window.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+    window.addEventListener(
+      "resize",
+      handleViewportChange
+    );
+
+    window.addEventListener(
+      "blur",
+      handleViewportChange
+    );
+
+
+    return () => {
+      window.removeEventListener(
+        "pointerdown",
+        handlePointerDown
       );
-    }
 
-    if (
-      field.type ===
-      "select"
-    ) {
-      return (
-        <select
-          className="field-select"
-          value={value}
-          required={
-            field.required
-          }
-          onChange={(event) =>
-            updateValue(
-              field.key,
-              event.target.value
-            )
-          }
-        >
-          <option value="">
-            {t(
-              "entities.selectOption"
-            )}
-          </option>
-
-          {field.options?.map(
-            (option) => (
-              <option
-                key={option}
-                value={option}
-              >
-                {option}
-              </option>
-            )
-          )}
-        </select>
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown
       );
-    }
 
-    if (
-      field.type ===
-      "entity-reference"
-    ) {
-      const options =
-        referenceOptions[
-          field.key
-        ] || [];
-
-      return (
-        <select
-          className="field-select"
-          value={value}
-          required={
-            field.required
-          }
-          onChange={(event) =>
-            updateValue(
-              field.key,
-              event.target.value
-            )
-          }
-        >
-          <option value="">
-            {t(
-              "entities.selectEntity"
-            )}
-          </option>
-
-          {options.map(
-            (entity) => (
-              <option
-                key={
-                  entity._id
-                }
-                value={
-                  entity._id
-                }
-              >
-                {entity.name}
-              </option>
-            )
-          )}
-        </select>
+      window.removeEventListener(
+        "resize",
+        handleViewportChange
       );
-    }
 
-    return null;
-  }
-
-
-  // ====================================================
-  // Edit Field Renderer
-  // ====================================================
-
-  function renderEditField(
-    field
-  ) {
-    const value =
-      editValues[
-        field.key
-      ] ?? "";
-
-    if (
-      field.type ===
-      "text"
-    ) {
-      return (
-        <input
-          type="text"
-          value={value}
-          required={
-            field.required
-          }
-          onChange={(event) =>
-            updateEditValue(
-              field.key,
-              event.target.value
-            )
-          }
-        />
+      window.removeEventListener(
+        "blur",
+        handleViewportChange
       );
-    }
-
-    if (
-      field.type ===
-      "long-text"
-    ) {
-      return (
-        <textarea
-          value={value}
-          required={
-            field.required
-          }
-          onChange={(event) =>
-            updateEditValue(
-              field.key,
-              event.target.value
-            )
-          }
-        />
-      );
-    }
-
-    if (
-      field.type ===
-      "number"
-    ) {
-      return (
-        <input
-          type="number"
-          value={value}
-          required={
-            field.required
-          }
-          onChange={(event) =>
-            updateEditValue(
-              field.key,
-              event.target.value
-            )
-          }
-        />
-      );
-    }
-
-    if (
-      field.type ===
-      "date"
-    ) {
-      return (
-        <input
-          type="date"
-          value={value}
-          required={
-            field.required
-          }
-          onChange={(event) =>
-            updateEditValue(
-              field.key,
-              event.target.value
-            )
-          }
-        />
-      );
-    }
-
-    if (
-      field.type ===
-      "boolean"
-    ) {
-      return (
-        <label className="checkbox-row entity-checkbox">
-          <input
-            type="checkbox"
-            checked={
-              Boolean(
-                editValues[
-                  field.key
-                ]
-              )
-            }
-            onChange={(event) =>
-              updateEditValue(
-                field.key,
-                event.target.checked
-              )
-            }
-          />
-
-          {t(
-            "entities.yes"
-          )}
-        </label>
-      );
-    }
-
-    if (
-      field.type ===
-      "select"
-    ) {
-      return (
-        <select
-          className="field-select"
-          value={value}
-          required={
-            field.required
-          }
-          onChange={(event) =>
-            updateEditValue(
-              field.key,
-              event.target.value
-            )
-          }
-        >
-          <option value="">
-            {t(
-              "entities.selectOption"
-            )}
-          </option>
-
-          {field.options?.map(
-            (option) => (
-              <option
-                key={option}
-                value={option}
-              >
-                {option}
-              </option>
-            )
-          )}
-        </select>
-      );
-    }
-
-    if (
-      field.type ===
-      "entity-reference"
-    ) {
-      const options =
-        referenceOptions[
-          field.key
-        ] || [];
-
-      return (
-        <select
-          className="field-select"
-          value={value}
-          required={
-            field.required
-          }
-          onChange={(event) =>
-            updateEditValue(
-              field.key,
-              event.target.value
-            )
-          }
-        >
-          <option value="">
-            {t(
-              "entities.selectEntity"
-            )}
-          </option>
-
-          {options.map(
-            (entity) => (
-              <option
-                key={
-                  entity._id
-                }
-                value={
-                  entity._id
-                }
-              >
-                {entity.name}
-              </option>
-            )
-          )}
-        </select>
-      );
-    }
-
-    return null;
-  }
+    };
+  }, [
+    contextMenu,
+  ]);
 
 
   // ====================================================
@@ -1770,12 +3068,30 @@ function EntitiesPage() {
     );
 
 
+  const contextMenuNode =
+    contextMenu
+      ? treeNodes.find(
+          (node) =>
+            node._id ===
+            contextMenu.nodeId
+        )
+      : null;
+
+
   // ====================================================
   // Explorer Sidebar
   // ====================================================
 
   const explorerSidebar = (
-    <aside className="entity-tree-sidebar">
+    <aside
+      ref={
+        explorerSidebarRef
+      }
+      className="entity-tree-sidebar"
+      onScroll={
+        handleExplorerScroll
+      }
+    >
       <div className="entity-tree-header">
         <span>
           {t(
@@ -1787,28 +3103,19 @@ function EntitiesPage() {
           <button
             type="button"
             className="tree-add-button"
-            onClick={() =>
-              openFolderForm(
-                null
+            onClick={
+              () =>
+                openFolderForm(
+                  null
+                )
+            }
+            title={
+              t(
+                "tree.newFolder"
               )
             }
-            title={t(
-              "tree.newFolder"
-            )}
-            aria-label={t(
-              "tree.newFolder"
-            )}
           >
-            <span aria-hidden="true">
-              📁
-            </span>
-
-            <span
-              className="tree-add-symbol"
-              aria-hidden="true"
-            >
-            
-            </span>
+            📁
           </button>
 
           <button
@@ -1817,17 +3124,19 @@ function EntitiesPage() {
             onClick={
               openCreateForm
             }
-            title={t(
-              "entities.newEntity"
-            )}
-            aria-label={t(
-              "entities.newEntity"
-            )}
+            title={
+              t(
+                "entities.newEntity"
+              )
+            }
           >
             +
           </button>
         </div>
       </div>
+
+
+      {/* Folder Creation */}
 
       {showFolderForm && (
         <form
@@ -1837,13 +3146,15 @@ function EntitiesPage() {
           }
         >
           <div className="folder-create-parent">
-            {folderParentId
-              ? t(
-                  "tree.createInside"
-                )
-              : t(
-                  "tree.createAtRoot"
-                )}
+            {
+              folderParentId
+                ? t(
+                    "tree.createInside"
+                  )
+                : t(
+                    "tree.createAtRoot"
+                  )
+            }
           </div>
 
           <div className="folder-create-row">
@@ -1852,19 +3163,22 @@ function EntitiesPage() {
               value={
                 folderName
               }
-              placeholder={t(
-                "tree.folderName"
-              )}
-              onChange={(event) =>
-                setFolderName(
-                  event.target.value
+              placeholder={
+                t(
+                  "tree.folderName"
                 )
+              }
+              onChange={
+                (event) =>
+                  setFolderName(
+                    event.target
+                      .value
+                  )
               }
             />
 
             <button
               type="submit"
-              aria-label="Create folder"
             >
               ✓
             </button>
@@ -1874,7 +3188,6 @@ function EntitiesPage() {
               onClick={
                 closeFolderForm
               }
-              aria-label="Cancel"
             >
               ×
             </button>
@@ -1882,67 +3195,330 @@ function EntitiesPage() {
         </form>
       )}
 
+
+      {/* Tree */}
+
       <DndContext
-        onDragEnd={handleDragEnd}
+        collisionDetection={
+          pointerWithin
+        }
+        onDragStart={
+          handleDragStart
+        }
+        onDragCancel={
+          handleDragCancel
+        }
+        onDragEnd={
+          handleDragEnd
+        }
         modifiers={[
           restrictToVerticalAxis,
-          restrictToParentElement,
         ]}
       >
         <RootDropZone />
 
         <div className="entity-tree">
-          {renderTreeNodes()}
+          {
+            renderTreeNodes()
+          }
         </div>
+
+        <DragOverlay
+          dropAnimation={null}
+        >
+          {activeTreeNode ? (
+            <div className="explorer-drag-overlay">
+              <span className="explorer-toggle">
+                {activeTreeNode.kind ===
+                "folder"
+                  ? "›"
+                  : ""}
+              </span>
+
+              <div className="explorer-node-main">
+                <span className="explorer-icon">
+                  {activeTreeNode.kind ===
+                  "folder"
+                    ? "📁"
+                    : activeTreeNode
+                        .entityId
+                        ?.entityTypeId
+                        ?.icon ||
+                      "📄"}
+                </span>
+
+                <span className="explorer-name">
+                  {activeTreeNode.kind ===
+                  "folder"
+                    ? activeTreeNode.name
+                    : activeTreeNode
+                        .entityId
+                        ?.name ||
+                      "Missing Entity"}
+                </span>
+              </div>
+            </div>
+          ) : null}
+        </DragOverlay>
       </DndContext>
+
+
+      {/* Context Menu */}
+
+      {contextMenu &&
+        contextMenuNode && (
+          <div
+            className="explorer-context-menu"
+            style={{
+              left:
+                `${contextMenu.x}px`,
+
+              top:
+                `${contextMenu.y}px`,
+            }}
+            onPointerDown={
+              (event) =>
+                event
+                  .stopPropagation()
+            }
+            onContextMenu={
+              (event) =>
+                event
+                  .preventDefault()
+            }
+          >
+            {contextMenuNode.kind ===
+            "folder" ? (
+              <>
+                <button
+                  type="button"
+                  className="explorer-context-item"
+                  onClick={
+                    () => {
+                      closeContextMenu();
+
+                      openFolderForm(
+                        contextMenuNode._id
+                      );
+                    }
+                  }
+                >
+                  <span>
+                    📁
+                  </span>
+
+                  <span>
+                    {
+                      i18n.language.startsWith(
+                        "zh"
+                      )
+                        ? "新建子文件夹"
+                        : "New Folder"
+                    }
+                  </span>
+                </button>
+
+
+                <button
+                  type="button"
+                  className="explorer-context-item"
+                  onClick={
+                    () =>
+                      startRenameFolder(
+                        contextMenuNode
+                      )
+                  }
+                >
+                  <span>
+                    ✎
+                  </span>
+
+                  <span>
+                    {
+                      i18n.language.startsWith(
+                        "zh"
+                      )
+                        ? "重命名"
+                        : "Rename"
+                    }
+                  </span>
+                </button>
+
+
+                <div className="explorer-context-divider" />
+
+
+                <button
+                  type="button"
+                  className="explorer-context-item danger"
+                  onClick={
+                    () =>
+                      deleteFolder(
+                        contextMenuNode
+                      )
+                  }
+                >
+                  <span>
+                    ×
+                  </span>
+
+                  <span>
+                    {
+                      i18n.language.startsWith(
+                        "zh"
+                      )
+                        ? "删除文件夹"
+                        : "Delete Folder"
+                    }
+                  </span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="explorer-context-item"
+                  onClick={
+                    () =>
+                      openEntityDetail(
+                        contextMenuNode.entityId
+                      )
+                  }
+                >
+                  <span>
+                    ◉
+                  </span>
+
+                  <span>
+                    {
+                      i18n.language.startsWith(
+                        "zh"
+                      )
+                        ? "打开"
+                        : "Open"
+                    }
+                  </span>
+                </button>
+
+
+                <button
+                  type="button"
+                  className="explorer-context-item"
+                  onClick={
+                    () =>
+                      startEditEntity(
+                        contextMenuNode.entityId
+                      )
+                  }
+                >
+                  <span>
+                    ✎
+                  </span>
+
+                  <span>
+                    {
+                      i18n.language.startsWith(
+                        "zh"
+                      )
+                        ? "修改"
+                        : "Edit"
+                    }
+                  </span>
+                </button>
+
+
+                <div className="explorer-context-divider" />
+
+
+                <button
+                  type="button"
+                  className="explorer-context-item danger"
+                  onClick={
+                    () =>
+                      deleteEntityNode(
+                        contextMenuNode
+                      )
+                  }
+                >
+                  <span>
+                    ×
+                  </span>
+
+                  <span>
+                    {
+                      i18n.language.startsWith(
+                        "zh"
+                      )
+                        ? "删除实体"
+                        : "Delete Entity"
+                    }
+                  </span>
+                </button>
+              </>
+            )}
+          </div>
+        )}
     </aside>
   );
 
 
   // ====================================================
-  // Page
+  // Render
   // ====================================================
 
   return (
     <WorldLayout
-      worldId={worldId}
-      worldName={world.name}
+      worldId={
+        worldId
+      }
+      worldName={
+        world.name
+      }
       secondarySidebar={
         explorerSidebar
       }
       enableUltrawidePane
     >
+      {/* ==================================================
+          Page Header
+          ================================================== */}
+
       <div className="entity-page-header">
         <div>
           <h1>
-            {showCreateForm
-              ? t(
-                  "entities.createTitle"
-                )
-              : isEditingEntity
+            {
+              showCreateForm
                 ? t(
-                    "entities.editTitle"
+                    "entities.createTitle"
                   )
-                : selectedDetailEntity
-                  ? selectedDetailEntity.name
-                  : t(
-                      "entities.title"
-                    )}
+                : isEditingEntity
+                  ? t(
+                      "entities.editTitle"
+                    )
+                  : selectedDetailEntity
+                    ? selectedDetailEntity.name
+                    : t(
+                        "entities.title"
+                      )
+            }
           </h1>
 
           <p>
-            {showCreateForm
-              ? t(
-                  "entities.createDescription"
-                )
-              : selectedDetailEntity &&
-                  detailEntityType
-                ? `${detailEntityType.icon || ""} ${detailEntityType.name}`
-                : t(
-                    "entities.subtitle"
-                  )}
+            {
+              showCreateForm
+                ? t(
+                    "entities.createDescription"
+                  )
+                : selectedDetailEntity &&
+                    detailEntityType
+                  ? `${detailEntityType.icon || ""} ${detailEntityType.name}`
+                  : t(
+                      "entities.subtitle"
+                    )
+            }
           </p>
         </div>
+
 
         {!showCreateForm &&
           !isEditingEntity && (
@@ -1958,16 +3534,16 @@ function EntitiesPage() {
             </button>
           )}
 
-          <button
-            type="button"
-            className="mobile-sheet-close"
-            onClick={
-              closeMobileSheet
-            }
-            aria-label="Close"
-          >
-            ×
-          </button>
+
+        <button
+          type="button"
+          className="mobile-sheet-close"
+          onClick={
+            closeMobileSheet
+          }
+        >
+          ×
+        </button>
       </div>
 
 
@@ -1993,10 +3569,11 @@ function EntitiesPage() {
               value={
                 selectedEntityTypeId
               }
-              onChange={(event) =>
-                selectEntityType(
-                  event.target.value
-                )
+              onChange={
+                (event) =>
+                  selectEntityType(
+                    event.target.value
+                  )
               }
             >
               <option value="">
@@ -2022,6 +3599,7 @@ function EntitiesPage() {
               )}
             </select>
 
+
             {selectedEntityType && (
               <>
                 <div className="entity-form-divider" />
@@ -2040,6 +3618,7 @@ function EntitiesPage() {
                   </strong>
                 </div>
 
+
                 <label>
                   {t(
                     "schema.nameField"
@@ -2052,14 +3631,19 @@ function EntitiesPage() {
 
                 <input
                   type="text"
-                  value={name}
+                  value={
+                    name
+                  }
                   required
-                  onChange={(event) =>
-                    setName(
-                      event.target.value
-                    )
+                  onChange={
+                    (event) =>
+                      setName(
+                        event.target
+                          .value
+                      )
                   }
                 />
+
 
                 {selectedEntityType.fields.map(
                   (field) => (
@@ -2070,7 +3654,9 @@ function EntitiesPage() {
                       }
                     >
                       <label>
-                        {field.label}
+                        {
+                          field.label
+                        }
 
                         {field.required && (
                           <span className="required-star">
@@ -2079,14 +3665,17 @@ function EntitiesPage() {
                         )}
                       </label>
 
-                      {renderField(
-                        field
+                      {renderDynamicField(
+                        field,
+                        values,
+                        updateValue
                       )}
                     </div>
                   )
                 )}
               </>
             )}
+
 
             <div className="form-buttons">
               <button
@@ -2126,7 +3715,7 @@ function EntitiesPage() {
         isEditingEntity &&
         selectedDetailEntity &&
         detailEntityType && (
-          <div className="create-panel entity-create-panel entity-edit-panel">
+          <div className="create-panel entity-edit-panel">
             <form
               onSubmit={
                 saveEntityEdit
@@ -2146,6 +3735,7 @@ function EntitiesPage() {
                 </strong>
               </div>
 
+
               <label>
                 {t(
                   "schema.nameField"
@@ -2162,12 +3752,14 @@ function EntitiesPage() {
                   editName
                 }
                 required
-                onChange={(event) =>
-                  setEditName(
-                    event.target.value
-                  )
+                onChange={
+                  (event) =>
+                    setEditName(
+                      event.target.value
+                    )
                 }
               />
+
 
               {detailEntityType.fields.map(
                 (field) => (
@@ -2178,7 +3770,9 @@ function EntitiesPage() {
                     }
                   >
                     <label>
-                      {field.label}
+                      {
+                        field.label
+                      }
 
                       {field.required && (
                         <span className="required-star">
@@ -2187,12 +3781,15 @@ function EntitiesPage() {
                       )}
                     </label>
 
-                    {renderEditField(
-                      field
+                    {renderDynamicField(
+                      field,
+                      editValues,
+                      updateEditValue
                     )}
                   </div>
                 )
               )}
+
 
               <div className="form-buttons">
                 <button
@@ -2253,11 +3850,15 @@ function EntitiesPage() {
                 </div>
               </div>
 
+
               <button
                 type="button"
                 className="small-action-button"
                 onClick={
-                  startEditEntity
+                  () =>
+                    startEditEntity(
+                      selectedDetailEntity
+                    )
                 }
               >
                 {t(
@@ -2265,6 +3866,7 @@ function EntitiesPage() {
                 )}
               </button>
             </div>
+
 
             <div className="entity-detail-panel-body">
               {detailEntityType
@@ -2277,6 +3879,7 @@ function EntitiesPage() {
                 </div>
               )}
 
+
               {detailEntityType.fields.map(
                 (field) => {
                   const rawValue =
@@ -2284,6 +3887,7 @@ function EntitiesPage() {
                       .values?.[
                         field.key
                       ];
+
 
                   return (
                     <div
@@ -2315,19 +3919,22 @@ function EntitiesPage() {
               )}
             </div>
 
+
             <div className="entity-detail-panel-footer">
               {t(
                 "entities.lastUpdated"
               )}{" "}
 
-              {new Date(
-                selectedDetailEntity.updatedAt
-              ).toLocaleString(
-                i18n.language ===
-                  "zh-CN"
-                  ? "zh-CN"
-                  : "en-US"
-              )}
+              {
+                new Date(
+                  selectedDetailEntity.updatedAt
+                ).toLocaleString(
+                  i18n.language ===
+                    "zh-CN"
+                    ? "zh-CN"
+                    : "en-US"
+                )
+              }
             </div>
           </div>
         )}
@@ -2357,5 +3964,6 @@ function EntitiesPage() {
     </WorldLayout>
   );
 }
+
 
 export default EntitiesPage;

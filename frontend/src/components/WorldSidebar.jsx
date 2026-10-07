@@ -3,13 +3,20 @@ import {
   useNavigate,
 } from "react-router-dom";
 
-import { useTranslation } from "react-i18next";
+import {
+  useTranslation,
+} from "react-i18next";
 
 function WorldSidebar({
   worldId,
+  variant = "desktop",
+  onNavigate = null,
 }) {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate =
+    useNavigate();
+
+  const location =
+    useLocation();
 
   const { t } =
     useTranslation();
@@ -19,39 +26,64 @@ function WorldSidebar({
 
   function isExact(path) {
     return (
-      location.pathname === path
+      location.pathname ===
+      path
     );
   }
 
   function isSection(path) {
     return (
-      location.pathname === path ||
+      location.pathname ===
+        path ||
       location.pathname.startsWith(
         `${path}/`
       )
     );
   }
 
+  function goTo(path) {
+    navigate(path);
+
+    if (onNavigate) {
+      onNavigate();
+    }
+  }
+
+  const sidebarClassName =
+    variant === "drawer"
+      ? "workspace-sidebar workspace-sidebar--drawer"
+      : "workspace-sidebar workspace-sidebar--desktop";
+
   return (
-    <aside className="workspace-sidebar">
+    <aside
+      className={
+        sidebarClassName
+      }
+    >
       <div className="sidebar-section-title">
-        {t("workspace.library")}
+        {t(
+          "workspace.library"
+        )}
       </div>
 
       <button
+        type="button"
         className={
           isExact(basePath)
             ? "sidebar-item active"
             : "sidebar-item"
         }
         onClick={() =>
-          navigate(basePath)
+          goTo(basePath)
         }
       >
-        {t("workspace.home")}
+        {t(
+          "workspace.home"
+        )}
       </button>
 
       <button
+        type="button"
         className={
           isSection(
             `${basePath}/entity-types`
@@ -60,7 +92,7 @@ function WorldSidebar({
             : "sidebar-item"
         }
         onClick={() =>
-          navigate(
+          goTo(
             `${basePath}/entity-types`
           )
         }
@@ -71,6 +103,7 @@ function WorldSidebar({
       </button>
 
       <button
+        type="button"
         className={
           isSection(
             `${basePath}/entities`
@@ -79,7 +112,7 @@ function WorldSidebar({
             : "sidebar-item"
         }
         onClick={() =>
-          navigate(
+          goTo(
             `${basePath}/entities`
           )
         }
@@ -90,6 +123,7 @@ function WorldSidebar({
       </button>
 
       <button
+        type="button"
         className={
           isSection(
             `${basePath}/documents`
@@ -98,7 +132,7 @@ function WorldSidebar({
             : "sidebar-item"
         }
         onClick={() =>
-          navigate(
+          goTo(
             `${basePath}/documents`
           )
         }
@@ -111,6 +145,7 @@ function WorldSidebar({
       <div className="sidebar-divider" />
 
       <button
+        type="button"
         className="sidebar-item"
         disabled
       >
@@ -120,6 +155,7 @@ function WorldSidebar({
       </button>
 
       <button
+        type="button"
         className="sidebar-item"
         disabled
       >
@@ -131,6 +167,7 @@ function WorldSidebar({
       <div className="sidebar-spacer" />
 
       <button
+        type="button"
         className="sidebar-item"
         disabled
       >

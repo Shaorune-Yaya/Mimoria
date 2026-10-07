@@ -42,7 +42,9 @@
 
     "settings": "Settings",
 
-    "startMessage": "Your world workspace is ready. Start building your lore here."
+    "startMessage": "Your world workspace is ready. Start building your lore here.",
+    "secondaryWorkspace": "Secondary Workspace",
+    "closeSecondary": "Close secondary workspace"
   },
 
   "entityTypes": {
@@ -57,6 +59,7 @@
     "namePlaceholder": "Character, Location, Faction...",
 
     "icon": "Icon",
+    "setEmoji": "📄Supports emoji icons, etc.",
 
     "description": "Description",
     "descriptionPlaceholder": "What kind of information does this type represent?",
@@ -155,33 +158,36 @@
   },
 
   "documents": {
-  
-    "moreActions": "More actions",
-
-    "newDocumentInside": "New Document Inside",
-    "newFolderInside": "New Folder Inside",
-
-    "createFailed": "Failed to create document.",
-    "createFolderFailed": "Failed to create folder.",
-    "renameFailed": "Failed to rename item.",
-    "deleteFailed": "Failed to delete item.",
-
-    "deleteDocumentConfirm": "Are you sure you want to delete this document?",
-    "deleteFolderConfirm": "Delete this folder? Its contents will be moved to the parent folder.",
-
-    "syncComingSoon": "Story Sync will be added after the editor and block system are complete.",
     "title": "Documents",
     "subtitle": "Story and world writing",
 
     "loading": "Loading...",
     "loadError": "Failed to load Documents.",
 
+    "root": "Root",
+
     "emptyTree": "No documents yet.",
 
-    "selectTitle": "Documents",
-    "selectDescription": "Select a document from the Explorer to open it.",
+    "newDocument": "+ New Document",
+    "newFolder": "New Folder",
 
-    "comingSoon": "Rich text editing, auto-save, Entity links, Story Sync and consistency checking will be added in the next stages.",
+    "newDocumentInside": "New Document Inside",
+    "newFolderInside": "New Folder Inside",
+
+    "createTitle": "Create Document",
+    "createDescription": "Create a new writing document in this world.",
+    "create": "Create Document",
+
+    "documentName": "Document Name",
+    "documentNamePlaceholder": "Chapter 1, Prologue, World History...",
+    "folderName": "Folder name...",
+
+    "createInsideSelectedFolder": "This document will be created inside the selected folder.",
+
+    "browserTitle": "Document Browser",
+    "browserDescription": "Use the Explorer on the left to organize your writing. Select a document to open it.",
+
+    "documentWorkspaceDescription": "Write and organize the story of this world.",
 
     "untitled": "Untitled Document",
     "emptyDocument": "This document is empty.",
@@ -194,22 +200,31 @@
     "sync": "Sync",
     "syncPending": "Story Sync pending",
     "syncUpToDate": "Story Sync up to date",
+    "syncComingSoon": "Story Sync will be added after the editor and block system are complete.",
 
     "saved": "Saved",
-
-    "newDocument": "New Document",
-    "newFolder": "New Folder",
-
-    "createDocument": "Create Document",
-    "createFolder": "Create Folder",
 
     "rename": "Rename",
     "delete": "Delete",
 
-    "documentName": "Document name",
-    "folderName": "Folder name",
+    "moreActions": "More actions",
 
     "expand": "Expand",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirmDelete": "Delete",
+
+    "deleteDocumentConfirm": "Delete this document?",
+    "deleteFolderConfirm": "Delete this folder? Its contents will be moved to the parent folder.",
+
+    "createFailed": "Failed to create document.",
+    "createFolderFailed": "Failed to create folder.",
+    "renameFailed": "Failed to rename item.",
+    "deleteFailed": "Failed to delete item.",
+    "drag": "Drag",
+    "moveFailed": "Failed to move document item."
   }
 }

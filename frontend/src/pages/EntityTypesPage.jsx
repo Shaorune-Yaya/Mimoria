@@ -53,7 +53,7 @@ function EntityTypesPage() {
   const [
     icon,
     setIcon,
-  ] = useState("📄");
+  ] = useState("");
 
   async function fetchWorld() {
     try {
@@ -260,6 +260,9 @@ function EntityTypesPage() {
             <input
               type="text"
               value={icon}
+              placeholder={t(
+                "entityTypes.setEmoji"
+              )}
               onChange={(event) =>
                 setIcon(
                   event.target.value

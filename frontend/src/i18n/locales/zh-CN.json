@@ -42,7 +42,9 @@
 
     "settings": "设置",
 
-    "startMessage": "你的世界工作区已经准备好了，可以开始创建世界设定。"
+    "startMessage": "你的世界工作区已经准备好了，可以开始创建世界设定。",
+    "secondaryWorkspace": "第二工作区",
+    "closeSecondary": "关闭第二工作区"
   },
 
   "entityTypes": {
@@ -57,6 +59,7 @@
     "namePlaceholder": "生物、地点、势力……",
 
     "icon": "图标",
+    "setEmoji": "📄支持emoji图标等",
 
     "description": "描述",
     "descriptionPlaceholder": "这种实体代表类型的描述",
@@ -155,32 +158,36 @@
   },
 
   "documents": {
-    "moreActions": "更多操作",
-
-    "newDocumentInside": "在此新建文档",
-    "newFolderInside": "在此新建文件夹",
-
-    "createFailed": "创建文档失败。",
-    "createFolderFailed": "创建文件夹失败。",
-    "renameFailed": "重命名失败。",
-    "deleteFailed": "删除失败。",
-
-    "deleteDocumentConfirm": "确定要删除这个文档吗？",
-    "deleteFolderConfirm": "确定要删除这个文件夹吗？其中的内容会被移动到上一级目录。",
-
-    "syncComingSoon": "故事同步将在编辑器和段落系统完成后加入。",
     "title": "文档",
     "subtitle": "故事创作与世界设定",
 
     "loading": "正在加载……",
     "loadError": "加载文档失败。",
 
+    "root": "根目录",
+
     "emptyTree": "暂无文档。",
 
-    "selectTitle": "文档",
-    "selectDescription": "从左侧资源管理器选择一个文档即可打开。",
+    "newDocument": "+ 新建文档",
+    "newFolder": "新建文件夹",
 
-    "comingSoon": "后续将加入富文本编辑、自动保存、实体链接、故事同步以及设定一致性检查。",
+    "newDocumentInside": "在此新建文档",
+    "newFolderInside": "在此新建文件夹",
+
+    "createTitle": "创建文档",
+    "createDescription": "在这个世界中创建一个新的写作文档。",
+    "create": "创建文档",
+
+    "documentName": "文档名称",
+    "documentNamePlaceholder": "第一章、序章、世界历史……",
+    "folderName": "文件夹名称……",
+
+    "createInsideSelectedFolder": "这个文档将创建在当前选择的文件夹中。",
+
+    "browserTitle": "文档浏览器",
+    "browserDescription": "通过左侧资源管理器整理你的故事与资料。选择一个文档即可打开。",
+
+    "documentWorkspaceDescription": "编写和整理这个世界中的故事内容。",
 
     "untitled": "未命名文档",
     "emptyDocument": "这个文档目前是空的。",
@@ -193,22 +200,31 @@
     "sync": "同步",
     "syncPending": "故事同步待处理",
     "syncUpToDate": "故事同步已是最新",
+    "syncComingSoon": "故事同步将在编辑器和段落系统完成后加入。",
 
     "saved": "已保存",
-
-    "newDocument": "新建文档",
-    "newFolder": "新建文件夹",
-
-    "createDocument": "创建文档",
-    "createFolder": "创建文件夹",
 
     "rename": "重命名",
     "delete": "删除",
 
-    "documentName": "文档名称",
-    "folderName": "文件夹名称",
+    "moreActions": "更多操作",
 
     "expand": "展开",
-    "collapse": "折叠"
+    "collapse": "折叠",
+
+    "confirm": "确认",
+    "cancel": "取消",
+    "close": "关闭",
+    "confirmDelete": "确认删除",
+
+    "deleteDocumentConfirm": "确定要删除这个文档吗？",
+    "deleteFolderConfirm": "确定要删除这个文件夹吗？其中的内容会被移动到上一级目录。",
+
+    "createFailed": "创建文档失败。",
+    "createFolderFailed": "创建文件夹失败。",
+    "renameFailed": "重命名失败。",
+    "deleteFailed": "删除失败。",
+    "drag": "拖动",
+    "moveFailed": "移动文档项目失败。"
   }
 }

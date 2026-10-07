@@ -1033,6 +1033,15 @@
 
 
 /* ======================================================
+   Mobile Bottom Sheet Resize Handle
+   ====================================================== */
+
+.mobile-sheet-resize-handle {
+  display: none;
+}
+
+
+/* ======================================================
    Mobile
    ====================================================== */
 
@@ -1082,13 +1091,16 @@
 
   .workspace-body,
   .workspace-body.has-secondary-sidebar {
+    position: relative;
+
     display: block;
 
     width: 100%;
 
     height:
       calc(
-        100dvh - 52px
+        100dvh -
+        52px
       );
 
     overflow: hidden;
@@ -1101,6 +1113,29 @@
   .mobile-drawer-backdrop {
     display: block;
   }
+
+  /*
+   * The Explorer remains the base mobile screen.
+   */
+
+  .workspace-body.has-secondary-sidebar
+  > .entity-tree-sidebar,
+  .workspace-body.has-secondary-sidebar
+  > .documents-explorer,
+  .workspace-body.has-secondary-sidebar
+  > .documents-tree-sidebar {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+
+    height: 100%;
+
+    border-right: none;
+  }
+
+  /*
+   * Primary workspace becomes a draggable bottom sheet.
+   */
 
   .workspace-split-area,
   .workspace-split-area.secondary-open {
@@ -1119,15 +1154,6 @@
       none !important;
   }
 
-  .workspace-main {
-    width: 100%;
-    height: 100%;
-
-    padding: 20px 16px;
-
-    overflow: auto;
-  }
-
   .workspace-body.has-secondary-sidebar
   .workspace-split-area {
     position: fixed;
@@ -1140,11 +1166,18 @@
 
     width: 100%;
 
+    /*
+     * Default is roughly one third of the viewport.
+     * JavaScript updates this value while dragging.
+     */
     height:
-      min(
-        84dvh,
-        780px
+      var(
+        --mobile-sheet-height,
+        34dvh
       );
+
+    min-height: 28dvh;
+    max-height: 92dvh;
 
     background:
       var(--color-bg);
@@ -1168,11 +1201,18 @@
     transform:
       translateY(105%);
 
-    pointer-events: none;
+    pointer-events:
+      none;
+
+    overflow: hidden;
 
     transition:
       transform 0.22s ease;
   }
+
+  /*
+   * Entity sheets.
+   */
 
   .workspace-body.has-secondary-sidebar
   .workspace-split-area:has(
@@ -1186,31 +1226,156 @@
     pointer-events: auto;
   }
 
-  .workspace-body.has-secondary-sidebar
-  .workspace-split-area::before {
-    content: "";
+  /*
+   * Document create/detail sheets.
+   */
 
+  .workspace-body.has-secondary-sidebar
+  .workspace-split-area:has(
+    .documents-create-panel,
+    .document-preview
+  ) {
+    transform:
+      translateY(0);
+
+    pointer-events: auto;
+  }
+
+  /*
+   * Real draggable handle.
+   */
+
+  .workspace-body.has-secondary-sidebar
+  .workspace-split-area:has(
+    .entity-detail-panel,
+    .entity-create-panel,
+    .entity-edit-panel,
+    .documents-create-panel,
+    .document-preview
+  )
+  .mobile-sheet-resize-handle {
     position: absolute;
 
-    top: 8px;
-    left: 50%;
+    top: 0;
+    left: 0;
+    right: 0;
 
-    z-index: 10;
+    z-index: 50;
 
+    height: 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: ns-resize;
+
+    touch-action: none;
+
+    user-select: none;
+  }
+
+  .mobile-sheet-resize-pill {
     width: 42px;
     height: 4px;
 
-    transform:
-      translateX(-50%);
+    border-radius:
+      999px;
 
-    border-radius: 999px;
+    background:
+      #4a515d;
 
-    background: #434a55;
+    transition:
+      width 0.12s ease,
+      background 0.12s ease;
   }
+
+  .mobile-sheet-resize-handle:hover
+  .mobile-sheet-resize-pill,
+  .mobile-sheet-resize-handle.active
+  .mobile-sheet-resize-pill {
+    width: 54px;
+
+    background:
+      #707986;
+  }
+
+  /*
+   * Remove the old fake drag handle.
+   */
+
+  .workspace-body.has-secondary-sidebar
+  .workspace-split-area::before {
+    display: none;
+  }
+
+  /*
+   * The contents scroll inside the sheet instead of
+   * increasing the sheet height.
+   */
 
   .workspace-body.has-secondary-sidebar
   .workspace-main {
+    width: 100%;
+    height: 100%;
+
     padding:
-      24px 14px 24px;
+      30px 14px 24px;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    overscroll-behavior:
+      contain;
+
+    -webkit-overflow-scrolling:
+      touch;
+
+    scrollbar-gutter:
+      stable;
   }
+
+  /*
+   * While dragging, disable animations and text selection.
+   */
+
+  .mobile-sheet-is-resizing {
+    user-select: none;
+  }
+
+  .mobile-sheet-is-resizing
+  .workspace-split-area {
+    transition: none !important;
+  }
+
+  .mobile-sheet-is-resizing,
+  .mobile-sheet-is-resizing * {
+    cursor:
+      ns-resize !important;
+  }
+}
+
+/* ======================================================
+   Fixed Secondary Workspace Label
+   ====================================================== */
+
+.secondary-pane-fixed-view {
+  padding:
+    4px 7px;
+
+  border:
+    1px solid
+    var(--color-border);
+
+  border-radius:
+    5px;
+
+  color:
+    var(--color-text-dim);
+
+  font-size:
+    10px;
+
+  white-space:
+    nowrap;
 }
