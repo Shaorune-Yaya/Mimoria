@@ -59,6 +59,31 @@ const LANGUAGE_CONCEPTS = {
   },
 
 
+    "relation.orbits": {
+    kind: "relation",
+    symmetric: false,
+    objectConcepts: [
+      "entityType.star",
+      "entityType.planet",
+    ],
+  },
+
+  "relation.colony_of": {
+    kind: "relation",
+    symmetric: false,
+    objectConcepts: [
+      "entityType.country",
+      "entityType.government",
+      "entityType.organization",
+      "entityType.planet",
+    ],
+  },
+
+  "relation.connected_to": {
+    kind: "relation",
+    symmetric: true,
+  },
+
   // ====================================================
   // Relations - Organizations
   // ====================================================
@@ -335,6 +360,66 @@ const LANGUAGE_CONCEPTS = {
 
 
   // ====================================================
+  // Events - Sci-Fi/space
+  // ====================================================
+
+    "event.launch": {
+    kind: "event",
+  },
+
+  "event.land": {
+    kind: "event",
+  },
+
+  "event.dock": {
+    kind: "event",
+  },
+
+  "event.ftlJump": {
+    kind: "event",
+  },
+
+  "event.colonize": {
+    kind: "event",
+  },
+
+  "event.terraform": {
+    kind: "event",
+  },
+
+  "event.firstContact": {
+    kind: "event",
+  },
+
+  "event.awakenAI": {
+    kind: "event",
+  },
+
+  "event.shutdownAI": {
+    kind: "event",
+  },
+
+  "event.hack": {
+    kind: "event",
+  },
+
+  "event.augment": {
+    kind: "event",
+  },
+
+  "event.clone": {
+    kind: "event",
+  },
+
+  "event.uploadMind": {
+    kind: "event",
+  },
+
+  "event.downloadMind": {
+    kind: "event",
+  },
+  
+  // ====================================================
   // Events - Movement
   // ====================================================
 
@@ -539,6 +624,9 @@ const LANGUAGE_CONCEPTS = {
     kind: "modifier",
   },
 
+    "modifier.hybrid": {
+    kind: "modifier",
+  },
 
   // ====================================================
   // Discourse

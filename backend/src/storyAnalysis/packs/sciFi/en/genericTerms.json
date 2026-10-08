@@ -1,0 +1,57 @@
+{
+  "meta": {
+    "locale": "en",
+    "version": "1.0.0",
+    "pack": "sciFi",
+    "category": "generic-terms"
+  },
+  "genericPeople": [
+    "the robot",
+    "this robot",
+    "that robot",
+    "the android",
+    "this android",
+    "the cyborg",
+    "this cyborg",
+    "the AI",
+    "this AI"
+  ],
+  "genericObjects": [
+    "the ship",
+    "this ship",
+    "that ship",
+    "the starship",
+    "this starship",
+    "the spacecraft",
+    "this spacecraft",
+    "the system",
+    "this system",
+    "the device",
+    "this device"
+  ],
+  "genericLocations": [
+    "the planet",
+    "this planet",
+    "that planet",
+    "the station",
+    "this station",
+    "the colony",
+    "this colony",
+    "in space",
+    "in orbit"
+  ],
+  "genericOrganizations": [
+    "the fleet",
+    "this fleet",
+    "the corporation",
+    "this corporation"
+  ],
+  "stopFragments": [
+    "ship",
+    "station",
+    "planet",
+    "star",
+    "system",
+    "AI"
+  ]
+}

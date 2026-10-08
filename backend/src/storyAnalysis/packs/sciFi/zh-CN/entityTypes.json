@@ -1,0 +1,255 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.0.0",
+    "pack": "sciFi",
+    "category": "entity-types"
+  },
+  "entries": [
+    {
+      "conceptId": "entityType.artificialIntelligence",
+      "aliases": {
+        "strong": [
+          "人工智能",
+          "通用人工智能",
+          "强人工智能"
+        ],
+        "normal": [
+          "AI",
+          "AGI",
+          "智能核心",
+          "电子智能",
+          "机器智能"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.robot",
+      "aliases": {
+        "strong": [
+          "机器人"
+        ],
+        "normal": [
+          "机械人",
+          "机械单位",
+          "自主机器人"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.android",
+      "aliases": {
+        "strong": [
+          "仿生人",
+          "人造人"
+        ],
+        "normal": [
+          "合成人",
+          "人工人类",
+          "安卓人",
+          "Android"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.cyborg",
+      "aliases": {
+        "strong": [
+          "赛博格",
+          "义体人"
+        ],
+        "normal": [
+          "改造人",
+          "机械改造人",
+          "半机械人"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.spacecraft",
+      "aliases": {
+        "strong": [
+          "星舰",
+          "宇宙飞船",
+          "航天器"
+        ],
+        "normal": [
+          "飞船",
+          "太空船",
+          "宇宙船",
+          "舰船",
+          "穿梭机",
+          "运输舰",
+          "战舰",
+          "巡洋舰",
+          "驱逐舰",
+          "护卫舰",
+          "母舰"
+        ],
+        "weak": [
+          "舰"
+        ]
+      },
+      "suffixes": {
+        "strong": [
+          "星舰"
+        ],
+        "normal": [
+          "号舰",
+          "战舰",
+          "母舰",
+          "巡洋舰",
+          "驱逐舰",
+          "护卫舰"
+        ],
+        "weak": [
+          "舰"
+        ]
+      }
+    },
+    {
+      "conceptId": "entityType.spaceStation",
+      "aliases": {
+        "strong": [
+          "空间站",
+          "太空站",
+          "轨道空间站"
+        ],
+        "normal": [
+          "轨道站",
+          "轨道基地",
+          "太空基地",
+          "空间基地"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [
+          "空间站"
+        ],
+        "normal": [
+          "轨道站",
+          "太空站"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.colony",
+      "aliases": {
+        "strong": [
+          "星际殖民地",
+          "行星殖民地"
+        ],
+        "normal": [
+          "殖民地",
+          "殖民星",
+          "殖民据点",
+          "外星聚居地"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [
+          "殖民地"
+        ],
+        "normal": [
+          "殖民星"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.starSystem",
+      "aliases": {
+        "strong": [
+          "恒星系",
+          "行星系"
+        ],
+        "normal": [
+          "星系",
+          "太阳系"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [
+          "星系"
+        ],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.star",
+      "aliases": {
+        "strong": [
+          "恒星"
+        ],
+        "normal": [
+          "太阳",
+          "主星",
+          "伴星",
+          "红矮星",
+          "白矮星",
+          "中子星"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [
+          "恒星"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.technology",
+      "aliases": {
+        "strong": [
+          "科技",
+          "技术体系"
+        ],
+        "normal": [
+          "纳米科技",
+          "纳米技术",
+          "生物科技",
+          "生物技术",
+          "量子技术",
+          "基因技术"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    }
+  ]
+}

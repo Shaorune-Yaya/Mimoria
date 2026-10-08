@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "pack": "sciFi",
+    "scope": "shared",
+    "category": "relations"
+  },
+  "entries": [
+    {
+      "conceptId": "relation.orbits",
+      "aliases": {
+        "strong": [
+          "orbits",
+          "is in orbit around"
+        ],
+        "normal": [
+          "orbiting",
+          "revolves around"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "relation.colony_of",
+      "aliases": {
+        "strong": [
+          "is a colony of",
+          "colony of"
+        ],
+        "normal": [
+          "colonial possession of",
+          "settlement of"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "relation.connected_to",
+      "aliases": {
+        "strong": [
+          "connected to",
+          "linked to"
+        ],
+        "normal": [
+          "networked with",
+          "connected with",
+          "interfaces with"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

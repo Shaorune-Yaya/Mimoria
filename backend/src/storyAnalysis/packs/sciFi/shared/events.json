@@ -1,0 +1,211 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "pack": "sciFi",
+    "scope": "shared",
+    "category": "events"
+  },
+  "entries": [
+    {
+      "conceptId": "event.launch",
+      "aliases": {
+        "strong": [
+          "launched",
+          "was launched"
+        ],
+        "normal": [
+          "launch",
+          "lifted off"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.land",
+      "aliases": {
+        "strong": [
+          "landed"
+        ],
+        "normal": [
+          "land",
+          "touched down"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.dock",
+      "aliases": {
+        "strong": [
+          "docked with",
+          "docked at"
+        ],
+        "normal": [
+          "docked",
+          "berthed"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.ftlJump",
+      "aliases": {
+        "strong": [
+          "entered hyperspace",
+          "jumped to hyperspace",
+          "made an FTL jump"
+        ],
+        "normal": [
+          "warped",
+          "jumped",
+          "FTL jumped",
+          "hyperspace jump"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.colonize",
+      "aliases": {
+        "strong": [
+          "colonized",
+          "established a colony"
+        ],
+        "normal": [
+          "colonize",
+          "settled the planet",
+          "settled on"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.terraform",
+      "aliases": {
+        "strong": [
+          "terraformed"
+        ],
+        "normal": [
+          "terraform",
+          "planetary engineering"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.firstContact",
+      "aliases": {
+        "strong": [
+          "first contact"
+        ],
+        "normal": [
+          "made contact with an alien species",
+          "contacted an alien civilization"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.awakenAI",
+      "aliases": {
+        "strong": [
+          "became self-aware",
+          "achieved sentience",
+          "gained sentience"
+        ],
+        "normal": [
+          "awakened",
+          "became conscious"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.shutdownAI",
+      "aliases": {
+        "strong": [
+          "shut down the AI",
+          "deactivated the AI"
+        ],
+        "normal": [
+          "shut down",
+          "deactivated"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.hack",
+      "aliases": {
+        "strong": [
+          "hacked into",
+          "breached the network"
+        ],
+        "normal": [
+          "hacked",
+          "breached",
+          "cracked the system"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.augment",
+      "aliases": {
+        "strong": [
+          "received cybernetic implants",
+          "underwent augmentation"
+        ],
+        "normal": [
+          "augmented",
+          "implanted",
+          "cybernetically enhanced"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.clone",
+      "aliases": {
+        "strong": [
+          "was cloned",
+          "created a clone"
+        ],
+        "normal": [
+          "cloned",
+          "clone"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.uploadMind",
+      "aliases": {
+        "strong": [
+          "uploaded consciousness",
+          "uploaded their mind",
+          "mind upload"
+        ],
+        "normal": [
+          "uploaded mind",
+          "digitized consciousness"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.downloadMind",
+      "aliases": {
+        "strong": [
+          "downloaded consciousness",
+          "downloaded their mind"
+        ],
+        "normal": [
+          "downloaded mind",
+          "restored consciousness"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,228 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.0.0",
+    "pack": "sciFi",
+    "category": "events"
+  },
+  "entries": [
+    {
+      "conceptId": "event.launch",
+      "aliases": {
+        "strong": [
+          "发射升空",
+          "正式发射"
+        ],
+        "normal": [
+          "发射",
+          "升空",
+          "起飞"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.land",
+      "aliases": {
+        "strong": [
+          "成功着陆"
+        ],
+        "normal": [
+          "着陆",
+          "降落",
+          "落地"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.dock",
+      "aliases": {
+        "strong": [
+          "完成对接"
+        ],
+        "normal": [
+          "对接",
+          "停靠",
+          "泊入"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.ftlJump",
+      "aliases": {
+        "strong": [
+          "进行跃迁",
+          "进入超空间"
+        ],
+        "normal": [
+          "跃迁",
+          "曲率航行",
+          "进入曲率",
+          "超光速航行",
+          "穿越虫洞",
+          "通过星门"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.colonize",
+      "aliases": {
+        "strong": [
+          "建立殖民地",
+          "完成殖民"
+        ],
+        "normal": [
+          "殖民",
+          "开拓殖民地",
+          "建立定居点"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.terraform",
+      "aliases": {
+        "strong": [
+          "完成地球化"
+        ],
+        "normal": [
+          "地球化",
+          "改造行星",
+          "行星改造",
+          "环境改造"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.firstContact",
+      "aliases": {
+        "strong": [
+          "第一次接触",
+          "首次接触",
+          "首度接触"
+        ],
+        "normal": [
+          "接触外星文明",
+          "发现外星文明"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.awakenAI",
+      "aliases": {
+        "strong": [
+          "产生自我意识",
+          "获得自我意识"
+        ],
+        "normal": [
+          "AI觉醒",
+          "人工智能觉醒",
+          "产生意识",
+          "获得意识"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.shutdownAI",
+      "aliases": {
+        "strong": [
+          "关闭人工智能",
+          "停用人工智能"
+        ],
+        "normal": [
+          "关闭AI",
+          "停用AI",
+          "注销AI",
+          "断开AI"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.hack",
+      "aliases": {
+        "strong": [
+          "攻破网络",
+          "入侵系统"
+        ],
+        "normal": [
+          "黑入",
+          "骇入",
+          "破解",
+          "黑客入侵",
+          "网络入侵"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.augment",
+      "aliases": {
+        "strong": [
+          "接受义体改造",
+          "进行了义体改造"
+        ],
+        "normal": [
+          "义体化",
+          "植入义体",
+          "安装义体",
+          "神经植入",
+          "机械改造",
+          "强化改造"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.clone",
+      "aliases": {
+        "strong": [
+          "被克隆"
+        ],
+        "normal": [
+          "克隆",
+          "复制克隆体",
+          "制造克隆人"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.uploadMind",
+      "aliases": {
+        "strong": [
+          "上传意识",
+          "意识上传"
+        ],
+        "normal": [
+          "上传人格",
+          "上传心智",
+          "数字化意识",
+          "意识数字化"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "event.downloadMind",
+      "aliases": {
+        "strong": [
+          "下载意识",
+          "意识下载"
+        ],
+        "normal": [
+          "下载人格",
+          "恢复意识",
+          "意识恢复"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

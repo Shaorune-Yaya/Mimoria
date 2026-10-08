@@ -1,0 +1,57 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.0.0",
+    "pack": "sciFi",
+    "category": "relations"
+  },
+  "entries": [
+    {
+      "conceptId": "relation.orbits",
+      "aliases": {
+        "strong": [
+          "环绕运行",
+          "围绕公转"
+        ],
+        "normal": [
+          "环绕",
+          "围绕",
+          "公转于",
+          "运行在轨道上"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "relation.colony_of",
+      "aliases": {
+        "strong": [
+          "是殖民地",
+          "属于殖民地体系"
+        ],
+        "normal": [
+          "殖民于",
+          "隶属于殖民政府",
+          "受殖民政府管辖"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "relation.connected_to",
+      "aliases": {
+        "strong": [
+          "连接至",
+          "连接到"
+        ],
+        "normal": [
+          "联网至",
+          "接入",
+          "链接到",
+          "与其联网"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

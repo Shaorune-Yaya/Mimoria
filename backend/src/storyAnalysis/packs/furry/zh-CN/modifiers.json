@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.0.0",
+    "pack": "furry",
+    "category": "modifiers"
+  },
+  "entries": [
+    {
+      "conceptId": "modifier.hybrid",
+      "aliases": {
+        "strong": [
+          "混种",
+          "混血种",
+          "混合种",
+          "杂交种",
+          "融合种"
+        ],
+        "normal": [
+          "混血",
+          "杂交",
+          "混合",
+          "融合"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

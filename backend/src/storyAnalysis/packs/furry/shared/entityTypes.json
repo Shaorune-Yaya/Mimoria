@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "pack": "furry",
+    "scope": "shared",
+    "category": "entity-types"
+  },
+  "entries": [
+    {
+      "conceptId": "entityType.character",
+      "aliases": {
+        "strong": [
+          "fursona"
+        ],
+        "normal": [
+          "sona",
+          "OC",
+          "original character"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.creature",
+      "aliases": {
+        "strong": [
+          "anthropomorphic animal"
+        ],
+        "normal": [
+          "anthro",
+          "furry",
+          "feral"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.item",
+      "aliases": {
+        "strong": [
+          "fursuit"
+        ],
+        "normal": [
+          "fullsuit",
+          "partial",
+          "partial suit",
+          "fursuit head",
+          "handpaws",
+          "feetpaws",
+          "armsleeves"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    }
+  ]
+}

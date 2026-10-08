@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "pack": "sciFi",
+    "scope": "shared",
+    "category": "titles"
+  },
+  "entries": [
+    {
+      "conceptId": "role.occupation",
+      "aliases": {
+        "strong": [
+          "cyberneticist",
+          "xenobiologist",
+          "xenologist",
+          "astrophysicist",
+          "terraforming engineer"
+        ],
+        "normal": [
+          "pilot",
+          "starship pilot",
+          "engineer",
+          "scientist",
+          "researcher",
+          "technician",
+          "hacker",
+          "netrunner",
+          "mercenary",
+          "colonist"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "role.military",
+      "aliases": {
+        "strong": [
+          "fleet admiral",
+          "space admiral"
+        ],
+        "normal": [
+          "admiral",
+          "captain",
+          "commander",
+          "marine"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

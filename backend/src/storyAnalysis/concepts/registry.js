@@ -80,6 +80,17 @@ const CONCEPTS = {
     parent: "entityType.character",
     icon: "🤖",
   },
+  "entityType.android": {
+    kind: "entity-type",
+    parent: "entityType.robot",
+    icon: "🤖",
+  },
+
+  "entityType.cyborg": {
+    kind: "entity-type",
+    parent: "entityType.character",
+    icon: "◈",
+  },
 
   "entityType.artificialIntelligence": {
     kind: "entity-type",
@@ -162,6 +173,30 @@ const CONCEPTS = {
     kind: "entity-type",
     parent: "entityType.location",
     icon: "🪐",
+  },
+
+    "entityType.star": {
+    kind: "entity-type",
+    parent: "entityType.location",
+    icon: "★",
+  },
+
+  "entityType.starSystem": {
+    kind: "entity-type",
+    parent: "entityType.location",
+    icon: "✦",
+  },
+
+  "entityType.spaceStation": {
+    kind: "entity-type",
+    parent: "entityType.location",
+    icon: "◉",
+  },
+
+  "entityType.colony": {
+    kind: "entity-type",
+    parent: "entityType.location",
+    icon: "⌂",
   },
 
   "entityType.world": {
@@ -1136,6 +1171,146 @@ const CONCEPTS = {
     valueType: "number",
   },
 
+    // ====================================================
+  // Fields - Science Fiction / Technology
+  // ====================================================
+
+  "field.model": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.serialNumber": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.version": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.techLevel": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.energySource": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.powerOutput": {
+    kind: "field",
+    valueType: "number",
+  },
+
+  "field.homeworld": {
+    kind: "field",
+    valueType: "entity-reference",
+    targetConcept: "entityType.planet",
+  },
+
+  "field.starSystem": {
+    kind: "field",
+    valueType: "entity-reference",
+    targetConcept: "entityType.starSystem",
+  },
+
+  "field.shipClass": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.shipRole": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.crewCapacity": {
+    kind: "field",
+    valueType: "number",
+  },
+
+  "field.cargoCapacity": {
+    kind: "field",
+    valueType: "number",
+  },
+
+  "field.propulsion": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.ftlMethod": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.weaponSystems": {
+    kind: "field",
+    valueType: "long-text",
+  },
+
+  "field.defenseSystems": {
+    kind: "field",
+    valueType: "long-text",
+  },
+
+  "field.sensorSystems": {
+    kind: "field",
+    valueType: "long-text",
+  },
+
+  "field.cybernetics": {
+    kind: "field",
+    valueType: "long-text",
+  },
+
+  "field.augmentation": {
+    kind: "field",
+    valueType: "long-text",
+  },
+
+  "field.consciousnessLevel": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.autonomy": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.habitability": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.atmosphere": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.gravity": {
+    kind: "field",
+    valueType: "number",
+  },
+
+  "field.orbitalPeriod": {
+    kind: "field",
+    valueType: "number",
+  },
+
+  "field.network": {
+    kind: "field",
+    valueType: "text",
+  },
+
+  "field.protocol": {
+    kind: "field",
+    valueType: "text",
+  },
 
   // ====================================================
   // Fields - Society / Culture

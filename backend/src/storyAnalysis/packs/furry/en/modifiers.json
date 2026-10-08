@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "locale": "en",
+    "version": "1.0.0",
+    "pack": "furry",
+    "category": "modifiers"
+  },
+  "entries": [
+    {
+      "conceptId": "modifier.hybrid",
+      "aliases": {
+        "strong": [
+          "hybrid species",
+          "mixed species",
+          "crossbreed",
+          "cross-breed"
+        ],
+        "normal": [
+          "hybrid",
+          "mixed-species",
+          "cross"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

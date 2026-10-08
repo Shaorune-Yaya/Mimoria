@@ -36,6 +36,18 @@ const {
 );
 
 const {
+  normalizeSpeciesEvidence,
+} = require(
+  "./core/speciesNormalizer"
+);
+
+const {
+  detectCompoundSpecies,
+} = require(
+  "./core/compoundSpeciesDetector"
+);
+
+const {
   mergeLexicons,
 } = require(
   "./core/lexiconMerger"
@@ -44,6 +56,7 @@ const {
 const {
   loadPackLocale,
   clearPackCache,
+  getPackDebugInfo,
 } = require(
   "./packs/packLoader"
 );
@@ -134,7 +147,7 @@ function buildLexicon(
 
 
 // ======================================================
-// Analysis
+// Lexical Analysis
 // ======================================================
 
 function analyzeLexicon(
@@ -169,6 +182,27 @@ function analyzeLexicon(
     );
 
 
+  const speciesEvidence =
+    normalizeSpeciesEvidence({
+      text,
+      matches,
+      lexicon,
+      locale,
+    });
+
+
+  const compoundSpeciesCandidates =
+    detectCompoundSpecies({
+      text,
+
+      speciesEvidence,
+
+      matches,
+
+      locale,
+    });
+
+
   return {
     locale,
 
@@ -186,10 +220,18 @@ function analyzeLexicon(
 
     matches,
 
+    speciesEvidence,
+
+    compoundSpeciesCandidates,
+
     lexicon,
   };
 }
 
+
+// ======================================================
+// Unknown Entity Analysis
+// ======================================================
 
 function analyzeUnknownEntities(
   text,
@@ -255,8 +297,12 @@ module.exports = {
 
   loadPackLocale,
   clearPackCache,
+  getPackDebugInfo,
 
   buildLexicon,
+
+  normalizeSpeciesEvidence,
+  detectCompoundSpecies,
 
   analyzeLexicon,
   analyzeUnknownEntities,

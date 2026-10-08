@@ -52,9 +52,15 @@
           "ferret",
           "raccoon",
           "red panda",
-          "hybrid",
           "aquatic",
-          "big cat"
+          "big cat",
+          "bird",
+          "eagle",
+          "crow",
+          "raven",
+          "griffin",
+          "gryphon",
+          "kirin"
         ],
         "weak": []
       }

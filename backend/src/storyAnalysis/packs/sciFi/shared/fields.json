@@ -1,0 +1,414 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "pack": "sciFi",
+    "scope": "shared",
+    "category": "fields"
+  },
+  "entries": [
+    {
+      "conceptId": "field.model",
+      "aliases": {
+        "strong": [
+          "model number",
+          "model designation"
+        ],
+        "normal": [
+          "model",
+          "unit model"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.serialNumber",
+      "aliases": {
+        "strong": [
+          "serial number"
+        ],
+        "normal": [
+          "serial",
+          "unit number",
+          "serial ID"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.version",
+      "aliases": {
+        "strong": [
+          "version"
+        ],
+        "normal": [
+          "revision",
+          "generation",
+          "gen"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.techLevel",
+      "aliases": {
+        "strong": [
+          "technology level",
+          "technological level"
+        ],
+        "normal": [
+          "tech level",
+          "civilization level"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.energySource",
+      "aliases": {
+        "strong": [
+          "energy source",
+          "power source"
+        ],
+        "normal": [
+          "reactor",
+          "fusion reactor",
+          "antimatter reactor",
+          "power core",
+          "energy core"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.powerOutput",
+      "aliases": {
+        "strong": [
+          "power output"
+        ],
+        "normal": [
+          "output power",
+          "reactor output"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.homeworld",
+      "aliases": {
+        "strong": [
+          "homeworld",
+          "home planet"
+        ],
+        "normal": [
+          "native world",
+          "origin planet"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.starSystem",
+      "aliases": {
+        "strong": [
+          "star system",
+          "stellar system"
+        ],
+        "normal": [
+          "system of origin",
+          "home system"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.shipClass",
+      "aliases": {
+        "strong": [
+          "ship class",
+          "vessel class"
+        ],
+        "normal": [
+          "starship class",
+          "class designation"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.shipRole",
+      "aliases": {
+        "strong": [
+          "ship role",
+          "vessel role"
+        ],
+        "normal": [
+          "mission role",
+          "combat role"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.crewCapacity",
+      "aliases": {
+        "strong": [
+          "crew capacity"
+        ],
+        "normal": [
+          "crew complement",
+          "crew size",
+          "crew"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.cargoCapacity",
+      "aliases": {
+        "strong": [
+          "cargo capacity"
+        ],
+        "normal": [
+          "cargo space",
+          "cargo hold"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.propulsion",
+      "aliases": {
+        "strong": [
+          "propulsion system"
+        ],
+        "normal": [
+          "propulsion",
+          "drive system",
+          "engine",
+          "thruster",
+          "ion drive",
+          "fusion drive"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.ftlMethod",
+      "aliases": {
+        "strong": [
+          "FTL drive",
+          "faster-than-light drive"
+        ],
+        "normal": [
+          "FTL",
+          "warp drive",
+          "hyperdrive",
+          "jump drive",
+          "hyperspace",
+          "warp",
+          "jump"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.weaponSystems",
+      "aliases": {
+        "strong": [
+          "weapon systems"
+        ],
+        "normal": [
+          "weapons",
+          "laser cannon",
+          "railgun",
+          "coilgun",
+          "particle cannon",
+          "plasma cannon",
+          "missile system"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.defenseSystems",
+      "aliases": {
+        "strong": [
+          "defense systems",
+          "defence systems"
+        ],
+        "normal": [
+          "shield",
+          "shields",
+          "energy shield",
+          "deflector",
+          "armor plating",
+          "armour plating"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.sensorSystems",
+      "aliases": {
+        "strong": [
+          "sensor systems"
+        ],
+        "normal": [
+          "sensors",
+          "sensor array",
+          "scanner",
+          "radar",
+          "lidar"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.cybernetics",
+      "aliases": {
+        "strong": [
+          "cybernetics"
+        ],
+        "normal": [
+          "cyberware",
+          "cybernetic implant",
+          "cybernetic implants",
+          "neural implant",
+          "neural implants",
+          "prosthetic implant"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.augmentation",
+      "aliases": {
+        "strong": [
+          "augmentation"
+        ],
+        "normal": [
+          "augments",
+          "enhancement",
+          "enhancements",
+          "genetic modification",
+          "gene modification",
+          "gene editing",
+          "bioengineering"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.consciousnessLevel",
+      "aliases": {
+        "strong": [
+          "consciousness level",
+          "sentience level"
+        ],
+        "normal": [
+          "sentient",
+          "sapient",
+          "self-aware",
+          "self awareness"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.autonomy",
+      "aliases": {
+        "strong": [
+          "autonomy level"
+        ],
+        "normal": [
+          "autonomous",
+          "semi-autonomous",
+          "fully autonomous"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.habitability",
+      "aliases": {
+        "strong": [
+          "habitability"
+        ],
+        "normal": [
+          "habitable",
+          "inhabitable",
+          "uninhabitable"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.atmosphere",
+      "aliases": {
+        "strong": [
+          "atmospheric composition"
+        ],
+        "normal": [
+          "atmosphere",
+          "atmospheric pressure"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.gravity",
+      "aliases": {
+        "strong": [
+          "surface gravity"
+        ],
+        "normal": [
+          "gravity",
+          "artificial gravity"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.orbitalPeriod",
+      "aliases": {
+        "strong": [
+          "orbital period"
+        ],
+        "normal": [
+          "orbit period"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.network",
+      "aliases": {
+        "strong": [
+          "neural network",
+          "data network"
+        ],
+        "normal": [
+          "network",
+          "net",
+          "matrix",
+          "cyberspace"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.protocol",
+      "aliases": {
+        "strong": [
+          "communication protocol"
+        ],
+        "normal": [
+          "protocol",
+          "data protocol",
+          "network protocol"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

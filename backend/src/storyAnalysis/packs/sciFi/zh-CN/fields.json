@@ -1,0 +1,441 @@
+{
+  "meta": {
+    "locale": "zh-CN",
+    "version": "1.0.0",
+    "pack": "sciFi",
+    "category": "fields"
+  },
+  "entries": [
+    {
+      "conceptId": "field.model",
+      "aliases": {
+        "strong": [
+          "型号"
+        ],
+        "normal": [
+          "机型",
+          "型号编号",
+          "型号代号"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.serialNumber",
+      "aliases": {
+        "strong": [
+          "序列号"
+        ],
+        "normal": [
+          "编号",
+          "机体编号",
+          "单位编号"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.version",
+      "aliases": {
+        "strong": [
+          "版本"
+        ],
+        "normal": [
+          "代数",
+          "世代",
+          "改型"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.techLevel",
+      "aliases": {
+        "strong": [
+          "科技水平",
+          "技术等级"
+        ],
+        "normal": [
+          "文明等级",
+          "科技等级",
+          "技术水平"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.energySource",
+      "aliases": {
+        "strong": [
+          "能源来源",
+          "动力源"
+        ],
+        "normal": [
+          "能源",
+          "动力核心",
+          "能源核心",
+          "反应堆",
+          "聚变反应堆",
+          "反物质反应堆",
+          "核聚变",
+          "反物质"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.powerOutput",
+      "aliases": {
+        "strong": [
+          "输出功率"
+        ],
+        "normal": [
+          "功率",
+          "能源输出",
+          "反应堆输出"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.homeworld",
+      "aliases": {
+        "strong": [
+          "母星"
+        ],
+        "normal": [
+          "故乡星",
+          "起源星球",
+          "原生星球"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.starSystem",
+      "aliases": {
+        "strong": [
+          "所属星系",
+          "所属恒星系"
+        ],
+        "normal": [
+          "母星系",
+          "起源星系"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.shipClass",
+      "aliases": {
+        "strong": [
+          "舰级",
+          "舰船级别"
+        ],
+        "normal": [
+          "舰种",
+          "舰型",
+          "船级",
+          "级别"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.shipRole",
+      "aliases": {
+        "strong": [
+          "舰船定位",
+          "舰船用途"
+        ],
+        "normal": [
+          "任务定位",
+          "战术定位",
+          "作战定位"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.crewCapacity",
+      "aliases": {
+        "strong": [
+          "舰员人数",
+          "乘员人数"
+        ],
+        "normal": [
+          "舰员",
+          "船员",
+          "乘员",
+          "载员"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.cargoCapacity",
+      "aliases": {
+        "strong": [
+          "货运容量",
+          "载货量"
+        ],
+        "normal": [
+          "货舱容量",
+          "货舱",
+          "载荷"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.propulsion",
+      "aliases": {
+        "strong": [
+          "推进系统",
+          "推进方式"
+        ],
+        "normal": [
+          "推进器",
+          "引擎",
+          "发动机",
+          "离子推进",
+          "核聚变推进",
+          "等离子推进"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.ftlMethod",
+      "aliases": {
+        "strong": [
+          "超光速方式",
+          "超光速航行"
+        ],
+        "normal": [
+          "FTL",
+          "曲率引擎",
+          "曲率航行",
+          "跃迁引擎",
+          "跃迁",
+          "超空间",
+          "超空间航行",
+          "虫洞",
+          "星门"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.weaponSystems",
+      "aliases": {
+        "strong": [
+          "武器系统"
+        ],
+        "normal": [
+          "舰载武器",
+          "激光炮",
+          "粒子炮",
+          "等离子炮",
+          "轨道炮",
+          "电磁炮",
+          "线圈炮",
+          "导弹系统"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.defenseSystems",
+      "aliases": {
+        "strong": [
+          "防御系统"
+        ],
+        "normal": [
+          "护盾",
+          "能量护盾",
+          "偏导护盾",
+          "装甲",
+          "复合装甲",
+          "反应装甲"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.sensorSystems",
+      "aliases": {
+        "strong": [
+          "传感器系统",
+          "探测系统"
+        ],
+        "normal": [
+          "传感器",
+          "传感器阵列",
+          "雷达",
+          "扫描仪",
+          "探测器",
+          "深空雷达"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.cybernetics",
+      "aliases": {
+        "strong": [
+          "义体",
+          "义体系统",
+          "赛博改造"
+        ],
+        "normal": [
+          "机械义肢",
+          "机械植入",
+          "神经植入",
+          "脑机接口",
+          "神经接口",
+          "BCI",
+          "cyberware"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.augmentation",
+      "aliases": {
+        "strong": [
+          "身体强化",
+          "人体改造"
+        ],
+        "normal": [
+          "增强改造",
+          "基因改造",
+          "基因编辑",
+          "生物强化",
+          "纳米改造"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.consciousnessLevel",
+      "aliases": {
+        "strong": [
+          "意识等级",
+          "智能等级"
+        ],
+        "normal": [
+          "自我意识",
+          "自主意识",
+          "智慧",
+          "有意识",
+          "觉醒AI"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.autonomy",
+      "aliases": {
+        "strong": [
+          "自主程度",
+          "自主等级"
+        ],
+        "normal": [
+          "自主性",
+          "全自主",
+          "半自主",
+          "自动控制"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.habitability",
+      "aliases": {
+        "strong": [
+          "宜居度"
+        ],
+        "normal": [
+          "宜居",
+          "可居住",
+          "不可居住",
+          "生存环境"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.atmosphere",
+      "aliases": {
+        "strong": [
+          "大气成分"
+        ],
+        "normal": [
+          "大气",
+          "气压",
+          "大气压力"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.gravity",
+      "aliases": {
+        "strong": [
+          "表面重力"
+        ],
+        "normal": [
+          "重力",
+          "人工重力",
+          "引力"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.orbitalPeriod",
+      "aliases": {
+        "strong": [
+          "公转周期",
+          "轨道周期"
+        ],
+        "normal": [
+          "公转时间"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.network",
+      "aliases": {
+        "strong": [
+          "数据网络"
+        ],
+        "normal": [
+          "网络",
+          "矩阵",
+          "赛博空间",
+          "虚拟网络",
+          "神经网络"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "field.protocol",
+      "aliases": {
+        "strong": [
+          "通信协议",
+          "通讯协议"
+        ],
+        "normal": [
+          "协议",
+          "网络协议",
+          "数据协议"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}

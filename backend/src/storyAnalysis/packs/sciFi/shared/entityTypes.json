@@ -1,0 +1,220 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "pack": "sciFi",
+    "scope": "shared",
+    "category": "entity-types"
+  },
+  "entries": [
+    {
+      "conceptId": "entityType.artificialIntelligence",
+      "aliases": {
+        "strong": [
+          "artificial intelligence",
+          "AGI",
+          "artificial general intelligence"
+        ],
+        "normal": [
+          "AI",
+          "machine intelligence",
+          "synthetic intelligence"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.robot",
+      "aliases": {
+        "strong": [
+          "robot"
+        ],
+        "normal": [
+          "bot",
+          "machine unit",
+          "autonomous robot"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.android",
+      "aliases": {
+        "strong": [
+          "android"
+        ],
+        "normal": [
+          "synthetic human",
+          "synthetic person",
+          "artificial human"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.cyborg",
+      "aliases": {
+        "strong": [
+          "cyborg"
+        ],
+        "normal": [
+          "augmented human",
+          "cybernetic human"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.spacecraft",
+      "aliases": {
+        "strong": [
+          "spacecraft",
+          "starship",
+          "spaceship"
+        ],
+        "normal": [
+          "space ship",
+          "space vessel",
+          "shuttle",
+          "orbital shuttle"
+        ],
+        "weak": [
+          "ship"
+        ]
+      },
+      "suffixes": {
+        "strong": [
+          "Starship"
+        ],
+        "normal": [
+          "Ship",
+          "Shuttle"
+        ],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.spaceStation",
+      "aliases": {
+        "strong": [
+          "space station",
+          "orbital station"
+        ],
+        "normal": [
+          "station",
+          "orbital habitat",
+          "space habitat"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [
+          "Station"
+        ],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.colony",
+      "aliases": {
+        "strong": [
+          "space colony",
+          "planetary colony",
+          "off-world colony"
+        ],
+        "normal": [
+          "colony",
+          "settlement"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [
+          "Colony"
+        ],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.starSystem",
+      "aliases": {
+        "strong": [
+          "star system",
+          "stellar system"
+        ],
+        "normal": [
+          "solar system"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [
+          "System"
+        ],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.star",
+      "aliases": {
+        "strong": [
+          "star"
+        ],
+        "normal": [
+          "sun",
+          "stellar primary"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    },
+    {
+      "conceptId": "entityType.technology",
+      "aliases": {
+        "strong": [
+          "technology"
+        ],
+        "normal": [
+          "tech",
+          "nanotechnology",
+          "nanotech",
+          "biotechnology",
+          "biotech",
+          "quantum technology"
+        ],
+        "weak": []
+      },
+      "suffixes": {
+        "strong": [],
+        "normal": [],
+        "weak": []
+      }
+    }
+  ]
+}

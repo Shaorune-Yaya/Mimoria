@@ -1,10 +1,8 @@
-const fs = require(
-  "fs"
-);
+const fs =
+  require("fs");
 
-const path = require(
-  "path"
-);
+const path =
+  require("path");
 
 const {
   hasConcept,
@@ -44,12 +42,28 @@ const packCache =
 // Paths
 // ======================================================
 
-function getPacksRoot() {
+const PACKS_ROOT =
+  __dirname;
+
+
+function getPackRoot(
+  packId
+) {
   return path.join(
-    __dirname,
-    "..",
-    "lexicons",
-    "packs"
+    PACKS_ROOT,
+    packId
+  );
+}
+
+
+function getPackSharedDirectory(
+  packId
+) {
+  return path.join(
+    getPackRoot(
+      packId
+    ),
+    "shared"
   );
 }
 
@@ -59,9 +73,23 @@ function getPackLocaleDirectory(
   locale
 ) {
   return path.join(
-    getPacksRoot(),
-    packId,
+    getPackRoot(
+      packId
+    ),
     locale
+  );
+}
+
+
+function getPackNsfwSharedDirectory(
+  packId
+) {
+  return path.join(
+    getPackRoot(
+      packId
+    ),
+    "nsfw",
+    "shared"
   );
 }
 
@@ -71,8 +99,9 @@ function getPackNsfwLocaleDirectory(
   locale
 ) {
   return path.join(
-    getPacksRoot(),
-    packId,
+    getPackRoot(
+      packId
+    ),
     "nsfw",
     locale
   );
@@ -80,7 +109,7 @@ function getPackNsfwLocaleDirectory(
 
 
 // ======================================================
-// JSON Helpers
+// File Helpers
 // ======================================================
 
 function readJsonFile(
@@ -95,17 +124,18 @@ function readJsonFile(
 }
 
 
-function validateEntries(
+function validateMatchableFile(
   data,
   filePath
 ) {
   if (
+    !data ||
     !Array.isArray(
       data.entries
     )
   ) {
     throw new Error(
-      `Pack lexicon ${filePath} must contain an entries array`
+      `Pack lexicon file must contain an entries array: ${filePath}`
     );
   }
 
@@ -118,7 +148,7 @@ function validateEntries(
       !entry.conceptId
     ) {
       throw new Error(
-        `Missing conceptId in ${filePath}`
+        `Missing conceptId in: ${filePath}`
       );
     }
 
@@ -129,7 +159,7 @@ function validateEntries(
       )
     ) {
       throw new Error(
-        `Unknown concept "${entry.conceptId}" in ${filePath}`
+        `Unknown concept "${entry.conceptId}" in: ${filePath}`
       );
     }
   }
@@ -143,50 +173,53 @@ function validateEntries(
 // Merge Helpers
 // ======================================================
 
-function mergeMatchableData(
-  base,
-  extra
+function mergeMatchableCategory(
+  current,
+  incoming
 ) {
-  if (!base) {
-    return extra;
-  }
+  if (!current) {
+    return {
+      ...incoming,
 
-
-  if (!extra) {
-    return base;
+      entries: [
+        ...(incoming.entries ||
+          []),
+      ],
+    };
   }
 
 
   return {
     meta: {
-      ...(base.meta || {}),
-      ...(extra.meta || {}),
+      ...(current.meta ||
+        {}),
+      ...(incoming.meta ||
+        {}),
     },
 
     entries: [
-      ...(base.entries || []),
-      ...(extra.entries || []),
+      ...(current.entries ||
+        []),
+      ...(incoming.entries ||
+        []),
     ],
   };
 }
 
 
-function mergeSupportData(
-  base,
-  extra
+function mergeSupportCategory(
+  current,
+  incoming
 ) {
-  if (!base) {
-    return extra;
-  }
-
-
-  if (!extra) {
-    return base;
+  if (!current) {
+    return {
+      ...incoming,
+    };
   }
 
 
   const result = {
-    ...(base || {}),
+    ...current,
   };
 
 
@@ -196,13 +229,20 @@ function mergeSupportData(
       value,
     ] of
     Object.entries(
-      extra
+      incoming
     )
   ) {
     if (
       key ===
       "meta"
     ) {
+      result.meta = {
+        ...(result.meta ||
+          {}),
+        ...(value ||
+          {}),
+      };
+
       continue;
     }
 
@@ -223,10 +263,13 @@ function mergeSupportData(
           ...value,
         ]),
       ];
-    } else {
-      result[key] =
-        value;
+
+      continue;
     }
+
+
+    result[key] =
+      value;
   }
 
 
@@ -238,7 +281,7 @@ function mergeSupportData(
 // Directory Loader
 // ======================================================
 
-function loadDirectoryIntoResult({
+function loadDirectory({
   directory,
   result,
 }) {
@@ -272,7 +315,7 @@ function loadDirectoryIntoResult({
 
 
     const data =
-      validateEntries(
+      validateMatchableFile(
         readJsonFile(
           filePath
         ),
@@ -283,11 +326,10 @@ function loadDirectoryIntoResult({
     result.categories[
       category
     ] =
-      mergeMatchableData(
+      mergeMatchableCategory(
         result.categories[
           category
         ],
-
         data
       );
   }
@@ -322,11 +364,10 @@ function loadDirectoryIntoResult({
     result.support[
       category
     ] =
-      mergeSupportData(
+      mergeSupportCategory(
         result.support[
           category
         ],
-
         data
       );
   }
@@ -334,7 +375,7 @@ function loadDirectoryIntoResult({
 
 
 // ======================================================
-// Public Loader
+// Public
 // ======================================================
 
 function loadPackLocale(
@@ -355,44 +396,18 @@ function loadPackLocale(
   }
 
 
-  if (
-    !definition
-      .supportedLocales
-      .includes(
-        locale
-      )
-  ) {
-    return {
-      id:
-        packId,
-
-      locale,
-
-      nsfwEnabled:
-        false,
-
-      categories: {},
-
-      support: {},
-    };
-  }
-
-
   const nsfwEnabled =
     options.nsfwEnabled ===
     true;
 
 
-  const cacheKey =
-    [
-      packId,
-      locale,
-      nsfwEnabled
-        ? "nsfw"
-        : "safe",
-    ].join(
-      ":"
-    );
+  const cacheKey = [
+    packId,
+    locale,
+    nsfwEnabled
+      ? "nsfw"
+      : "safe",
+  ].join(":");
 
 
   if (
@@ -420,7 +435,25 @@ function loadPackLocale(
   };
 
 
-  loadDirectoryIntoResult({
+  /*
+   * Order matters:
+   *
+   * shared
+   * -> locale
+   * -> nsfw shared
+   * -> nsfw locale
+   */
+  loadDirectory({
+    directory:
+      getPackSharedDirectory(
+        packId
+      ),
+
+    result,
+  });
+
+
+  loadDirectory({
     directory:
       getPackLocaleDirectory(
         packId,
@@ -434,7 +467,17 @@ function loadPackLocale(
   if (
     nsfwEnabled
   ) {
-    loadDirectoryIntoResult({
+    loadDirectory({
+      directory:
+        getPackNsfwSharedDirectory(
+          packId
+        ),
+
+      result,
+    });
+
+
+    loadDirectory({
       directory:
         getPackNsfwLocaleDirectory(
           packId,
@@ -461,10 +504,79 @@ function clearPackCache() {
 }
 
 
+function getPackDebugInfo(
+  packId,
+  locale
+) {
+  return {
+    packsRoot:
+      PACKS_ROOT,
+
+    packRoot:
+      getPackRoot(
+        packId
+      ),
+
+    sharedDirectory:
+      getPackSharedDirectory(
+        packId
+      ),
+
+    sharedExists:
+      fs.existsSync(
+        getPackSharedDirectory(
+          packId
+        )
+      ),
+
+    localeDirectory:
+      getPackLocaleDirectory(
+        packId,
+        locale
+      ),
+
+    localeExists:
+      fs.existsSync(
+        getPackLocaleDirectory(
+          packId,
+          locale
+        )
+      ),
+
+    nsfwSharedDirectory:
+      getPackNsfwSharedDirectory(
+        packId
+      ),
+
+    nsfwSharedExists:
+      fs.existsSync(
+        getPackNsfwSharedDirectory(
+          packId
+        )
+      ),
+
+    nsfwLocaleDirectory:
+      getPackNsfwLocaleDirectory(
+        packId,
+        locale
+      ),
+
+    nsfwLocaleExists:
+      fs.existsSync(
+        getPackNsfwLocaleDirectory(
+          packId,
+          locale
+        )
+      ),
+  };
+}
+
+
 module.exports = {
   PACK_MATCHABLE_CATEGORIES,
   PACK_SUPPORT_CATEGORIES,
 
   loadPackLocale,
   clearPackCache,
+  getPackDebugInfo,
 };

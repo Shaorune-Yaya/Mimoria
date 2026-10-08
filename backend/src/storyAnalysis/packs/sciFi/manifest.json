@@ -1,0 +1,13 @@
+{
+  "id": "sciFi",
+  "version": "1.0.0",
+  "name": {
+    "zh-CN": "科幻",
+    "en": "Science Fiction"
+  },
+  "description": {
+    "zh-CN": "涵盖通用科幻、硬科幻、星际文明、太空歌剧、人工智能、机器人、义体、生物科技及赛博朋克基础术语。",
+    "en": "Vocabulary for general science fiction, hard sci-fi, space opera, artificial intelligence, robotics, cybernetics, biotechnology, colonies, and starships."
+  },
+  "supportsNSFW": true
+}

@@ -1,0 +1,178 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "pack": "furry",
+    "scope": "shared",
+    "category": "fields"
+  },
+  "entries": [
+    {
+      "conceptId": "field.species",
+      "aliases": {
+        "strong": [
+          "Protogen",
+          "Primagen",
+          "Sergal",
+          "Dutch Angel Dragon",
+          "Avali",
+          "Synth"
+        ],
+        "normal": [
+          "Protogens",
+          "Primagens",
+          "Sergals",
+          "Dutchie",
+          "Dutchies",
+          "DAD",
+          "DADs",
+          "Avalis",
+          "Synths"
+        ],
+        "weak": [
+          "Proot",
+          "Proots"
+        ]
+      }
+    },
+
+    {
+      "conceptId": "field.bodyForm",
+      "aliases": {
+        "strong": [
+          "body form",
+          "body type"
+        ],
+        "normal": [
+          "anthro",
+          "anthropomorphic",
+          "feral",
+          "kemonomimi",
+          "taur"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.legType",
+      "aliases": {
+        "strong": [
+          "digitigrade",
+          "plantigrade",
+          "unguligrade"
+        ],
+        "normal": [
+          "digi",
+          "plantigrade legs",
+          "digitigrade legs"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.markings",
+      "aliases": {
+        "strong": [
+          "markings"
+        ],
+        "normal": [
+          "pattern",
+          "patterns",
+          "stripes",
+          "spots",
+          "patches",
+          "gradient"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.colorPalette",
+      "aliases": {
+        "strong": [
+          "color palette",
+          "colour palette"
+        ],
+        "normal": [
+          "palette",
+          "color scheme",
+          "colour scheme"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.pawPadColor",
+      "aliases": {
+        "strong": [
+          "paw pad color",
+          "paw pad colour"
+        ],
+        "normal": [
+          "paw pads",
+          "beans"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.furColor",
+      "aliases": {
+        "strong": [
+          "fur color",
+          "fur colour",
+          "coat color",
+          "coat colour"
+        ],
+        "normal": [
+          "fur",
+          "coat"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.itemType",
+      "aliases": {
+        "strong": [
+          "fursuit type"
+        ],
+        "normal": [
+          "fullsuit",
+          "full suit",
+          "partial",
+          "mini partial",
+          "lite partial",
+          "heavy partial",
+          "deluxe partial",
+          "three-quarter suit",
+          "quad suit",
+          "quadsuit"
+        ],
+        "weak": []
+      }
+    },
+
+    {
+      "conceptId": "field.appearance",
+      "aliases": {
+        "strong": [
+          "fursuit style"
+        ],
+        "normal": [
+          "Kemono",
+          "Kig",
+          "Toony",
+          "Realistic",
+          "Semi-realistic"
+        ],
+        "weak": []
+      }
+    }
+  ]
+}
