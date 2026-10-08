@@ -1,4 +1,10 @@
 const {
+  filterSpecificEvidence,
+} = require(
+  "./evidenceFilter"
+);
+
+const {
   segmentClauses,
   getMatchesInsideClause,
   getCandidatesInsideClause,
@@ -110,6 +116,41 @@ const DIRECT_VALUE_EXPRESSIONS =
         "超空间",
         "虫洞",
         "星门",
+      ]),
+    ],
+
+        [
+      "field.cybernetics",
+      new Set([
+        "义体",
+        "义体系统",
+        "神经接口",
+        "机械义肢",
+        "脑机接口",
+
+        "cyberware",
+        "cybernetic implant",
+        "cybernetic implants",
+        "neural implant",
+        "neural implants",
+      ]),
+    ],
+
+    [
+      "field.augmentation",
+      new Set([
+        "身体强化",
+        "人体改造",
+        "基因改造",
+        "基因编辑",
+        "生物强化",
+        "纳米改造",
+
+        "augmentation",
+        "genetic modification",
+        "gene modification",
+        "gene editing",
+        "bioengineering",
       ]),
     ],
   ]);
@@ -281,6 +322,19 @@ function cleanChineseSubject(
     );
 
 
+  /*
+   * Possessive marker:
+   *
+   * 伊甸的意识等级
+   * -> 伊甸
+   */
+  result =
+    result.replace(
+      /(?:的|之)$/u,
+      ""
+    );
+
+
   return result.trim();
 }
 
@@ -409,7 +463,7 @@ function resolveEnglishSubjectHint({
   triggerStart,
 }) {
   /*
-   * First look for:
+   * Entity type followed by a proper name:
    *
    * artificial intelligence Eden
    * android Alice
@@ -475,14 +529,52 @@ function resolveEnglishSubjectHint({
     );
 
 
-  const simple =
+  /*
+   * Luna is a wolf...
+   * Alice is 24...
+   * Mira has cyberware...
+   */
+  const subjectVerbPattern =
     before.match(
-      /(?:^|\s)([A-Z][A-Za-z0-9'’-]*(?:\s+[A-Z][A-Za-z0-9'’-]*){0,2})\s+(?:is|was|has|had|uses|used|received|underwent|became|comes|came|lives|lived|was born)?\s*$/u
+      /^\s*([A-Z][A-Za-z0-9'’-]*(?:\s+[A-Z][A-Za-z0-9'’-]*){0,2})\s+(?:is|was|are|were|has|have|had|uses|used|received|underwent|became|comes|came|lives|lived)\s+(?:a|an|the)?\s*$/iu
+    );
+
+
+  if (
+    subjectVerbPattern
+  ) {
+    return subjectVerbPattern[1];
+  }
+
+
+  /*
+   * Her body type...
+   * His species...
+   */
+  const pronounPattern =
+    before.match(
+      /(?:^|\s)(He|She|It|They|His|Her|Its|Their)\b[^.!?;]*$/u
+    );
+
+
+  if (
+    pronounPattern
+  ) {
+    return pronounPattern[1];
+  }
+
+
+  /*
+   * Very simple sentence subject.
+   */
+  const simpleSubject =
+    before.match(
+      /^\s*([A-Z][A-Za-z0-9'’-]*(?:\s+[A-Z][A-Za-z0-9'’-]*){0,2})\b/u
     );
 
 
   return (
-    simple?.[1] ||
+    simpleSubject?.[1] ||
     null
   );
 }
@@ -1231,6 +1323,69 @@ function extractDirectValues({
       continue;
     }
 
+        /*
+     * Suppress a generic field lexical match when it
+     * is completely contained by a larger field match.
+     *
+     * Example:
+     *
+     * 意识等级
+     * ├─ field.consciousnessLevel
+     * └─ 等级 -> field.rank
+     *
+     * Keep consciousnessLevel.
+     */
+    const containedByMoreSpecificField =
+      clauseMatches.some(
+        (other) => {
+          if (
+            other ===
+            match
+          ) {
+            return false;
+          }
+
+
+          if (
+            other.concept
+              ?.kind !==
+            "field"
+          ) {
+            return false;
+          }
+
+
+          const contains =
+            other.start <=
+              match.start &&
+            other.end >=
+              match.end;
+
+
+          const longer =
+            (
+              other.end -
+              other.start
+            ) >
+            (
+              match.end -
+              match.start
+            );
+
+
+          return (
+            contains &&
+            longer
+          );
+        }
+      );
+
+
+    if (
+      containedByMoreSpecificField
+    ) {
+      continue;
+    }
 
     const allowed =
       DIRECT_VALUE_EXPRESSIONS.get(
@@ -1649,11 +1804,17 @@ function extractPatternCandidates({
     const clause of
     clauses
   ) {
-    const clauseMatches =
+    const rawClauseMatches =
       getMatchesInsideClause(
         lexicalAnalysis
           .matches,
         clause
+      );
+
+
+    const clauseMatches =
+      filterSpecificEvidence(
+        rawClauseMatches
       );
 
 

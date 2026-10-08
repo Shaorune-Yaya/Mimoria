@@ -184,11 +184,16 @@
         "strong": [
           "uploaded consciousness",
           "uploaded their mind",
+          "uploaded his mind",
+          "uploaded her mind",
+          "uploaded its mind",
           "mind upload"
         ],
         "normal": [
           "uploaded mind",
-          "digitized consciousness"
+          "upload mind",
+          "digitized consciousness",
+          "uploaded personality"
         ],
         "weak": []
       }
@@ -198,10 +203,14 @@
       "aliases": {
         "strong": [
           "downloaded consciousness",
-          "downloaded their mind"
+          "downloaded their mind",
+          "downloaded his mind",
+          "downloaded her mind",
+          "downloaded its mind"
         ],
         "normal": [
           "downloaded mind",
+          "download mind",
           "restored consciousness"
         ],
         "weak": []
