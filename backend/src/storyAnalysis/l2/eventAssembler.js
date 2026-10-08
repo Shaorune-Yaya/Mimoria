@@ -32,6 +32,13 @@ const {
 );
 
 
+const {
+  extractEnglishCoordinatedSubjects,
+} = require(
+  "./coordinatedSubjectResolver"
+);
+
+
 // ======================================================
 // Entity Type Groups
 // ======================================================
@@ -201,6 +208,7 @@ function makeEventCandidate({
 // ======================================================
 // Chinese Text Helpers
 // ======================================================
+
 function stripChineseDiscoursePrefix(
   value
 ) {
@@ -213,20 +221,21 @@ function stripChineseDiscoursePrefix(
 
   result =
     result.replace(
-      /^(?:一开始|最初|起初|后来|随后|然后|接着|最终|最后|之后|同时)+/u,
+      /^(?:一开始|最初|起初|后来|随后|然后|接着|最终还是|最后还是|最终|最后|之后|同时)+/u,
       ""
     );
 
 
   result =
     result.replace(
-      /^(?:又|再|还|也|并且|并)+/u,
+      /^(?:还是|又|再|还|也|并且|并)+/u,
       ""
     );
 
 
   return result.trim();
 }
+
 
 function stripChineseDiscourseSuffix(
   value
@@ -235,7 +244,7 @@ function stripChineseDiscourseSuffix(
     value || ""
   )
     .replace(
-      /(?:一开始|最初|起初|后来|随后|然后|接着|最终|最后|之后|同时)$/u,
+      /(?:一开始|最初|起初|后来|随后|然后|接着|最终还是|最后还是|最终|最后|之后|同时|还是)$/u,
       ""
     )
     .trim();
@@ -262,6 +271,29 @@ function stripChineseAuxiliaryPhrase(
 
 
   return normalized;
+}
+
+
+function isChineseDiscourseOnlyPhrase(
+  value
+) {
+  const normalized =
+    String(
+      value || ""
+    )
+      .trim();
+
+
+  if (
+    !normalized
+  ) {
+    return false;
+  }
+
+
+  return /^(?:但是|但|而|并且|并|则|又|再|还|还是|一开始|最初|起初|后来|随后|然后|接着|最终|最后|最终还是|最后还是|之后|同时)+$/u.test(
+    normalized
+  );
 }
 
 
@@ -295,10 +327,32 @@ function cleanChineseSubject(
     );
 
 
+  /*
+   * A conjunction may expose another discourse marker:
+   *
+   * 但是最后还是
+   * -> 最后还是
+   * -> ""
+   */
+  result =
+    stripChineseDiscoursePrefix(
+      result
+    );
+
+
   result =
     stripChineseDiscourseSuffix(
       result
     );
+
+
+  if (
+    isChineseDiscourseOnlyPhrase(
+      result
+    )
+  ) {
+    return "";
+  }
 
 
   /*
@@ -348,7 +402,7 @@ function cleanChineseObject(
 
   result =
     result.replace(
-      /^(?:了|到|至|向|往|前往|进入|加入|于|在|给|对|把|将)+/u,
+      /^(?:的是|是的|的|是|为|了|到|至|向|往|前往|进入|加入|于|在|给|对|把|将)+/u,
       ""
     );
 
@@ -364,6 +418,121 @@ function cleanChineseObject(
     result.trim() ||
     null
   );
+}
+
+
+// ======================================================
+// Chinese Coordinated Participants
+//
+// Some symmetric / two-party events use a structure like:
+//
+// 美利坚合众国与天朝建交了
+//
+// A generic subject extractor would otherwise treat
+// "美利坚合众国与天朝" as one subject.
+// ======================================================
+
+function extractChineseCoordinatedParticipants({
+  clause,
+  eventMatch,
+}) {
+  if (
+    eventMatch
+      .conceptId !==
+    "event.establishDiplomacy"
+  ) {
+    return null;
+  }
+
+
+  const relativeStart =
+    eventMatch.start -
+    clause.start;
+
+
+  let before =
+    clause.text.slice(
+      0,
+      relativeStart
+    );
+
+
+  const pieces =
+    before.split(
+      /[，；。！？]/u
+    );
+
+
+  before =
+    pieces[
+      pieces.length - 1
+    ]
+      .trim();
+
+
+  before =
+    stripChineseDiscoursePrefix(
+      before
+    );
+
+
+  before =
+    before.replace(
+      /^(?:但是|但|而|并且|并|则)+/u,
+      ""
+    )
+      .trim();
+
+
+  before =
+    stripChineseDiscoursePrefix(
+      before
+    );
+
+
+  const pair =
+    before.match(
+      /^(.{1,40}?)(?:与|和|同)(.{1,40}?)$/u
+    );
+
+
+  if (
+    !pair
+  ) {
+    return null;
+  }
+
+
+  const subjectHint =
+    cleanChineseSubject(
+      pair[1]
+    );
+
+
+  const objectHint =
+    cleanChineseObject(
+      pair[2]
+    );
+
+
+  if (
+    !subjectHint ||
+    !objectHint ||
+    isChineseDiscourseOnlyPhrase(
+      subjectHint
+    ) ||
+    isChineseDiscourseOnlyPhrase(
+      objectHint
+    )
+  ) {
+    return null;
+  }
+
+
+  return {
+    subjectHint,
+    objectHint,
+  };
 }
 
 
@@ -450,17 +619,17 @@ function resolveChineseSubject({
 
   /*
    * Remove discourse words even when they are attached
-   * to the end of a real subject:
+   * to the end of a real subject.
    */
   local =
     stripChineseDiscoursePrefix(
-        local
+      local
     );
 
 
-    local =
+  local =
     stripChineseDiscourseSuffix(
-        local
+      local
     );
 
 
@@ -501,7 +670,10 @@ function resolveChineseSubject({
   if (
     !local ||
     local.length >
-      30
+      30 ||
+    isChineseDiscourseOnlyPhrase(
+      local
+    )
   ) {
     return (
       previousSubject ||
@@ -653,6 +825,71 @@ function resolveSubject({
     previousSubject ||
     null
   );
+}
+
+
+// ======================================================
+// Subject List Resolver
+//
+// Most events have one subject.
+//
+// Explicit English coordinated subjects may expand into
+// multiple independent semantic events:
+//
+// Alice and John joined the Guild.
+//
+// ->
+//
+// Alice joined the Guild.
+// John joined the Guild.
+//
+// This keeps downstream L3/L4 unchanged: they simply see
+// two ordinary events.
+// ======================================================
+
+function resolveSubjectHints({
+  clause,
+  eventMatch,
+  locale,
+  previousSubject,
+}) {
+  if (
+    isEnglishLocale(
+      locale
+    )
+  ) {
+    const coordinated =
+      extractEnglishCoordinatedSubjects({
+        clause,
+        eventMatch,
+      });
+
+
+    if (
+      coordinated.length >=
+      2
+    ) {
+      return coordinated;
+    }
+  }
+
+
+  const subject =
+    resolveSubject({
+      clause,
+      eventMatch,
+      locale,
+      previousSubject,
+    });
+
+
+  return subject
+    ? [
+        subject,
+      ]
+    : [
+        null,
+      ];
 }
 
 
@@ -1435,8 +1672,8 @@ function assembleEvents({
       const eventMatch of
       eventMatches
     ) {
-      let subjectHint =
-        resolveSubject({
+      const subjectHints =
+        resolveSubjectHints({
           clause,
           eventMatch,
           locale,
@@ -1446,11 +1683,35 @@ function assembleEvents({
         });
 
 
+      /*
+      * Keep one discourse subject for legacy single-subject
+      * inheritance.
+      *
+      * For an explicit coordinated subject we intentionally
+      * do not collapse the semantic events back into one
+      * combined entity.
+      *
+      * The last explicit subject becomes the short-term
+      * legacy discourse fallback.
+      *
+      * Plural pronoun coreference ("they") is a separate
+      * future feature.
+      */
+      const explicitSubjects =
+        subjectHints.filter(
+          Boolean
+        );
+
+
       if (
-        subjectHint
+        explicitSubjects.length >
+        0
       ) {
         discourseSubject =
-          subjectHint;
+          explicitSubjects[
+            explicitSubjects.length -
+            1
+          ];
       }
 
 
@@ -1465,17 +1726,23 @@ function assembleEvents({
 
 
       /*
-       * Membership ellipsis:
-       *
-       * 牙牙加入民主党，后来退出。
-       */
+      * Membership ellipsis:
+      *
+      * 牙牙加入民主党，后来退出。
+      *
+      * Only use the old single-subject inheritance when this
+      * event itself does not contain an explicit coordinated
+      * subject.
+      */
       if (
         !objectHint &&
         eventMatch.conceptId ===
           "event.leave" &&
         previousEvent &&
+        subjectHints.length ===
+          1 &&
         previousEvent.subjectHint ===
-          subjectHint
+          subjectHints[0]
       ) {
         objectHint =
           previousEvent.objectHint ||
@@ -1484,13 +1751,11 @@ function assembleEvents({
 
 
       /*
-       * Terraform after colonization:
-       *
-       * 联邦在新伊甸建立殖民地，
-       * 随后开始进行行星改造。
-       *
-       * The location can be inherited.
-       */
+      * Terraform after colonization:
+      *
+      * 联邦在新伊甸建立殖民地，
+      * 随后开始进行行星改造。
+      */
       if (
         !objectHint &&
         eventMatch.conceptId ===
@@ -1559,89 +1824,122 @@ function assembleEvents({
         });
 
 
-      const confidence =
-        calculateEventConfidence({
-          eventMatch,
-          subjectHint,
-          objectHint,
-          negated,
-          intended,
-          uncertain,
-        });
-
-
-      const candidate =
-        makeEventCandidate({
-          eventConcept:
-            eventMatch.conceptId,
-
-          subjectHint,
-
-          objectHint,
-
-          negated,
-          intended,
-          uncertain,
-
-          start:
-            eventMatch.start,
-
-          end:
-            eventMatch.end,
-
-          sourceText:
-            text.slice(
-              eventMatch.start,
-              eventMatch.end
-            ),
-
-          confidence,
-
-          sequenceIndex,
-
-          evidence: [
+      /*
+      * One explicit coordinated subject becomes one ordinary
+      * event Candidate.
+      *
+      * This is important because downstream:
+      *
+      * Entity resolution
+      * Relation derivation
+      * Current-state replay
+      * Story Suggestion generation
+      *
+      * already operate correctly on normal singular events.
+      */
+      for (
+        const subjectHint of
+        subjectHints
+      ) {
+        const confidence =
+          calculateEventConfidence({
             eventMatch,
-          ],
+            subjectHint,
+            objectHint,
+            negated,
+            intended,
+            uncertain,
+          });
 
-          metadata: {
-            producesRelation:
-              eventMatch.concept
-                ?.producesRelation ||
-              null,
 
-            endsRelation:
-              eventMatch.concept
-                ?.endsRelation ||
-              null,
+        const candidate =
+          makeEventCandidate({
+            eventConcept:
+              eventMatch.conceptId,
 
-            objectInherited:
-              Boolean(
-                objectHint &&
-                previousEvent &&
-                objectHint ===
-                  previousEvent.objectHint &&
-                (
-                  eventMatch.conceptId ===
-                    "event.leave" ||
-                  eventMatch.conceptId ===
-                    "event.terraform"
-                )
+            subjectHint,
+
+            objectHint,
+
+            negated,
+            intended,
+            uncertain,
+
+            start:
+              eventMatch.start,
+
+            end:
+              eventMatch.end,
+
+            sourceText:
+              text.slice(
+                eventMatch.start,
+                eventMatch.end
               ),
-          },
-        });
+
+            confidence,
+
+            sequenceIndex,
+
+            evidence: [
+              eventMatch,
+            ],
+
+            metadata: {
+              producesRelation:
+                eventMatch.concept
+                  ?.producesRelation ||
+                null,
+
+              endsRelation:
+                eventMatch.concept
+                  ?.endsRelation ||
+                null,
+
+              coordinatedSubject:
+                subjectHints.length >
+                1,
+
+              coordinatedSubjectCount:
+                subjectHints.length,
+
+              coordinatedSubjects:
+                subjectHints.length >
+                1
+                  ? [
+                      ...subjectHints,
+                    ]
+                  : null,
+
+              objectInherited:
+                Boolean(
+                  objectHint &&
+                  previousEvent &&
+                  objectHint ===
+                    previousEvent.objectHint &&
+                  (
+                    eventMatch.conceptId ===
+                      "event.leave" ||
+                    eventMatch.conceptId ===
+                      "event.terraform"
+                  )
+                ),
+            },
+          });
 
 
-      events.push(
-        candidate
-      );
+        events.push(
+          candidate
+        );
 
 
-      previousEvent =
-        candidate;
+        previousEvent =
+          candidate;
 
 
-      sequenceIndex +=
-        1;
+        sequenceIndex +=
+          1;
+      }
     }
   }
 
@@ -1655,4 +1953,10 @@ function assembleEvents({
 
 module.exports = {
   assembleEvents,
+
+  // Exported for deterministic regression tests.
+  cleanChineseSubject,
+  cleanChineseObject,
+  isChineseDiscourseOnlyPhrase,
+  extractChineseCoordinatedParticipants,
 };

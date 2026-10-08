@@ -2,7 +2,6 @@
   "app": {
     "name": "Mimoria"
   },
-
   "worlds": {
     "title": "当前世界",
     "subtitle": "在这里创建和管理你的世界。",
@@ -19,7 +18,6 @@
     "noDescription": "暂无描述。",
     "updated": "更新于"
   },
-
   "workspace": {
     "loading": "正在加载世界...",
     "notFound": "找不到这个世界。",
@@ -35,7 +33,6 @@
     "secondaryWorkspace": "第二工作区",
     "closeSecondary": "关闭第二工作区"
   },
-
   "entityTypes": {
     "title": "实体类型",
     "subtitle": "定义这个世界中可以存在的资料类型。",
@@ -52,7 +49,6 @@
     "emptyTitle": "暂无实体类型",
     "emptyDescription": "创建一个实体类型来开始整理你的世界。"
   },
-
   "schema": {
     "fields": "字段",
     "help": "字段决定这种实体中的每条资料可以保存哪些信息。",
@@ -76,7 +72,6 @@
     "option": "选项",
     "addOption": "+ 添加选项"
   },
-
   "fieldTypes": {
     "text": "文本",
     "long-text": "长文本",
@@ -86,7 +81,6 @@
     "select": "下拉选择",
     "entity-reference": "实体引用"
   },
-
   "entities": {
     "title": "实体",
     "subtitle": "创建和管理这个世界中的人物、地点、物品、事件以及其他设定资料。",
@@ -111,53 +105,39 @@
     "editTitle": "修改实体",
     "saveChanges": "保存修改"
   },
-
   "tree": {
     "newFolder": "新建文件夹",
     "folderName": "文件夹名称……",
     "createAtRoot": "在根目录创建",
     "createInside": "在当前节点内创建"
   },
-
   "documents": {
     "title": "文档",
     "subtitle": "故事创作与世界设定",
-
     "loading": "正在加载……",
     "loadError": "加载文档失败。",
-
     "root": "根目录",
     "emptyTree": "暂无文档。",
-
     "newDocument": "+ 新建文档",
     "newFolder": "新建文件夹",
-
     "newDocumentInside": "在此新建文档",
     "newFolderInside": "在此新建文件夹",
-
     "createTitle": "创建文档",
     "createDescription": "在这个世界中创建一个新的写作文档。",
     "create": "创建文档",
-
     "documentName": "文档名称",
     "documentNamePlaceholder": "第一章、序章、世界历史……",
     "folderName": "文件夹名称……",
-
     "createInsideSelectedFolder": "这个文档将创建在当前选择的文件夹中。",
-
     "browserTitle": "文档浏览器",
     "browserDescription": "通过左侧资源管理器整理你的故事与资料。选择一个文档即可打开。",
-
     "documentWorkspaceDescription": "编写和整理这个世界中的故事内容。",
-
     "untitled": "未命名文档",
     "emptyDocument": "这个文档目前是空的。",
-
     "version": "版本",
 
     "storySynced": "故事数据已同步",
     "storyOutOfSync": "故事数据尚未同步",
-
     "sync": "同步",
     "syncPending": "故事同步待处理",
     "syncUpToDate": "故事同步已是最新",
@@ -188,24 +168,21 @@
     "rename": "重命名",
     "delete": "删除",
     "moreActions": "更多操作",
-
     "expand": "展开",
     "collapse": "折叠",
-
     "confirm": "确认",
     "cancel": "取消",
     "close": "关闭",
     "confirmDelete": "确认删除",
-
     "deleteDocumentConfirm": "确定要删除这个文档吗？",
     "deleteFolderConfirm": "确定要删除这个文件夹吗？其中的内容会被移动到上一级目录。",
-
     "createFailed": "创建文档失败。",
     "createFolderFailed": "创建文件夹失败。",
     "renameFailed": "重命名失败。",
     "deleteFailed": "删除失败。",
     "drag": "拖动",
     "moveFailed": "移动文档项目失败。",
+
     "entityMentionType": "实体类型",
     "entityMentionUnknownType": "未知类型",
     "entityMentionOpenHint": "点击打开这个实体。",
@@ -221,6 +198,9 @@
     "analysisPending": "设定分析待处理",
     "analysisUpToDate": "当前版本已完成设定分析",
 
+    "canonNeedsAnalysis": "世界设定已变化，需要重新分析",
+    "canonAnalysisPending": "世界设定已变化，等待重新分析",
+
     "storySuggestionsTitle": "设定建议",
     "storySuggestionsDescription": "这些内容由规则分析产生，只有在你确认后才会写入世界数据库。",
     "storySuggestionsEmpty": "没有发现足够明确的设定建议。",
@@ -234,9 +214,81 @@
     "suggestionApplied": "已应用",
     "suggestionIgnored": "已忽略",
 
+    "editSuggestion": "编辑",
+    "saveSuggestionEdit": "保存修改",
+    "cancelSuggestionEdit": "取消",
+    "suggestionEdited": "已手动修改",
+    "storySuggestionEditFailed": "修改建议失败",
+
+    "editSuggestedValue": "建议值",
+    "editSubject": "主体",
+    "editObject": "对象",
+    "editRelation": "关系",
+    "editEvent": "事件",
+    "editEntityName": "实体名称",
+    "editFieldName": "字段名称",
+    "editFieldType": "字段类型",
+    "editOptionValue": "选项值",
+
     "storyAnalysisFailed": "分析当前文档失败。",
     "storySuggestionsLoadFailed": "加载设定建议失败。",
     "storySuggestionApplyFailed": "应用设定建议失败。",
-    "storySuggestionIgnoreFailed": "忽略设定建议失败。"
+    "storySuggestionIgnoreFailed": "忽略设定建议失败。",
+    "entityTypesLoadFailed": "加载实体类型失败。",
+
+    "recommendedEntityType": "推荐实体类型",
+    "recommendedTypeExists": "此类型已存在于当前世界",
+    "recommendedTypeMissing": "当前世界尚未创建此类型",
+    "createRecommendedTypeAndApply": "创建“{{type}}”类型并应用",
+    "useRecommendedTypeAndApply": "使用“{{type}}”并应用",
+    "orChooseExistingType": "或者选择已有类型",
+    "useSelectedTypeAndApply": "使用所选类型并应用",
+    "keepRecommendedEntityType": "保留推荐类型",
+
+    "timelineNotAvailable": "时间线持久化尚未实现，因此该历史事件暂时不能应用。",
+    "timelinePending": "等待时间线",
+
+    "selectEntityTypeBeforeApply": "请先为这个新实体选择实体类型。",
+    "suggestionDeferred": "这个建议目前还不能应用。",
+
+    "createEntityName": "新实体",
+    "entityTypeForSuggestion": "实体类型",
+    "selectEntityType": "选择实体类型……",
+    "suggestedEntityType": "建议类型：",
+
+    "createFieldLabel": "新增字段",
+    "addSelectOption": "添加选项",
+
+    "suggestionKinds": {
+      "fieldUpdate": "字段更新",
+      "relationUpdate": "关系更新",
+      "eventHistory": "历史事件",
+      "createEntity": "创建实体",
+      "createSchemaField": "创建字段",
+      "createSelectOption": "添加选项",
+      "unknown": "设定建议"
+    },
+
+    "concepts": {
+      "field_age": "年龄",
+      "field_occupation": "职业",
+      "field_birthplace": "出生地",
+
+      "relation_member_of": "隶属于",
+      "relation_diplomatic_relations_with": "外交关系",
+
+      "event_establishDiplomacy": "建立外交关系",
+      "event_join": "加入",
+      "event_leave": "退出",
+
+      "entityType_character": "人物",
+      "entityType_person": "人物",
+      "entityType_church": "教会",
+      "entityType_guild": "公会",
+      "entityType_politicalParty": "政党",
+      "entityType_order": "组织",
+      "entityType_religion": "宗教",
+      "entityType_cult": "教团"
+    }
   }
 }

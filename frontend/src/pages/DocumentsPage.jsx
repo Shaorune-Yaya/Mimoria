@@ -27,13 +27,10 @@ import {
 
 import WorldLayout from "../components/WorldLayout";
 import DocumentEditor from "../components/DocumentEditor";
+import StorySuggestionsPanel from "../components/StorySuggestionsPanel";
 
 import { API_URL } from "../config/api";
 
-
-// ======================================================
-// Document Tree Row
-// ======================================================
 
 function DocumentTreeRow({
   node,
@@ -447,10 +444,6 @@ function DocumentTreeRow({
 }
 
 
-// ======================================================
-// Root Drop Zone
-// ======================================================
-
 function DocumentRootDropZone({
   t,
 }) {
@@ -461,6 +454,7 @@ function DocumentRootDropZone({
     id:
       "document-root:end",
   });
+
 
   return (
     <div
@@ -481,41 +475,39 @@ function DocumentRootDropZone({
 }
 
 
-// ======================================================
-// Documents Page
-// ======================================================
-
 function DocumentsPage() {
   const {
     worldId,
   } = useParams();
 
+
   const {
     t,
+    i18n,
   } = useTranslation();
+
 
   const menuRef =
     useRef(null);
 
-
-  // ====================================================
-  // Base Data
-  // ====================================================
 
   const [
     world,
     setWorld,
   ] = useState(null);
 
+
   const [
     treeNodes,
     setTreeNodes,
   ] = useState([]);
 
+
   const [
     loading,
     setLoading,
   ] = useState(true);
+
 
   const [
     error,
@@ -523,33 +515,29 @@ function DocumentsPage() {
   ] = useState("");
 
 
-  // ====================================================
-  // Document Workspace
-  // ====================================================
-
   const [
     selectedDocument,
     setSelectedDocument,
   ] = useState(null);
+
 
   const [
     showCreateDocument,
     setShowCreateDocument,
   ] = useState(false);
 
+
   const [
     documentTitle,
     setDocumentTitle,
   ] = useState("");
+
 
   const [
     documentParentId,
     setDocumentParentId,
   ] = useState(null);
 
-  // ====================================================
-  // Story Suggestions
-  // ====================================================
 
   const [
     storySuggestions,
@@ -572,10 +560,36 @@ function DocumentsPage() {
 
 
   const [
+    storyAnalysisMeta,
+    setStoryAnalysisMeta,
+  ] = useState({
+    documentNeedsAnalysis:
+      false,
+
+    canonNeedsAnalysis:
+      false,
+
+    needsAnalysis:
+      false,
+
+    worldCanonVersion:
+      null,
+
+    lastAnalyzedCanonVersion:
+      null,
+  });
+
+
+  const [
     storySuggestionActionId,
     setStorySuggestionActionId,
   ] = useState(null);
 
+
+  const [
+    entityTypes,
+    setEntityTypes,
+  ] = useState([]);
 
   const [
     editorSaveState,
@@ -584,9 +598,6 @@ function DocumentsPage() {
     "saved"
   );
 
-  // ====================================================
-  // Explorer
-  // ====================================================
 
   const [
     expandedFolders,
@@ -595,10 +606,12 @@ function DocumentsPage() {
     () => new Set()
   );
 
+
   const [
     activeNodeId,
     setActiveNodeId,
   ] = useState(null);
+
 
   const activeDocumentNode =
     activeNodeId
@@ -610,19 +623,17 @@ function DocumentsPage() {
       : null;
 
 
-  // ====================================================
-  // Folder Creation
-  // ====================================================
-
   const [
     showFolderForm,
     setShowFolderForm,
   ] = useState(false);
 
+
   const [
     folderName,
     setFolderName,
   ] = useState("");
+
 
   const [
     folderParentId,
@@ -630,29 +641,29 @@ function DocumentsPage() {
   ] = useState(null);
 
 
-  // ====================================================
-  // Rename / Delete / Context Menu
-  // ====================================================
-
   const [
     editingNodeId,
     setEditingNodeId,
   ] = useState(null);
+
 
   const [
     editingName,
     setEditingName,
   ] = useState("");
 
+
   const [
     deleteTarget,
     setDeleteTarget,
   ] = useState(null);
 
+
   const [
     contextMenu,
     setContextMenu,
   ] = useState(null);
+
 
   const [
     actionError,
@@ -660,12 +671,15 @@ function DocumentsPage() {
   ] = useState("");
 
 
-  // ====================================================
-  // Loading
-  // ====================================================
-
   useEffect(() => {
     loadPage();
+  }, [
+    worldId,
+  ]);
+
+
+  useEffect(() => {
+    loadEntityTypes();
   }, [
     worldId,
   ]);
@@ -687,10 +701,12 @@ function DocumentsPage() {
       }
     }
 
+
     document.addEventListener(
       "mousedown",
       handleOutsideClick
     );
+
 
     return () => {
       document.removeEventListener(
@@ -700,18 +716,39 @@ function DocumentsPage() {
     };
   }, []);
 
+
   useEffect(() => {
     setStorySuggestions(
       []
     );
 
+
     setStoryAnalysisError(
       ""
     );
 
+
     setStoryAnalysisState(
       "idle"
     );
+
+
+    setStoryAnalysisMeta({
+      documentNeedsAnalysis:
+        false,
+
+      canonNeedsAnalysis:
+        false,
+
+      needsAnalysis:
+        false,
+
+      worldCanonVersion:
+        null,
+
+      lastAnalyzedCanonVersion:
+        null,
+    });
 
 
     if (
@@ -721,11 +758,6 @@ function DocumentsPage() {
     }
 
 
-    /*
-    * The current text changed after the most recent
-    * analysis. Old suggestions should not be shown as
-    * if they belonged to the new version.
-    */
     if (
       selectedDocument
         .contentVersion !==
@@ -752,16 +784,63 @@ function DocumentsPage() {
     selectedDocument?.contentVersion,
     selectedDocument?.syncedVersion,
   ]);
-  
+
+
+  async function loadEntityTypes() {
+    try {
+      const response =
+        await fetch(
+          `${API_URL.entityTypes}/world/${worldId}`
+        );
+
+
+      if (
+        !response.ok
+      ) {
+        throw new Error(
+          t(
+            "documents.entityTypesLoadFailed"
+          )
+        );
+      }
+
+
+      const data =
+        await response.json();
+
+
+      setEntityTypes(
+        Array.isArray(
+          data
+        )
+          ? data
+          : []
+      );
+    } catch (loadError) {
+      console.error(
+        "Failed to load Entity Types for Story Suggestions:",
+        loadError
+      );
+
+
+      setEntityTypes(
+        []
+      );
+    }
+  }
+
+
   async function loadPage() {
     try {
       setLoading(
         true
       );
 
+
       setError(
         ""
       );
+
 
       const [
         worldResponse,
@@ -777,6 +856,7 @@ function DocumentsPage() {
           ),
         ]);
 
+
       if (
         !worldResponse.ok
       ) {
@@ -786,6 +866,7 @@ function DocumentsPage() {
           )
         );
       }
+
 
       if (
         !treeResponse.ok
@@ -797,11 +878,14 @@ function DocumentsPage() {
         );
       }
 
+
       const worldData =
         await worldResponse.json();
 
+
       const treeData =
         await treeResponse.json();
+
 
       const safeTree =
         Array.isArray(
@@ -810,13 +894,16 @@ function DocumentsPage() {
           ? treeData
           : [];
 
+
       setWorld(
         worldData
       );
 
+
       setTreeNodes(
         safeTree
       );
+
 
       setExpandedFolders(
         new Set(
@@ -837,6 +924,7 @@ function DocumentsPage() {
         "Failed to load Documents:",
         loadError
       );
+
 
       setError(
         loadError.message ||
@@ -862,6 +950,7 @@ function DocumentsPage() {
           `${API_URL.documentTree}/world/${worldId}`
         );
 
+
       if (
         !response.ok
       ) {
@@ -872,8 +961,10 @@ function DocumentsPage() {
         );
       }
 
+
       const data =
         await response.json();
+
 
       const safeData =
         Array.isArray(
@@ -882,17 +973,21 @@ function DocumentsPage() {
           ? data
           : [];
 
+
       setTreeNodes(
         safeData
       );
+
 
       const currentId =
         preferredDocumentId ||
         selectedDocument?._id;
 
+
       if (!currentId) {
         return;
       }
+
 
       const node =
         safeData.find(
@@ -903,15 +998,12 @@ function DocumentsPage() {
               currentId
         );
 
+
       if (
         node?.documentId
       ) {
         setSelectedDocument(
           (current) => {
-            /*
-             * Do not overwrite newer editor data
-             * with an older tree snapshot.
-             */
             if (
               current?._id ===
               node.documentId._id &&
@@ -923,6 +1015,7 @@ function DocumentsPage() {
             ) {
               return current;
             }
+
 
             return node.documentId;
           }
@@ -940,6 +1033,7 @@ function DocumentsPage() {
         refreshError
       );
 
+
       setActionError(
         refreshError.message ||
           t(
@@ -950,10 +1044,6 @@ function DocumentsPage() {
   }
 
 
-  // ====================================================
-  // Tree Helpers
-  // ====================================================
-
   function getParentId(
     node
   ) {
@@ -962,6 +1052,7 @@ function DocumentsPage() {
     ) {
       return null;
     }
+
 
     if (
       typeof node.parentId ===
@@ -973,6 +1064,7 @@ function DocumentsPage() {
       );
     }
 
+
     return node.parentId;
   }
 
@@ -981,6 +1073,7 @@ function DocumentsPage() {
     useMemo(() => {
       const map =
         new Map();
+
 
       for (
         const node of
@@ -991,12 +1084,14 @@ function DocumentsPage() {
             node
           );
 
+
         const key =
           parentId
             ? String(
                 parentId
               )
             : "root";
+
 
         if (
           !map.has(
@@ -1009,6 +1104,7 @@ function DocumentsPage() {
           );
         }
 
+
         map
           .get(
             key
@@ -1017,6 +1113,7 @@ function DocumentsPage() {
             node
           );
       }
+
 
       for (
         const children of
@@ -1028,6 +1125,7 @@ function DocumentsPage() {
             (b.order ?? 0)
         );
       }
+
 
       return map;
     }, [
@@ -1044,6 +1142,7 @@ function DocumentsPage() {
             parentId
           )
         : "root";
+
 
     return (
       nodesByParent.get(
@@ -1063,6 +1162,7 @@ function DocumentsPage() {
             current
           );
 
+
         if (
           next.has(
             folderId
@@ -1076,6 +1176,7 @@ function DocumentsPage() {
             folderId
           );
         }
+
 
         return next;
       }
@@ -1093,37 +1194,40 @@ function DocumentsPage() {
       return;
     }
 
+
     const documentId =
       node.documentId?._id;
+
 
     if (!documentId) {
       return;
     }
 
+
     setShowCreateDocument(
       false
     );
+
 
     setContextMenu(
       null
     );
 
+
     setDeleteTarget(
       null
     );
+
 
     setActionError(
       ""
     );
 
-    /*
-     * Open immediately from the populated tree data,
-     * then refresh the document directly so the editor
-     * always receives the newest content.
-     */
+
     setSelectedDocument(
       node.documentId
     );
+
 
     try {
       const response =
@@ -1131,14 +1235,17 @@ function DocumentsPage() {
           `${API_URL.documents}/${documentId}`
         );
 
+
       if (
         !response.ok
       ) {
         return;
       }
 
+
       const freshDocument =
         await response.json();
+
 
       setSelectedDocument(
         (current) =>
@@ -1156,10 +1263,6 @@ function DocumentsPage() {
   }
 
 
-  // ====================================================
-  // Drag & Drop
-  // ====================================================
-
   async function moveDocumentNode(
     nodeId,
     parentId,
@@ -1169,6 +1272,7 @@ function DocumentsPage() {
       setActionError(
         ""
       );
+
 
       const response =
         await fetch(
@@ -1190,6 +1294,7 @@ function DocumentsPage() {
           }
         );
 
+
       if (
         !response.ok
       ) {
@@ -1200,6 +1305,7 @@ function DocumentsPage() {
               () => ({})
             );
 
+
         throw new Error(
           data.message ||
             t(
@@ -1207,6 +1313,7 @@ function DocumentsPage() {
             )
         );
       }
+
 
       if (
         parentId
@@ -1218,14 +1325,17 @@ function DocumentsPage() {
                 current
               );
 
+
             next.add(
               parentId
             );
+
 
             return next;
           }
         );
       }
+
 
       await refreshTree();
     } catch (moveError) {
@@ -1233,6 +1343,7 @@ function DocumentsPage() {
         "Failed to move document node:",
         moveError
       );
+
 
       setActionError(
         moveError.message ||
@@ -1254,6 +1365,7 @@ function DocumentsPage() {
         targetNode
       );
 
+
     const siblings =
       getChildren(
         parentId
@@ -1263,6 +1375,7 @@ function DocumentsPage() {
           draggedId
       );
 
+
     const targetIndex =
       siblings.findIndex(
         (node) =>
@@ -1270,16 +1383,19 @@ function DocumentsPage() {
           targetNode._id
       );
 
+
     if (
       targetIndex ===
       -1
     ) {
       return {
         parentId,
+
         index:
           siblings.length,
       };
     }
+
 
     return {
       parentId,
@@ -1301,23 +1417,28 @@ function DocumentsPage() {
       over,
     } = event;
 
+
     setActiveNodeId(
       null
     );
 
+
     if (!over) {
       return;
     }
+
 
     const draggedId =
       String(
         active.id
       );
 
+
     const dropId =
       String(
         over.id
       );
+
 
     if (
       dropId ===
@@ -1332,19 +1453,23 @@ function DocumentsPage() {
             draggedId
         );
 
+
       await moveDocumentNode(
         draggedId,
         null,
         rootSiblings.length
       );
 
+
       return;
     }
+
 
     const separatorIndex =
       dropId.indexOf(
         ":"
       );
+
 
     if (
       separatorIndex ===
@@ -1353,17 +1478,20 @@ function DocumentsPage() {
       return;
     }
 
+
     const position =
       dropId.slice(
         0,
         separatorIndex
       );
 
+
     const targetNodeId =
       dropId.slice(
         separatorIndex +
           1
       );
+
 
     if (
       ![
@@ -1377,12 +1505,14 @@ function DocumentsPage() {
       return;
     }
 
+
     if (
       targetNodeId ===
       draggedId
     ) {
       return;
     }
+
 
     const targetNode =
       treeNodes.find(
@@ -1391,9 +1521,11 @@ function DocumentsPage() {
           targetNodeId
       );
 
+
     if (!targetNode) {
       return;
     }
+
 
     if (
       position ===
@@ -1406,6 +1538,7 @@ function DocumentsPage() {
         return;
       }
 
+
       const children =
         getChildren(
           targetNode._id
@@ -1415,14 +1548,17 @@ function DocumentsPage() {
             draggedId
         );
 
+
       await moveDocumentNode(
         draggedId,
         targetNode._id,
         children.length
       );
 
+
       return;
     }
+
 
     const destination =
       calculateInsertIndex(
@@ -1430,6 +1566,7 @@ function DocumentsPage() {
         targetNode,
         position
       );
+
 
     await moveDocumentNode(
       draggedId,
@@ -1448,6 +1585,7 @@ function DocumentsPage() {
       )
     );
 
+
     setContextMenu(
       null
     );
@@ -1461,10 +1599,6 @@ function DocumentsPage() {
   }
 
 
-  // ====================================================
-  // Create Document
-  // ====================================================
-
   function openCreateDocument(
     parentId = null
   ) {
@@ -1472,29 +1606,36 @@ function DocumentsPage() {
       null
     );
 
+
     setDocumentTitle(
       ""
     );
+
 
     setDocumentParentId(
       parentId
     );
 
+
     setShowCreateDocument(
       true
     );
+
 
     setDeleteTarget(
       null
     );
 
+
     setContextMenu(
       null
     );
 
+
     setActionError(
       ""
     );
+
 
     if (
       parentId
@@ -1506,9 +1647,11 @@ function DocumentsPage() {
               current
             );
 
+
           next.add(
             parentId
           );
+
 
           return next;
         }
@@ -1522,9 +1665,11 @@ function DocumentsPage() {
       false
     );
 
+
     setDocumentTitle(
       ""
     );
+
 
     setDocumentParentId(
       null
@@ -1537,17 +1682,21 @@ function DocumentsPage() {
   ) {
     event.preventDefault();
 
+
     const title =
       documentTitle.trim();
+
 
     if (!title) {
       return;
     }
 
+
     try {
       setActionError(
         ""
       );
+
 
       const response =
         await fetch(
@@ -1564,6 +1713,7 @@ function DocumentsPage() {
             body:
               JSON.stringify({
                 worldId,
+
                 title,
 
                 parentId:
@@ -1571,6 +1721,7 @@ function DocumentsPage() {
               }),
           }
         );
+
 
       if (
         !response.ok
@@ -1582,6 +1733,7 @@ function DocumentsPage() {
               () => ({})
             );
 
+
         throw new Error(
           data.message ||
             t(
@@ -1590,8 +1742,10 @@ function DocumentsPage() {
         );
       }
 
+
       const newDocument =
         await response.json();
+
 
       if (
         documentParentId
@@ -1603,20 +1757,25 @@ function DocumentsPage() {
                 current
               );
 
+
             next.add(
               documentParentId
             );
+
 
             return next;
           }
         );
       }
 
+
       closeCreateDocument();
+
 
       setSelectedDocument(
         newDocument
       );
+
 
       await refreshTree(
         newDocument._id
@@ -1626,6 +1785,7 @@ function DocumentsPage() {
         "Failed to create document:",
         createError
       );
+
 
       setActionError(
         createError.message ||
@@ -1637,10 +1797,6 @@ function DocumentsPage() {
   }
 
 
-  // ====================================================
-  // Folder Creation
-  // ====================================================
-
   function openFolderForm(
     parentId = null
   ) {
@@ -1648,17 +1804,21 @@ function DocumentsPage() {
       parentId
     );
 
+
     setFolderName(
       ""
     );
+
 
     setShowFolderForm(
       true
     );
 
+
     setActionError(
       ""
     );
+
 
     if (
       parentId
@@ -1670,9 +1830,11 @@ function DocumentsPage() {
               current
             );
 
+
           next.add(
             parentId
           );
+
 
           return next;
         }
@@ -1686,9 +1848,11 @@ function DocumentsPage() {
       false
     );
 
+
     setFolderName(
       ""
     );
+
 
     setFolderParentId(
       null
@@ -1701,17 +1865,21 @@ function DocumentsPage() {
   ) {
     event.preventDefault();
 
+
     const name =
       folderName.trim();
+
 
     if (!name) {
       return;
     }
 
+
     try {
       setActionError(
         ""
       );
+
 
       const response =
         await fetch(
@@ -1728,6 +1896,7 @@ function DocumentsPage() {
             body:
               JSON.stringify({
                 worldId,
+
                 name,
 
                 parentId:
@@ -1735,6 +1904,7 @@ function DocumentsPage() {
               }),
           }
         );
+
 
       if (
         !response.ok
@@ -1746,6 +1916,7 @@ function DocumentsPage() {
               () => ({})
             );
 
+
         throw new Error(
           data.message ||
             t(
@@ -1754,8 +1925,10 @@ function DocumentsPage() {
         );
       }
 
+
       const folder =
         await response.json();
+
 
       setExpandedFolders(
         (current) => {
@@ -1764,9 +1937,11 @@ function DocumentsPage() {
               current
             );
 
+
           next.add(
             folder._id
           );
+
 
           if (
             folderParentId
@@ -1776,11 +1951,14 @@ function DocumentsPage() {
             );
           }
 
+
           return next;
         }
       );
 
+
       closeFolderForm();
+
 
       await refreshTree();
     } catch (createError) {
@@ -1788,6 +1966,7 @@ function DocumentsPage() {
         "Failed to create document folder:",
         createError
       );
+
 
       setActionError(
         createError.message ||
@@ -1799,10 +1978,6 @@ function DocumentsPage() {
   }
 
 
-  // ====================================================
-  // Rename
-  // ====================================================
-
   function startRename(
     node
   ) {
@@ -1810,17 +1985,21 @@ function DocumentsPage() {
       node._id
     );
 
+
     setEditingName(
       node.name || ""
     );
+
 
     setContextMenu(
       null
     );
 
+
     setDeleteTarget(
       null
     );
+
 
     setActionError(
       ""
@@ -1832,6 +2011,7 @@ function DocumentsPage() {
     setEditingNodeId(
       null
     );
+
 
     setEditingName(
       ""
@@ -1845,14 +2025,17 @@ function DocumentsPage() {
     const name =
       editingName.trim();
 
+
     if (!name) {
       cancelRename();
 
       return;
     }
 
+
     try {
       let response;
+
 
       if (
         node.kind ===
@@ -1880,9 +2063,11 @@ function DocumentsPage() {
         const documentId =
           node.documentId?._id;
 
+
         if (!documentId) {
           return;
         }
+
 
         response =
           await fetch(
@@ -1905,6 +2090,7 @@ function DocumentsPage() {
           );
       }
 
+
       if (
         !response.ok
       ) {
@@ -1915,6 +2101,7 @@ function DocumentsPage() {
               () => ({})
             );
 
+
         throw new Error(
           data.message ||
             t(
@@ -1923,10 +2110,13 @@ function DocumentsPage() {
         );
       }
 
+
       const updated =
         await response.json();
 
+
       cancelRename();
+
 
       if (
         node.kind ===
@@ -1945,12 +2135,14 @@ function DocumentsPage() {
         );
       }
 
+
       await refreshTree();
     } catch (renameError) {
       console.error(
         "Failed to rename document item:",
         renameError
       );
+
 
       setActionError(
         renameError.message ||
@@ -1962,10 +2154,6 @@ function DocumentsPage() {
   }
 
 
-  // ====================================================
-  // Delete
-  // ====================================================
-
   function requestDelete(
     node
   ) {
@@ -1973,9 +2161,11 @@ function DocumentsPage() {
       node
     );
 
+
     setContextMenu(
       null
     );
+
 
     setActionError(
       ""
@@ -1995,8 +2185,10 @@ function DocumentsPage() {
       return;
     }
 
+
     try {
       let response;
+
 
       if (
         deleteTarget.kind ===
@@ -2015,9 +2207,11 @@ function DocumentsPage() {
           deleteTarget
             .documentId?._id;
 
+
         if (!documentId) {
           return;
         }
+
 
         response =
           await fetch(
@@ -2029,6 +2223,7 @@ function DocumentsPage() {
           );
       }
 
+
       if (
         !response.ok
       ) {
@@ -2039,6 +2234,7 @@ function DocumentsPage() {
               () => ({})
             );
 
+
         throw new Error(
           data.message ||
             t(
@@ -2046,6 +2242,7 @@ function DocumentsPage() {
             )
         );
       }
+
 
       if (
         deleteTarget.kind ===
@@ -2059,9 +2256,11 @@ function DocumentsPage() {
         );
       }
 
+
       setDeleteTarget(
         null
       );
+
 
       await refreshTree();
     } catch (deleteError) {
@@ -2069,6 +2268,7 @@ function DocumentsPage() {
         "Failed to delete document item:",
         deleteError
       );
+
 
       setActionError(
         deleteError.message ||
@@ -2080,24 +2280,23 @@ function DocumentsPage() {
   }
 
 
-  // ====================================================
-  // Context Menu
-  // ====================================================
-
   function openContextMenu(
     event,
     node
   ) {
     event.preventDefault();
 
+
     const menuWidth =
       210;
+
 
     const menuHeight =
       node.kind ===
       "folder"
         ? 190
         : 110;
+
 
     const x =
       Math.min(
@@ -2107,6 +2306,7 @@ function DocumentsPage() {
           8
       );
 
+
     const y =
       Math.min(
         event.clientY,
@@ -2114,6 +2314,7 @@ function DocumentsPage() {
           menuHeight -
           8
       );
+
 
     setContextMenu({
       x:
@@ -2132,240 +2333,533 @@ function DocumentsPage() {
     });
   }
 
-// ====================================================
-// Story Suggestions
-// ====================================================
 
-async function loadStorySuggestions(
-  documentId
-) {
-  if (!documentId) {
-    return;
+  function getStoryCandidateId(
+    candidate
+  ) {
+    return (
+      candidate?.id ||
+      candidate?._id ||
+      null
+    );
   }
 
 
-  try {
-    setStoryAnalysisError(
-      ""
+  function getConceptLabel(
+    concept
+  ) {
+    if (!concept) {
+      return "";
+    }
+
+
+    const conceptKey =
+      String(
+        concept
+      )
+        .replace(
+          /\./gu,
+          "_"
+        );
+
+
+    const key =
+      `documents.concepts.${conceptKey}`;
+
+
+    return t(
+      key,
+      {
+        defaultValue:
+          String(
+            concept
+          )
+            .replace(
+              /^(?:field|relation|event|entityType)\./u,
+              ""
+            )
+            .replace(
+              /_/gu,
+              " "
+            ),
+      }
     );
+  }
 
 
-    const response =
-      await fetch(
-        `${API_URL.storySync}/documents/${documentId}/candidates`
+  function getSuggestionKindLabel(
+    kind
+  ) {
+    const keyMap = {
+      "field-update":
+        "documents.suggestionKinds.fieldUpdate",
+
+      "relation-update":
+        "documents.suggestionKinds.relationUpdate",
+
+      "event-history":
+        "documents.suggestionKinds.eventHistory",
+
+      "create-entity":
+        "documents.suggestionKinds.createEntity",
+
+      "create-schema-field":
+        "documents.suggestionKinds.createSchemaField",
+
+      "create-select-option":
+        "documents.suggestionKinds.createSelectOption",
+    };
+
+
+    return t(
+      keyMap[kind] ||
+        "documents.suggestionKinds.unknown"
+    );
+  }
+
+
+  function replaceStorySuggestion(
+    updatedCandidate
+  ) {
+    const updatedId =
+      getStoryCandidateId(
+        updatedCandidate
       );
 
 
     if (
-      !response.ok
+      !updatedId
     ) {
+      return;
+    }
+
+
+    setStorySuggestions(
+      (current) =>
+        current.map(
+          (item) =>
+            getStoryCandidateId(
+              item
+            ) ===
+            updatedId
+              ? updatedCandidate
+              : item
+        )
+    );
+  }
+
+
+  async function loadStorySuggestions(
+    documentId
+  ) {
+    if (!documentId) {
+      return;
+    }
+
+
+    try {
+      setStoryAnalysisError(
+        ""
+      );
+
+
+      const response =
+        await fetch(
+          `${API_URL.storySuggestions}/documents/${documentId}`
+        );
+
+
+      if (
+        !response.ok
+      ) {
+        const data =
+          await response
+            .json()
+            .catch(
+              () => ({})
+            );
+
+
+        throw new Error(
+          data.message ||
+            t(
+              "documents.storySuggestionsLoadFailed"
+            )
+        );
+      }
+
+
       const data =
-        await response
-          .json()
-          .catch(
-            () => ({})
-          );
+        await response.json();
 
 
-      throw new Error(
-        data.message ||
+      setStorySuggestions(
+        Array.isArray(
+          data.candidates
+        )
+          ? data.candidates
+          : []
+      );
+
+
+      setStoryAnalysisMeta({
+        documentNeedsAnalysis:
+          Boolean(
+            data.documentNeedsAnalysis
+          ),
+
+        canonNeedsAnalysis:
+          Boolean(
+            data.canonNeedsAnalysis
+          ),
+
+        needsAnalysis:
+          Boolean(
+            data.needsAnalysis
+          ),
+
+        worldCanonVersion:
+          data.worldCanonVersion ??
+          null,
+
+        lastAnalyzedCanonVersion:
+          data.lastAnalyzedCanonVersion ??
+          null,
+      });
+
+
+      setStoryAnalysisState(
+        "complete"
+      );
+    } catch (error) {
+      console.error(
+        "Failed to load Story Suggestions:",
+        error
+      );
+
+
+      setStoryAnalysisError(
+        error.message ||
           t(
             "documents.storySuggestionsLoadFailed"
           )
       );
+
+
+      setStoryAnalysisState(
+        "error"
+      );
+    }
+  }
+
+  async function analyzeStory() {
+    if (
+      !selectedDocument?._id
+    ) {
+      return;
     }
 
 
-    const data =
-      await response.json();
+    if (
+      editorSaveState !==
+      "saved"
+    ) {
+      return;
+    }
 
 
-    setStorySuggestions(
-      Array.isArray(
-        data.candidates
-      )
-        ? data.candidates
-        : []
-    );
-
-
-    setStoryAnalysisState(
-      "complete"
-    );
-  } catch (error) {
-    console.error(
-      "Failed to load Story Suggestions:",
-      error
-    );
-
-
-    setStoryAnalysisError(
-      error.message ||
-        t(
-          "documents.storySuggestionsLoadFailed"
-        )
-    );
-
-
-    setStoryAnalysisState(
-      "error"
-    );
-  }
-}
-
-
-async function analyzeStory() {
-  if (
-    !selectedDocument?._id
-  ) {
-    return;
-  }
-
-
-  /*
-   * Never analyze an older backend snapshot.
-   */
-  if (
-    editorSaveState !==
-    "saved"
-  ) {
-    return;
-  }
-
-
-  try {
-    setStoryAnalysisState(
-      "analyzing"
-    );
-
-    setStoryAnalysisError(
-      ""
-    );
-
-
-    const response =
-      await fetch(
-        `${API_URL.storySync}/documents/${selectedDocument._id}/analyze`,
-        {
-          method:
-            "POST",
-        }
+    try {
+      setStoryAnalysisState(
+        "analyzing"
       );
 
 
-    if (
-      !response.ok
-    ) {
+      setStoryAnalysisError(
+        ""
+      );
+
+
+      const response =
+        await fetch(
+          `${API_URL.storySuggestions}/documents/${selectedDocument._id}/analyze`,
+          {
+            method:
+              "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify({
+                locale:
+                  "auto",
+
+                forceLocale:
+                  false,
+
+                enabledPacks: [
+                  "furry",
+                  "sciFi",
+                ],
+
+                nsfwEnabled:
+                  false,
+              }),
+          }
+        );
+
+
+      if (
+        !response.ok
+      ) {
+        const data =
+          await response
+            .json()
+            .catch(
+              () => ({})
+            );
+
+
+        throw new Error(
+          data.message ||
+            t(
+              "documents.storyAnalysisFailed"
+            )
+        );
+      }
+
+
       const data =
-        await response
-          .json()
-          .catch(
-            () => ({})
-          );
+        await response.json();
 
 
-      throw new Error(
-        data.message ||
+      const analyzedDocument =
+        data.document;
+
+
+      const candidates =
+        Array.isArray(
+          data.candidates
+        )
+          ? data.candidates
+          : [];
+
+
+      setStorySuggestions(
+        candidates
+      );
+
+
+      setStoryAnalysisState(
+        "complete"
+      );
+
+
+      setStoryAnalysisMeta({
+        documentNeedsAnalysis:
+          Boolean(
+            analyzedDocument
+              ?.documentNeedsAnalysis
+          ),
+
+        canonNeedsAnalysis:
+          Boolean(
+            analyzedDocument
+              ?.canonNeedsAnalysis
+          ),
+
+        needsAnalysis:
+          Boolean(
+            analyzedDocument
+              ?.needsAnalysis
+          ),
+
+        worldCanonVersion:
+          analyzedDocument
+            ?.worldCanonVersion ??
+          null,
+
+        lastAnalyzedCanonVersion:
+          analyzedDocument
+            ?.lastAnalyzedCanonVersion ??
+          null,
+      });
+
+
+      if (
+        analyzedDocument
+      ) {
+        setSelectedDocument(
+          (current) => {
+            if (
+              !current ||
+              current._id !==
+                analyzedDocument.id
+            ) {
+              return current;
+            }
+
+
+            return {
+              ...current,
+
+              contentVersion:
+                analyzedDocument.contentVersion ??
+                current.contentVersion,
+
+              syncedVersion:
+                analyzedDocument.syncedVersion ??
+                current.syncedVersion,
+
+              lastAnalyzedCanonVersion:
+                analyzedDocument.lastAnalyzedCanonVersion ??
+                current.lastAnalyzedCanonVersion,
+
+              lastSyncedAt:
+                analyzedDocument.lastSyncedAt ??
+                current.lastSyncedAt,
+            };
+          }
+        );
+
+
+        setTreeNodes(
+          (currentNodes) =>
+            currentNodes.map(
+              (node) => {
+                if (
+                  node.kind !==
+                    "document" ||
+                  node.documentId?._id !==
+                    analyzedDocument.id
+                ) {
+                  return node;
+                }
+
+
+                return {
+                  ...node,
+
+                  documentId: {
+                    ...node.documentId,
+
+                    contentVersion:
+                      analyzedDocument.contentVersion ??
+                      node.documentId
+                        ?.contentVersion,
+
+                    syncedVersion:
+                      analyzedDocument.syncedVersion ??
+                      node.documentId
+                        ?.syncedVersion,
+
+                    lastAnalyzedCanonVersion:
+                      analyzedDocument.lastAnalyzedCanonVersion ??
+                      node.documentId
+                        ?.lastAnalyzedCanonVersion,
+
+                    lastSyncedAt:
+                      analyzedDocument.lastSyncedAt ??
+                      node.documentId
+                        ?.lastSyncedAt,
+                  },
+                };
+              }
+            )
+        );
+      }
+    } catch (error) {
+      console.error(
+        "Story analysis failed:",
+        error
+      );
+
+
+      setStoryAnalysisError(
+        error.message ||
           t(
             "documents.storyAnalysisFailed"
           )
       );
-    }
 
 
-    const data =
-      await response.json();
-
-
-    const analyzedDocument =
-      data.document;
-
-
-    const candidates =
-      Array.isArray(
-        data.candidates
-      )
-        ? data.candidates
-        : [];
-
-
-    setStorySuggestions(
-      candidates
-    );
-
-
-    setStoryAnalysisState(
-      "complete"
-    );
-
-
-    /*
-     * Story Sync updates syncedVersion and
-     * lastSyncedAt, so update the same Document object
-     * used by the rest of the page.
-     */
-    if (
-      analyzedDocument
-    ) {
-      handleDocumentSaved(
-        analyzedDocument
+      setStoryAnalysisState(
+        "error"
       );
     }
-  } catch (error) {
-    console.error(
-      "Story analysis failed:",
-      error
-    );
-
-
-    setStoryAnalysisError(
-      error.message ||
-        t(
-          "documents.storyAnalysisFailed"
-        )
-    );
-
-
-    setStoryAnalysisState(
-      "error"
-    );
   }
-}
 
 
-async function applyStorySuggestion(
-  candidate
-) {
-  if (
-    !candidate?._id
+  async function applyStorySuggestion(
+    candidate,
+    options = {}
   ) {
-    return;
-  }
-
-
-  try {
-    setStorySuggestionActionId(
-      candidate._id
-    );
-
-    setStoryAnalysisError(
-      ""
-    );
-
-
-    const response =
-      await fetch(
-        `${API_URL.storySync}/candidates/${candidate._id}/apply`,
-        {
-          method:
-            "POST",
-        }
+    const candidateId =
+      getStoryCandidateId(
+        candidate
       );
 
 
     if (
-      !response.ok
+      !candidateId
     ) {
+      return false;
+    }
+
+
+    if (
+      candidate.kind ===
+        "event-history"
+    ) {
+      setStoryAnalysisError(
+        t(
+          "documents.timelineNotAvailable"
+        )
+      );
+
+
+      return false;
+    }
+
+
+    try {
+      setStorySuggestionActionId(
+        candidateId
+      );
+
+
+      setStoryAnalysisError(
+        ""
+      );
+
+
+      const requestBody = {
+        ...options,
+      };
+
+
+      const response =
+        await fetch(
+          `${API_URL.storySuggestions}/${candidateId}/apply`,
+          {
+            method:
+              "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify(
+                requestBody
+              ),
+          }
+        );
+
+
       const data =
         await response
           .json()
@@ -2374,87 +2868,142 @@ async function applyStorySuggestion(
           );
 
 
-      throw new Error(
-        data.message ||
+      if (
+        !response.ok
+      ) {
+        if (
+          data.code ===
+            "STORY_SYNC_APPLY_DEFERRED"
+        ) {
+          throw new Error(
+            data.message ||
+              t(
+                "documents.suggestionDeferred"
+              )
+          );
+        }
+
+
+        throw new Error(
+          data.message ||
+            t(
+              "documents.storySuggestionApplyFailed"
+            )
+        );
+      }
+
+
+      if (
+        data.candidate
+      ) {
+        replaceStorySuggestion(
+          data.candidate
+        );
+      }
+
+
+      if (
+        data.recommendedEntityType
+      ) {
+        await loadEntityTypes();
+      }
+
+
+      if (
+        data.canonChanged
+      ) {
+        setStoryAnalysisMeta(
+          (current) => ({
+            ...current,
+
+            canonNeedsAnalysis:
+              true,
+
+            needsAnalysis:
+              true,
+
+            worldCanonVersion:
+              data.canonVersion ??
+              current.worldCanonVersion,
+          })
+        );
+      }
+
+
+      return true;
+    } catch (error) {
+      console.error(
+        "Failed to apply Story Suggestion:",
+        error
+      );
+
+
+      setStoryAnalysisError(
+        error.message ||
           t(
             "documents.storySuggestionApplyFailed"
           )
       );
-    }
 
 
-    const data =
-      await response.json();
-
-
-    if (
-      data.candidate
-    ) {
-      setStorySuggestions(
-        (current) =>
-          current.map(
-            (item) =>
-              item._id ===
-              data.candidate._id
-                ? data.candidate
-                : item
-          )
+      return false;
+    } finally {
+      setStorySuggestionActionId(
+        null
       );
     }
-  } catch (error) {
-    console.error(
-      "Failed to apply Story Suggestion:",
-      error
-    );
-
-
-    setStoryAnalysisError(
-      error.message ||
-        t(
-          "documents.storySuggestionApplyFailed"
-        )
-    );
-  } finally {
-    setStorySuggestionActionId(
-      null
-    );
   }
-}
 
 
-async function ignoreStorySuggestion(
-  candidate
-) {
-  if (
-    !candidate?._id
+  async function editStorySuggestion(
+    candidate,
+    payloadPatch
   ) {
-    return;
-  }
-
-
-  try {
-    setStorySuggestionActionId(
-      candidate._id
-    );
-
-    setStoryAnalysisError(
-      ""
-    );
-
-
-    const response =
-      await fetch(
-        `${API_URL.storySync}/candidates/${candidate._id}/ignore`,
-        {
-          method:
-            "POST",
-        }
+    const candidateId =
+      getStoryCandidateId(
+        candidate
       );
 
 
     if (
-      !response.ok
+      !candidateId
     ) {
+      return false;
+    }
+
+
+    try {
+      setStorySuggestionActionId(
+        candidateId
+      );
+
+
+      setStoryAnalysisError(
+        ""
+      );
+
+
+      const response =
+        await fetch(
+          `${API_URL.storySuggestions}/${candidateId}`,
+          {
+            method:
+              "PATCH",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify({
+                payload:
+                  payloadPatch,
+              }),
+          }
+        );
+
+
       const data =
         await response
           .json()
@@ -2463,56 +3012,143 @@ async function ignoreStorySuggestion(
           );
 
 
-      throw new Error(
-        data.message ||
+      if (
+        !response.ok
+      ) {
+        throw new Error(
+          data.message ||
+            t(
+              "documents.storySuggestionEditFailed"
+            )
+        );
+      }
+
+
+      if (
+        data.candidate
+      ) {
+        replaceStorySuggestion(
+          data.candidate
+        );
+      }
+
+
+      return true;
+    } catch (error) {
+      console.error(
+        "Failed to edit Story Suggestion:",
+        error
+      );
+
+
+      setStoryAnalysisError(
+        error.message ||
+          t(
+            "documents.storySuggestionEditFailed"
+          )
+      );
+
+
+      return false;
+    } finally {
+      setStorySuggestionActionId(
+        null
+      );
+    }
+  }
+
+  async function ignoreStorySuggestion(
+    candidate
+  ) {
+    const candidateId =
+      getStoryCandidateId(
+        candidate
+      );
+
+
+    if (
+      !candidateId
+    ) {
+      return;
+    }
+
+
+    try {
+      setStorySuggestionActionId(
+        candidateId
+      );
+
+
+      setStoryAnalysisError(
+        ""
+      );
+
+
+      const response =
+        await fetch(
+          `${API_URL.storySuggestions}/${candidateId}/ignore`,
+          {
+            method:
+              "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify({}),
+          }
+        );
+
+
+      const data =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
+
+
+      if (
+        !response.ok
+      ) {
+        throw new Error(
+          data.message ||
+            t(
+              "documents.storySuggestionIgnoreFailed"
+            )
+        );
+      }
+
+
+      if (
+        data.candidate
+      ) {
+        replaceStorySuggestion(
+          data.candidate
+        );
+      }
+    } catch (error) {
+      console.error(
+        "Failed to ignore Story Suggestion:",
+        error
+      );
+
+
+      setStoryAnalysisError(
+        error.message ||
           t(
             "documents.storySuggestionIgnoreFailed"
           )
       );
-    }
-
-
-    const data =
-      await response.json();
-
-
-    if (
-      data.candidate
-    ) {
-      setStorySuggestions(
-        (current) =>
-          current.map(
-            (item) =>
-              item._id ===
-              data.candidate._id
-                ? data.candidate
-                : item
-          )
+    } finally {
+      setStorySuggestionActionId(
+        null
       );
     }
-  } catch (error) {
-    console.error(
-      "Failed to ignore Story Suggestion:",
-      error
-    );
-
-
-    setStoryAnalysisError(
-      error.message ||
-        t(
-          "documents.storySuggestionIgnoreFailed"
-        )
-    );
-  } finally {
-    setStorySuggestionActionId(
-      null
-    );
   }
-}
 
-  // ====================================================
-  // Editor Save Callback
-  // ====================================================
 
   function handleDocumentSaved(
     savedDocument
@@ -2524,6 +3160,7 @@ async function ignoreStorySuggestion(
           ? savedDocument
           : current
     );
+
 
     setTreeNodes(
       (currentNodes) =>
@@ -2537,6 +3174,7 @@ async function ignoreStorySuggestion(
             ) {
               return node;
             }
+
 
             return {
               ...node,
@@ -2553,10 +3191,6 @@ async function ignoreStorySuggestion(
   }
 
 
-  // ====================================================
-  // Render Tree
-  // ====================================================
-
   function renderTree(
     parentId = null,
     depth = 0
@@ -2565,6 +3199,7 @@ async function ignoreStorySuggestion(
       getChildren(
         parentId
       );
+
 
     return children.map(
       (node) => (
@@ -2628,10 +3263,6 @@ async function ignoreStorySuggestion(
   }
 
 
-  // ====================================================
-  // Explorer Sidebar
-  // ====================================================
-
   const explorerSidebar = (
     <DndContext
       collisionDetection={
@@ -2658,6 +3289,7 @@ async function ignoreStorySuggestion(
             )}
           </span>
 
+
           <div className="tree-header-actions">
             <button
               type="button"
@@ -2676,6 +3308,7 @@ async function ignoreStorySuggestion(
             >
               📁
             </button>
+
 
             <button
               type="button"
@@ -2715,6 +3348,7 @@ async function ignoreStorySuggestion(
                   )}
             </div>
 
+
             <div className="folder-create-row">
               <input
                 autoFocus
@@ -2733,6 +3367,7 @@ async function ignoreStorySuggestion(
                 }
               />
 
+
               <button
                 type="submit"
                 aria-label={t(
@@ -2741,6 +3376,7 @@ async function ignoreStorySuggestion(
               >
                 ✓
               </button>
+
 
               <button
                 type="button"
@@ -2771,11 +3407,13 @@ async function ignoreStorySuggestion(
                   )}
             </div>
 
+
             <div className="documents-delete-target">
               {
                 deleteTarget.name
               }
             </div>
+
 
             <div className="documents-delete-actions">
               <button
@@ -2789,6 +3427,7 @@ async function ignoreStorySuggestion(
                   "documents.cancel"
                 )}
               </button>
+
 
               <button
                 type="button"
@@ -2831,6 +3470,7 @@ async function ignoreStorySuggestion(
             </div>
           )}
 
+
           {!loading &&
             error && (
               <div className="documents-explorer-message error">
@@ -2839,6 +3479,7 @@ async function ignoreStorySuggestion(
                 }
               </div>
             )}
+
 
           {!loading &&
             !error &&
@@ -2850,6 +3491,7 @@ async function ignoreStorySuggestion(
                 )}
               </div>
             )}
+
 
           {!loading &&
             !error &&
@@ -2873,6 +3515,7 @@ async function ignoreStorySuggestion(
                 : ""}
             </span>
 
+
             <div className="explorer-node-main">
               <span className="explorer-icon">
                 {activeDocumentNode
@@ -2881,6 +3524,7 @@ async function ignoreStorySuggestion(
                   ? "📁"
                   : "▤"}
               </span>
+
 
               <span className="explorer-name">
                 {
@@ -2895,16 +3539,30 @@ async function ignoreStorySuggestion(
   );
 
 
-  // ====================================================
-  // Workspace
-  // ====================================================
+  const documentNeedsAnalysis =
+    Boolean(
+      selectedDocument &&
+      selectedDocument
+        .contentVersion !==
+        selectedDocument
+          .syncedVersion
+    );
+
+
+  const canonNeedsAnalysis =
+    Boolean(
+      storyAnalysisMeta
+        .canonNeedsAnalysis
+    );
+
 
   const storyNeedsSync =
-    selectedDocument &&
-    selectedDocument
-      .contentVersion >
-      selectedDocument
-        .syncedVersion;
+    Boolean(
+      documentNeedsAnalysis ||
+      canonNeedsAnalysis ||
+      storyAnalysisMeta
+        .needsAnalysis
+    );
 
 
   function closeMobileWorkspace() {
@@ -2915,6 +3573,7 @@ async function ignoreStorySuggestion(
 
       return;
     }
+
 
     setSelectedDocument(
       null
@@ -2966,6 +3625,7 @@ async function ignoreStorySuggestion(
                       "documents.title"
                     )}
             </h1>
+
 
             <p>
               {showCreateDocument
@@ -3033,6 +3693,7 @@ async function ignoreStorySuggestion(
                 </span>
               </label>
 
+
               <input
                 autoFocus
                 type="text"
@@ -3075,6 +3736,7 @@ async function ignoreStorySuggestion(
                   )}
                 </button>
 
+
                 <button
                   type="submit"
                   className="save-button"
@@ -3100,20 +3762,26 @@ async function ignoreStorySuggestion(
                   {t(
                     "documents.version"
                   )}{" "}
+
                   {
                     selectedDocument.contentVersion
                   }
 
                   {" · "}
 
-                  {storyNeedsSync
+                  {documentNeedsAnalysis
                     ? t(
                         "documents.storyNeedsAnalysis"
                       )
-                    : t(
-                        "documents.storyAnalyzed"
-                      )}
+                    : canonNeedsAnalysis
+                      ? t(
+                          "documents.canonNeedsAnalysis"
+                        )
+                      : t(
+                          "documents.storyAnalyzed"
+                        )}
                 </div>
+
 
                 <button
                   type="button"
@@ -3180,270 +3848,76 @@ async function ignoreStorySuggestion(
                 }
               />
 
-              {(
-                storyAnalysisState ===
-                  "complete" ||
-                storyAnalysisState ===
-                  "error"
-              ) && (
-                <section className="story-suggestions">
 
-                  <div className="story-suggestions-header">
+              <StorySuggestionsPanel
+                candidates={
+                  storySuggestions
+                }
+                entityTypes={
+                  entityTypes
+                }
+                analysisState={
+                  storyAnalysisState
+                }
+                analysisError={
+                  storyAnalysisError
+                }
+                actionCandidateId={
+                  storySuggestionActionId
+                }
+                language={
+                  i18n.language
+                }
+                t={
+                  t
+                }
+                getConceptLabel={
+                  getConceptLabel
+                }
+                getSuggestionKindLabel={
+                  getSuggestionKindLabel
+                }
+                onApply={
+                  applyStorySuggestion
+                }
+                onIgnore={
+                  ignoreStorySuggestion
+                }
+                onEdit={
+                  editStorySuggestion
+                }
+                onClearError={() =>
+                  setStoryAnalysisError(
+                    ""
+                  )
+                }
+              />
 
-                    <div>
-                      <h3>
-                        {t(
-                          "documents.storySuggestionsTitle"
-                        )}
-                      </h3>
-
-                      <p>
-                        {t(
-                          "documents.storySuggestionsDescription"
-                        )}
-                      </p>
-                    </div>
-
-
-                    <span className="story-suggestions-count">
-                      {
-                        storySuggestions.filter(
-                          (candidate) =>
-                            candidate.status ===
-                            "pending"
-                        ).length
-                      }
-                    </span>
-
-                  </div>
-
-
-                  {storyAnalysisError && (
-                    <div className="story-suggestions-error">
-                      {
-                        storyAnalysisError
-                      }
-                    </div>
-                  )}
-
-
-                  {!storyAnalysisError &&
-                    storySuggestions.length ===
-                      0 && (
-                      <div className="story-suggestions-empty">
-                        {t(
-                          "documents.storySuggestionsEmpty"
-                        )}
-                      </div>
-                    )}
-
-
-                  {storySuggestions.length >
-                    0 && (
-                    <div className="story-suggestions-list">
-
-                      {storySuggestions.map(
-                        (candidate) => {
-                          const subject =
-                            candidate
-                              .subjectEntityId;
-
-                          const object =
-                            candidate
-                              .objectEntityId;
-
-                          const working =
-                            storySuggestionActionId ===
-                            candidate._id;
-
-                          const resolved =
-                            candidate.status !==
-                            "pending";
-
-
-                          return (
-                            <article
-                              key={
-                                candidate._id
-                              }
-                              className={[
-                                "story-suggestion-card",
-
-                                `status-${candidate.status}`,
-                              ].join(" ")}
-                            >
-
-                              <div className="story-suggestion-kind">
-                                {t(
-                                  "documents.relationSuggestion"
-                                )}
-                              </div>
-
-
-                              <div className="story-suggestion-relation">
-
-                                <strong>
-                                  {
-                                    subject?.name ||
-                                    "?"
-                                  }
-                                </strong>
-
-                                <span className="story-suggestion-arrow">
-                                  →
-                                </span>
-
-                                <span className="story-suggestion-label">
-                                  {
-                                    candidate
-                                      .relationLabel ||
-                                    candidate
-                                      .relationType
-                                  }
-                                </span>
-
-                                <span className="story-suggestion-arrow">
-                                  →
-                                </span>
-
-                                <strong>
-                                  {
-                                    object?.name ||
-                                    "?"
-                                  }
-                                </strong>
-
-                              </div>
-
-
-                              {candidate.sourceText && (
-                                <blockquote className="story-suggestion-source">
-                                  “
-                                  {
-                                    candidate.sourceText
-                                  }
-                                  ”
-                                </blockquote>
-                              )}
-
-
-                              <div className="story-suggestion-meta">
-
-                                <span>
-                                  {t(
-                                    "documents.confidence"
-                                  )}
-                                  {" "}
-                                  {
-                                    Math.round(
-                                      (
-                                        candidate.confidence ??
-                                        0
-                                      ) *
-                                        100
-                                    )
-                                  }
-                                  %
-                                </span>
-
-
-                                {candidate.status ===
-                                  "accepted" && (
-                                  <span className="story-suggestion-status accepted">
-                                    ✓{" "}
-                                    {t(
-                                      "documents.suggestionApplied"
-                                    )}
-                                  </span>
-                                )}
-
-
-                                {candidate.status ===
-                                  "ignored" && (
-                                  <span className="story-suggestion-status ignored">
-                                    {t(
-                                      "documents.suggestionIgnored"
-                                    )}
-                                  </span>
-                                )}
-
-                              </div>
-
-
-                              {!resolved && (
-                                <div className="story-suggestion-actions">
-
-                                  <button
-                                    type="button"
-                                    className="story-suggestion-ignore"
-                                    disabled={
-                                      working
-                                    }
-                                    onClick={() =>
-                                      ignoreStorySuggestion(
-                                        candidate
-                                      )
-                                    }
-                                  >
-                                    {t(
-                                      "documents.ignoreSuggestion"
-                                    )}
-                                  </button>
-
-
-                                  <button
-                                    type="button"
-                                    className="story-suggestion-apply"
-                                    disabled={
-                                      working
-                                    }
-                                    onClick={() =>
-                                      applyStorySuggestion(
-                                        candidate
-                                      )
-                                    }
-                                  >
-                                    {working
-                                      ? t(
-                                          "documents.processingSuggestion"
-                                        )
-                                      : t(
-                                          "documents.applySuggestion"
-                                        )}
-                                  </button>
-
-                                </div>
-                              )}
-
-                            </article>
-                          );
-                        }
-                      )}
-
-                    </div>
-                  )}
-
-                </section>
-              )}
 
               <footer className="document-preview-footer">
                 <span>
                   {t(
                     "documents.version"
                   )}{" "}
+
                   {
                     selectedDocument.contentVersion
                   }
                 </span>
 
+
                 <span>
-                  {storyNeedsSync
+                  {documentNeedsAnalysis
                     ? t(
                         "documents.analysisPending"
                       )
-                    : t(
-                        "documents.analysisUpToDate"
-                      )}
+                    : canonNeedsAnalysis
+                      ? t(
+                          "documents.canonAnalysisPending"
+                        )
+                      : t(
+                          "documents.analysisUpToDate"
+                        )}
                 </span>
               </footer>
             </div>
@@ -3458,6 +3932,7 @@ async function ignoreStorySuggestion(
                   "documents.browserTitle"
                 )}
               </h2>
+
 
               <p>
                 {t(
@@ -3502,6 +3977,7 @@ async function ignoreStorySuggestion(
                 )}
               </button>
 
+
               <button
                 type="button"
                 onClick={() => {
@@ -3510,6 +3986,7 @@ async function ignoreStorySuggestion(
                       .node
                       ._id
                   );
+
 
                   setContextMenu(
                     null
@@ -3520,6 +3997,7 @@ async function ignoreStorySuggestion(
                   "documents.newFolderInside"
                 )}
               </button>
+
 
               <div className="documents-context-divider" />
             </>

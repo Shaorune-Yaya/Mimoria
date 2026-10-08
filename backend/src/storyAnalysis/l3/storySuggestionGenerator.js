@@ -388,9 +388,94 @@ function createSelectOptionSuggestion(
 // Create Entity Suggestions
 // ======================================================
 
+function normalizeEntitySuggestionName(
+  value
+) {
+  return String(
+    value || ""
+  )
+    .normalize(
+      "NFKC"
+    )
+    .trim();
+}
+
+
+function isObviouslyNonEntitySuggestion(
+  suggestion
+) {
+  const name =
+    normalizeEntitySuggestionName(
+      suggestion
+        ?.name
+    );
+
+
+  if (
+    !name
+  ) {
+    return true;
+  }
+
+
+  /*
+   * Defensive L3 guard.
+   *
+   * L2 should already resolve discourse/context fragments,
+   * but a user-facing create-entity suggestion must never
+   * be generated from obvious grammatical residue.
+   */
+  if (
+    /^(?:但是|但|而|并且|并|则|又|再|还|还是|一开始|最初|起初|后来|随后|然后|接着|最终|最后|最终还是|最后还是|之后|同时)+$/u.test(
+      name
+    )
+  ) {
+    return true;
+  }
+
+
+  if (
+    /^(?:的是|是的)(?:.+)?$/u.test(
+      name
+    )
+  ) {
+    return true;
+  }
+
+
+  /*
+   * A two-party diplomacy phrase is not one entity.
+   * L2 should split it into subject/object, but keep this
+   * guard so a malformed event cannot leak into the UI.
+   */
+  if (
+    suggestion
+      ?.sourceConcept ===
+      "event.establishDiplomacy" &&
+    /[与和同]/u.test(
+      name
+    )
+  ) {
+    return true;
+  }
+
+
+  return false;
+}
+
+
 function createEntitySuggestion(
   suggestion
 ) {
+  if (
+    isObviouslyNonEntitySuggestion(
+      suggestion
+    )
+  ) {
+    return null;
+  }
+
+
   return {
     suggestionId:
       makeSuggestionId([
@@ -575,6 +660,7 @@ function createRelationSuggestion(
   };
 }
 
+
 // ======================================================
 // Event Redundancy Filtering
 //
@@ -740,6 +826,7 @@ function isRedundantEventSuggestion({
 
   return false;
 }
+
 
 // ======================================================
 // Event Suggestions
@@ -1026,38 +1113,38 @@ function generateStorySuggestions({
   for (
     const candidate of
     eventCandidates
-    ) {
+  ) {
     /*
-    * Do not expose internal event evidence when a more
-    * precise canonical field suggestion already represents
-    * the same information.
-    */
+     * Do not expose internal event evidence when a more
+     * precise canonical field suggestion already represents
+     * the same information.
+     */
     if (
-        isRedundantEventSuggestion({
+      isRedundantEventSuggestion({
         eventCandidate:
-            candidate,
+          candidate,
 
         fieldCandidates,
-        })
+      })
     ) {
-        continue;
+      continue;
     }
 
 
     const suggestion =
-        createEventSuggestion(
+      createEventSuggestion(
         candidate
-        );
+      );
 
 
     if (
-        suggestion
+      suggestion
     ) {
-        suggestions.push(
+      suggestions.push(
         suggestion
-        );
+      );
     }
-    }
+  }
 
 
   // ----------------------------------------------------
@@ -1068,11 +1155,19 @@ function generateStorySuggestions({
     const entity of
     entitySuggestions
   ) {
-    suggestions.push(
+    const suggestion =
       createEntitySuggestion(
         entity
-      )
-    );
+      );
+
+
+    if (
+      suggestion
+    ) {
+      suggestions.push(
+        suggestion
+      );
+    }
   }
 
 
@@ -1084,11 +1179,19 @@ function generateStorySuggestions({
     const entity of
     referenceEntitySuggestions
   ) {
-    suggestions.push(
+    const suggestion =
       createEntitySuggestion(
         entity
-      )
-    );
+      );
+
+
+    if (
+      suggestion
+    ) {
+      suggestions.push(
+        suggestion
+      );
+    }
   }
 
 
@@ -1141,6 +1244,9 @@ module.exports = {
   createSchemaFieldSuggestion,
   createSelectOptionSuggestion,
   createEntitySuggestion,
+  normalizeEntitySuggestionName,
+  isObviouslyNonEntitySuggestion,
+
   createRelationSuggestion,
   createEventSuggestion,
 

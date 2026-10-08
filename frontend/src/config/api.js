@@ -28,6 +28,9 @@ export const API_URL = {
   storySync:
     `${API_BASE_URL}/api/story-sync`,
 
+  storySuggestions:
+    `${API_BASE_URL}/api/story-suggestions`,
+
   health:
     `${API_BASE_URL}/api/health`,
 };

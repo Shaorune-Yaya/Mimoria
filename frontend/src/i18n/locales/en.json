@@ -2,7 +2,6 @@
   "app": {
     "name": "Mimoria"
   },
-
   "worlds": {
     "title": "Your Worlds",
     "subtitle": "Create and manage your worlds here.",
@@ -19,7 +18,6 @@
     "noDescription": "No description yet.",
     "updated": "Updated"
   },
-
   "workspace": {
     "loading": "Loading world...",
     "notFound": "World not found.",
@@ -35,7 +33,6 @@
     "secondaryWorkspace": "Secondary Workspace",
     "closeSecondary": "Close secondary workspace"
   },
-
   "entityTypes": {
     "title": "Entity Types",
     "subtitle": "Define the kinds of information that exist in this world.",
@@ -52,7 +49,6 @@
     "emptyTitle": "No Entity Types Yet",
     "emptyDescription": "Create an entity type to start organizing your world."
   },
-
   "schema": {
     "fields": "Fields",
     "help": "Fields define the information stored by every entity of this type.",
@@ -76,7 +72,6 @@
     "option": "Option",
     "addOption": "+ Add Option"
   },
-
   "fieldTypes": {
     "text": "Text",
     "long-text": "Long Text",
@@ -86,7 +81,6 @@
     "select": "Dropdown",
     "entity-reference": "Entity Reference"
   },
-
   "entities": {
     "title": "Entities",
     "subtitle": "Create and manage the people, places, objects, events, and other information in your world.",
@@ -111,53 +105,39 @@
     "editTitle": "Edit Entity",
     "saveChanges": "Save Changes"
   },
-
   "tree": {
     "newFolder": "New Folder",
     "folderName": "Folder name...",
     "createAtRoot": "Create at root",
     "createInside": "Create inside selected node"
   },
-
   "documents": {
     "title": "Documents",
     "subtitle": "Story and world writing",
-
     "loading": "Loading...",
     "loadError": "Failed to load Documents.",
-
     "root": "Root",
     "emptyTree": "No documents yet.",
-
     "newDocument": "+ New Document",
     "newFolder": "New Folder",
-
     "newDocumentInside": "New Document Inside",
     "newFolderInside": "New Folder Inside",
-
     "createTitle": "Create Document",
     "createDescription": "Create a new writing document in this world.",
     "create": "Create Document",
-
     "documentName": "Document Name",
     "documentNamePlaceholder": "Chapter 1, Prologue, World History...",
     "folderName": "Folder name...",
-
     "createInsideSelectedFolder": "This document will be created inside the selected folder.",
-
     "browserTitle": "Document Browser",
     "browserDescription": "Use the Explorer on the left to organize your writing. Select a document to open it.",
-
     "documentWorkspaceDescription": "Write and organize the story of this world.",
-
     "untitled": "Untitled Document",
     "emptyDocument": "This document is empty.",
-
     "version": "Version",
 
     "storySynced": "Story data synced",
     "storyOutOfSync": "Story data out of sync",
-
     "sync": "Sync",
     "syncPending": "Story Sync pending",
     "syncUpToDate": "Story Sync up to date",
@@ -188,24 +168,21 @@
     "rename": "Rename",
     "delete": "Delete",
     "moreActions": "More actions",
-
     "expand": "Expand",
     "collapse": "Collapse",
-
     "confirm": "Confirm",
     "cancel": "Cancel",
     "close": "Close",
     "confirmDelete": "Delete",
-
     "deleteDocumentConfirm": "Delete this document?",
     "deleteFolderConfirm": "Delete this folder? Its contents will be moved to the parent folder.",
-
     "createFailed": "Failed to create document.",
     "createFolderFailed": "Failed to create folder.",
     "renameFailed": "Failed to rename item.",
     "deleteFailed": "Failed to delete item.",
     "drag": "Drag",
     "moveFailed": "Failed to move document item.",
+
     "entityMentionType": "Entity Type",
     "entityMentionUnknownType": "Unknown Type",
     "entityMentionOpenHint": "Click to open this Entity",
@@ -221,6 +198,9 @@
     "analysisPending": "Story analysis pending",
     "analysisUpToDate": "Current version analyzed",
 
+    "canonNeedsAnalysis": "World data changed — analysis needs refreshing",
+    "canonAnalysisPending": "World data changed — re-analysis required",
+
     "storySuggestionsTitle": "Story Suggestions",
     "storySuggestionsDescription": "These suggestions come from rule-based analysis. Nothing is added to your world until you approve it.",
     "storySuggestionsEmpty": "No sufficiently clear world-data suggestions were found.",
@@ -234,9 +214,81 @@
     "suggestionApplied": "Applied",
     "suggestionIgnored": "Ignored",
 
+    "editSuggestion": "Edit",
+    "saveSuggestionEdit": "Save changes",
+    "cancelSuggestionEdit": "Cancel",
+    "suggestionEdited": "Edited",
+    "storySuggestionEditFailed": "Failed to edit suggestion",
+
+    "editSuggestedValue": "Suggested value",
+    "editSubject": "Subject",
+    "editObject": "Object",
+    "editRelation": "Relation",
+    "editEvent": "Event",
+    "editEntityName": "Entity name",
+    "editFieldName": "Field name",
+    "editFieldType": "Field type",
+    "editOptionValue": "Option value",
+
     "storyAnalysisFailed": "Failed to analyze this document.",
     "storySuggestionsLoadFailed": "Failed to load Story Suggestions.",
     "storySuggestionApplyFailed": "Failed to apply this suggestion.",
-    "storySuggestionIgnoreFailed": "Failed to ignore this suggestion."
+    "storySuggestionIgnoreFailed": "Failed to ignore this suggestion.",
+    "entityTypesLoadFailed": "Failed to load entity types.",
+
+    "recommendedEntityType": "Recommended Entity Type",
+    "recommendedTypeExists": "This type already exists in this world",
+    "recommendedTypeMissing": "This type has not been created in this world yet",
+    "createRecommendedTypeAndApply": "Create “{{type}}” and apply",
+    "useRecommendedTypeAndApply": "Use “{{type}}” and apply",
+    "orChooseExistingType": "Or choose an existing type",
+    "useSelectedTypeAndApply": "Use selected type and apply",
+    "keepRecommendedEntityType": "Keep recommended type",
+
+    "timelineNotAvailable": "Timeline persistence is not implemented yet, so this historical event cannot be applied.",
+    "timelinePending": "Timeline unavailable",
+
+    "selectEntityTypeBeforeApply": "Select an Entity Type before creating this entity.",
+    "suggestionDeferred": "This suggestion cannot be applied yet.",
+
+    "createEntityName": "New Entity",
+    "entityTypeForSuggestion": "Entity Type",
+    "selectEntityType": "Select an Entity Type...",
+    "suggestedEntityType": "Suggested type:",
+
+    "createFieldLabel": "Create field",
+    "addSelectOption": "Add option",
+
+    "suggestionKinds": {
+      "fieldUpdate": "Field Update",
+      "relationUpdate": "Relation Update",
+      "eventHistory": "Historical Event",
+      "createEntity": "Create Entity",
+      "createSchemaField": "Create Field",
+      "createSelectOption": "Add Option",
+      "unknown": "Story Suggestion"
+    },
+
+    "concepts": {
+      "field_age": "Age",
+      "field_occupation": "Occupation",
+      "field_birthplace": "Birthplace",
+
+      "relation_member_of": "Member of",
+      "relation_diplomatic_relations_with": "Diplomatic relations",
+
+      "event_establishDiplomacy": "Establish diplomacy",
+      "event_join": "Join",
+      "event_leave": "Leave",
+
+      "entityType_character": "Character",
+      "entityType_person": "Person",
+      "entityType_church": "Church",
+      "entityType_guild": "Guild",
+      "entityType_politicalParty": "Political Party",
+      "entityType_order": "Order",
+      "entityType_religion": "Religion",
+      "entityType_cult": "Cult"
+    }
   }
 }

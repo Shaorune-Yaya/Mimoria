@@ -1380,3 +1380,123 @@ button.danger {
       9px;
   }
 }
+
+.story-suggestion-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.story-suggestion-edited-badge {
+  padding: 2px 7px;
+  border: 1px solid var(--border-color, #354052);
+  border-radius: 999px;
+  font-size: 11px;
+  opacity: 0.78;
+}
+
+.story-recommended-type {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid #344155;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.story-recommended-type-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.story-recommended-type-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.story-recommended-type-state {
+  font-size: 12px;
+  opacity: 0.68;
+}
+
+.story-manual-type {
+  display: grid;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.story-suggestion-select,
+.story-suggestion-edit-grid input,
+.story-suggestion-edit-grid select {
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid #354052;
+  border-radius: 6px;
+  background: #11161d;
+  color: #e7edf5;
+  font: inherit;
+  outline: none;
+}
+
+.story-suggestion-select:focus,
+.story-suggestion-edit-grid input:focus,
+.story-suggestion-edit-grid select:focus {
+  border-color: #6784a8;
+}
+
+.story-suggestion-select option,
+.story-suggestion-edit-grid select option {
+  background: #151b23;
+  color: #e7edf5;
+}
+
+.story-suggestion-edit-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.story-suggestion-edit-grid label {
+  display: grid;
+  gap: 5px;
+}
+
+.story-suggestion-recommended-apply,
+.story-suggestion-manual-apply,
+.story-suggestion-edit {
+  min-height: 32px;
+  padding: 6px 10px;
+  border: 1px solid #42536a;
+  border-radius: 6px;
+  background: #172231;
+  color: #dbeaff;
+  cursor: pointer;
+}
+
+.story-suggestion-recommended-apply:hover,
+.story-suggestion-manual-apply:hover,
+.story-suggestion-edit:hover {
+  background: #1d2c3e;
+}
+
+.story-suggestion-recommended-apply:disabled,
+.story-suggestion-manual-apply:disabled,
+.story-suggestion-edit:disabled {
+  opacity: 0.48;
+  cursor: default;
+}
+
+.story-suggestion-meta-spaced {
+  margin-top: 8px;
+}
+
+.story-suggestion-card.is-editing {
+  border-color: #536a89;
+}

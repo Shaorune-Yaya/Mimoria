@@ -1,55 +1,115 @@
-const dns = require("dns");
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
+const dns =
+  require(
+    "dns"
+  );
 
-const worldRoutes = require(
-  "./routes/worldRoutes"
-);
+const express =
+  require(
+    "express"
+  );
 
-const entityTypeRoutes = require(
-  "./routes/entityTypeRoutes"
-);
+const cors =
+  require(
+    "cors"
+  );
 
-const entityRoutes = require(
-  "./routes/entityRoutes"
-);
+const cookieParser =
+  require(
+    "cookie-parser"
+  );
 
-const treeRoutes = require(
-  "./routes/treeRoutes"
-);
+const mongoose =
+  require(
+    "mongoose"
+  );
 
-const documentRoutes = require(
-  "./routes/documentRoutes"
-);
-
-const documentTreeRoutes = require(
-  "./routes/documentTreeRoutes"
-);
-
-const relationRoutes = require(
-  "./routes/relationRoutes"
-);
-
-const storySyncRoutes = require(
-  "./routes/storySyncRoutes"
-);
+const dotenv =
+  require(
+    "dotenv"
+  );
 
 
-// Load environment variables before starting the application.
+// ======================================================
+// Environment
+// ======================================================
+
 dotenv.config();
 
 
-// Use public DNS servers for MongoDB Atlas SRV resolution.
+// ======================================================
+// DNS
+// ======================================================
+
 dns.setServers([
   "1.1.1.1",
   "8.8.8.8",
 ]);
 
 
+// ======================================================
+// Routes
+// ======================================================
+
+const worldRoutes =
+  require(
+    "./routes/worldRoutes"
+  );
+
+const entityTypeRoutes =
+  require(
+    "./routes/entityTypeRoutes"
+  );
+
+const entityRoutes =
+  require(
+    "./routes/entityRoutes"
+  );
+
+const treeRoutes =
+  require(
+    "./routes/treeRoutes"
+  );
+
+const documentRoutes =
+  require(
+    "./routes/documentRoutes"
+  );
+
+const documentTreeRoutes =
+  require(
+    "./routes/documentTreeRoutes"
+  );
+
+const relationRoutes =
+  require(
+    "./routes/relationRoutes"
+  );
+
+const storySyncRoutes =
+  require(
+    "./routes/storySyncRoutes"
+  );
+
+const storySuggestionRoutes =
+  require(
+    "./routes/storySuggestionRoutes"
+  );
+
+const {
+  router:
+    authRoutes,
+} = require(
+  "./routes/authRoutes"
+);
+
+
+// ======================================================
+// Application
+// ======================================================
+
 const app =
   express();
+
 
 const PORT =
   process.env.PORT ||
@@ -61,16 +121,46 @@ const PORT =
 // ======================================================
 
 app.use(
-  cors()
+  cors({
+    origin:
+      process.env
+        .FRONTEND_ORIGIN ||
+      "http://localhost:5173",
+
+    credentials:
+      true,
+  })
 );
 
+
 app.use(
-  express.json()
+  express.json({
+    limit:
+      "2mb",
+  })
+);
+
+
+app.use(
+  cookieParser()
 );
 
 
 // ======================================================
-// API Routes
+// Authentication API
+// ======================================================
+
+app.use(
+  "/api/auth",
+  authRoutes
+);
+
+
+// ======================================================
+// Existing API Routes
+//
+// These still use getDevUser() during the migration.
+// They will be protected by requireAuth in a later step.
 // ======================================================
 
 app.use(
@@ -78,39 +168,52 @@ app.use(
   worldRoutes
 );
 
+
 app.use(
   "/api/entity-types",
   entityTypeRoutes
 );
+
 
 app.use(
   "/api/entities",
   entityRoutes
 );
 
+
 app.use(
   "/api/tree",
   treeRoutes
 );
+
 
 app.use(
   "/api/documents",
   documentRoutes
 );
 
+
 app.use(
   "/api/document-tree",
   documentTreeRoutes
 );
+
 
 app.use(
   "/api/relations",
   relationRoutes
 );
 
+
 app.use(
   "/api/story-sync",
   storySyncRoutes
+);
+
+
+app.use(
+  "/api/story-suggestions",
+  storySuggestionRoutes
 );
 
 
@@ -120,6 +223,7 @@ app.use(
 
 app.get(
   "/api/health",
+
   (
     req,
     res
@@ -161,6 +265,26 @@ async function startServer() {
     }
 
 
+    if (
+      !process.env
+        .JWT_SECRET
+    ) {
+      throw new Error(
+        "JWT_SECRET is missing from the environment configuration"
+      );
+    }
+
+
+    if (
+      !process.env
+        .EMAIL_CODE_SECRET
+    ) {
+      throw new Error(
+        "EMAIL_CODE_SECRET is missing from the environment configuration"
+      );
+    }
+
+
     await mongoose.connect(
       process.env
         .MONGODB_URI
@@ -174,16 +298,24 @@ async function startServer() {
 
     app.listen(
       PORT,
+
       () => {
         console.log(
           `Mimoria API running at http://localhost:${PORT}`
         );
+
+        console.log(
+          `Email mode: ${process.env.EMAIL_MODE || "console"}`
+        );
       }
     );
-  } catch (error) {
+  } catch (
+    error
+  ) {
     console.error(
       "Failed to start Mimoria API:"
     );
+
 
     console.error(
       error

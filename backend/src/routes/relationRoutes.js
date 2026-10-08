@@ -2,15 +2,24 @@ const express = require(
   "express"
 );
 
+
 const Relation = require(
   "../models/Relation"
 );
+
 
 const {
   getDevUser,
   getOwnedWorld,
 } = require(
   "../utils/devUser"
+);
+
+
+const {
+  bumpWorldCanonVersion,
+} = require(
+  "../services/worldCanonVersionService"
 );
 
 
@@ -43,7 +52,9 @@ router.get(
         );
 
 
-      if (!world) {
+      if (
+        !world
+      ) {
         return res
           .status(404)
           .json({
@@ -91,6 +102,9 @@ router.get(
         .json({
           message:
             "Failed to load relations.",
+
+          error:
+            error.message,
         });
     }
   }
@@ -121,7 +135,9 @@ router.delete(
         );
 
 
-      if (!relation) {
+      if (
+        !relation
+      ) {
         return res
           .status(404)
           .json({
@@ -138,7 +154,9 @@ router.delete(
         );
 
 
-      if (!world) {
+      if (
+        !world
+      ) {
         return res
           .status(403)
           .json({
@@ -151,9 +169,17 @@ router.delete(
       await relation.deleteOne();
 
 
+      const canonVersion =
+        await bumpWorldCanonVersion(
+          world._id
+        );
+
+
       res.json({
         message:
           "Relation deleted.",
+
+        canonVersion,
       });
     } catch (error) {
       console.error(
@@ -167,11 +193,18 @@ router.delete(
         .json({
           message:
             "Failed to delete relation.",
+
+          error:
+            error.message,
         });
     }
   }
 );
 
+
+// ======================================================
+// Exports
+// ======================================================
 
 module.exports =
   router;
