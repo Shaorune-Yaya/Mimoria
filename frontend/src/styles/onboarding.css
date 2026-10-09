@@ -1,0 +1,1216 @@
+/* ======================================================
+   Onboarding Root
+   ====================================================== */
+
+.onboarding-root {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 100000;
+
+  pointer-events: none;
+}
+
+
+/* ======================================================
+   Backdrop
+   ====================================================== */
+
+.onboarding-welcome-backdrop,
+.onboarding-blocker {
+  position: fixed;
+
+  background:
+    rgba(
+      5,
+      8,
+      12,
+      0.82
+    );
+
+  backdrop-filter:
+    blur(1px);
+
+  pointer-events: auto;
+}
+
+
+.onboarding-welcome-backdrop {
+  inset: 0;
+}
+
+
+/* ======================================================
+   Focus Area
+   ====================================================== */
+
+.onboarding-focus-area {
+  position: fixed;
+
+  z-index: 100001;
+
+  pointer-events: none;
+
+  border:
+    1px solid
+    rgba(
+      107,
+      139,
+      168,
+      0.35
+    );
+
+  border-radius:
+    10px;
+
+  box-shadow:
+    0 0 26px
+    rgba(
+      71,
+      108,
+      143,
+      0.08
+    );
+}
+
+
+/* ======================================================
+   Spotlight
+   ====================================================== */
+
+.onboarding-spotlight {
+  position: fixed;
+
+  z-index: 100002;
+
+  pointer-events: none;
+
+  border:
+    2px solid
+    rgba(
+      135,
+      190,
+      240,
+      0.95
+    );
+
+  border-radius:
+    8px;
+
+  box-shadow:
+    0 0 0 2px
+    rgba(
+      89,
+      141,
+      189,
+      0.16
+    ),
+    0 0 26px
+    rgba(
+      92,
+      155,
+      213,
+      0.42
+    );
+
+  animation:
+    onboarding-pulse
+    1.8s ease-in-out
+    infinite;
+}
+
+
+@keyframes onboarding-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px
+      rgba(
+        89,
+        141,
+        189,
+        0.13
+      ),
+      0 0 20px
+      rgba(
+        92,
+        155,
+        213,
+        0.32
+      );
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 4px
+      rgba(
+        89,
+        141,
+        189,
+        0.2
+      ),
+      0 0 34px
+      rgba(
+        92,
+        155,
+        213,
+        0.55
+      );
+  }
+}
+
+
+/* ======================================================
+   Interaction Lock
+   ====================================================== */
+
+.onboarding-interaction-blocker {
+  position: fixed;
+
+  z-index: 100003;
+
+  background:
+    transparent;
+
+  pointer-events: auto;
+
+  cursor: default;
+}
+
+
+/* ======================================================
+   Target Interaction Surface
+   ====================================================== */
+
+.onboarding-target-interaction {
+  position: fixed;
+
+  z-index: 100004;
+
+  margin: 0;
+  padding: 0;
+
+  background:
+    transparent;
+
+  border:
+    none;
+
+  border-radius:
+    8px;
+
+  outline:
+    none;
+
+  cursor:
+    pointer;
+
+  pointer-events:
+    auto;
+}
+
+
+.onboarding-target-interaction:hover {
+  background:
+    rgba(
+      120,
+      183,
+      238,
+      0.035
+    );
+}
+
+
+.onboarding-target-interaction:focus-visible {
+  outline:
+    2px solid
+    rgba(
+      139,
+      194,
+      242,
+      0.9
+    );
+
+  outline-offset:
+    2px;
+}
+
+
+/* ======================================================
+   Top Controls
+   ====================================================== */
+
+.onboarding-top-controls {
+  position: fixed;
+
+  top:
+    18px;
+
+  right:
+    20px;
+
+  z-index:
+    100020;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    10px;
+
+  pointer-events:
+    auto;
+}
+
+
+.onboarding-step-counter {
+  padding:
+    7px 10px;
+
+  background:
+    rgba(
+      20,
+      25,
+      32,
+      0.96
+    );
+
+  color:
+    #9ba7b5;
+
+  border:
+    1px solid
+    #3a4552;
+
+  border-radius:
+    6px;
+
+  font-size:
+    10px;
+}
+
+
+.onboarding-skip-button {
+  position: fixed;
+
+  top:
+    18px;
+
+  right:
+    20px;
+
+  z-index:
+    100020;
+
+  min-height:
+    34px;
+
+  padding:
+    7px 13px;
+
+  background:
+    rgba(
+      24,
+      29,
+      36,
+      0.98
+    );
+
+  color:
+    #d6dce4;
+
+  border:
+    1px solid
+    #485462;
+
+  border-radius:
+    6px;
+
+  cursor:
+    pointer;
+
+  pointer-events:
+    auto;
+}
+
+
+.onboarding-skip-button:hover {
+  background:
+    #252d37;
+
+  color:
+    #ffffff;
+
+  border-color:
+    #607185;
+}
+
+
+.onboarding-skip-inline {
+  position:
+    static;
+}
+
+
+/* ======================================================
+   Welcome
+   ====================================================== */
+
+.onboarding-welcome-card {
+  position: fixed;
+
+  top:
+    50%;
+
+  left:
+    50%;
+
+  z-index:
+    100010;
+
+  width:
+    min(
+      520px,
+      calc(
+        100vw -
+        36px
+      )
+    );
+
+  padding:
+    32px;
+
+  transform:
+    translate(
+      -50%,
+      -50%
+    );
+
+  background:
+    #191e25;
+
+  color:
+    #edf2f7;
+
+  border:
+    1px solid
+    #3c4857;
+
+  border-radius:
+    12px;
+
+  box-shadow:
+    0 28px 80px
+    rgba(
+      0,
+      0,
+      0,
+      0.5
+    );
+
+  pointer-events:
+    auto;
+}
+
+
+.onboarding-beta-badge {
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  min-height:
+    24px;
+
+  margin-bottom:
+    17px;
+
+  padding:
+    3px 9px;
+
+  background:
+    #273c51;
+
+  color:
+    #a9cdec;
+
+  border:
+    1px solid
+    #3b5875;
+
+  border-radius:
+    5px;
+
+  font-size:
+    9px;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    0.13em;
+}
+
+
+.onboarding-welcome-card h1 {
+  margin:
+    0 0 12px;
+
+  font-size:
+    27px;
+}
+
+
+.onboarding-welcome-card p {
+  margin:
+    0;
+
+  color:
+    #9da8b5;
+
+  font-size:
+    13px;
+
+  line-height:
+    1.75;
+}
+
+
+.onboarding-welcome-actions {
+  display:
+    flex;
+
+  justify-content:
+    flex-end;
+
+  margin-top:
+    26px;
+}
+
+
+/* ======================================================
+   Coach Mark
+   ====================================================== */
+
+.onboarding-coachmark {
+  position:
+    fixed;
+
+  z-index:
+    100010;
+
+  min-width:
+    0;
+
+  max-width:
+    none;
+
+  /*
+   * Critical for responsive width.
+   *
+   * JS width now includes:
+   * - content
+   * - padding
+   * - border
+   *
+   * Without border-box, mobile coach marks become wider
+   * than the viewport.
+   */
+  box-sizing:
+    border-box;
+
+  padding:
+    18px;
+
+  background:
+    #192028;
+
+  color:
+    #edf2f7;
+
+  border:
+    1px solid
+    #4a6075;
+
+  border-radius:
+    9px;
+
+  box-shadow:
+    0 18px 48px
+    rgba(
+      0,
+      0,
+      0,
+      0.48
+    );
+
+  pointer-events:
+    auto;
+
+  overflow:
+    visible;
+}
+
+
+/* ======================================================
+   Dynamic Coach Mark Arrow
+
+   IMPORTANT:
+
+   The arrow does NOT default to the middle of an edge.
+
+   Horizontal edges:
+   - prefer upper-left / upper-right style positions
+
+   Vertical edges:
+   - prefer near the top
+
+   JS can override these positions through:
+   --onboarding-arrow-x
+   --onboarding-arrow-y
+   ====================================================== */
+
+.onboarding-coachmark::before {
+  content:
+    "";
+
+  position:
+    absolute;
+
+  width:
+    10px;
+
+  height:
+    10px;
+
+  background:
+    #192028;
+
+  transform:
+    rotate(
+      45deg
+    );
+
+  pointer-events:
+    none;
+}
+
+
+/* ======================================================
+   Bubble BELOW target
+   Arrow on TOP edge
+   ====================================================== */
+
+.onboarding-coachmark--bottom::before {
+  top:
+    -6px;
+
+  left:
+    calc(
+      var(
+        --onboarding-arrow-x,
+        30px
+      ) -
+      5px
+    );
+
+  border-left:
+    1px solid
+    #4a6075;
+
+  border-top:
+    1px solid
+    #4a6075;
+}
+
+
+/* ======================================================
+   Bubble ABOVE target
+   Arrow on BOTTOM edge
+   ====================================================== */
+
+.onboarding-coachmark--top::before {
+  bottom:
+    -6px;
+
+  left:
+    calc(
+      var(
+        --onboarding-arrow-x,
+        30px
+      ) -
+      5px
+    );
+
+  border-right:
+    1px solid
+    #4a6075;
+
+  border-bottom:
+    1px solid
+    #4a6075;
+}
+
+
+/* ======================================================
+   Bubble RIGHT of target
+   Arrow on LEFT edge
+   ====================================================== */
+
+.onboarding-coachmark--right::before {
+  left:
+    -6px;
+
+  top:
+    calc(
+      var(
+        --onboarding-arrow-y,
+        30px
+      ) -
+      5px
+    );
+
+  border-left:
+    1px solid
+    #4a6075;
+
+  border-bottom:
+    1px solid
+    #4a6075;
+}
+
+
+/* ======================================================
+   Bubble LEFT of target
+   Arrow on RIGHT edge
+   ====================================================== */
+
+.onboarding-coachmark--left::before {
+  right:
+    -6px;
+
+  top:
+    calc(
+      var(
+        --onboarding-arrow-y,
+        30px
+      ) -
+      5px
+    );
+
+  border-right:
+    1px solid
+    #4a6075;
+
+  border-top:
+    1px solid
+    #4a6075;
+}
+
+
+/* ======================================================
+   Coach Mark Content
+   ====================================================== */
+
+.onboarding-coachmark-eyebrow {
+  margin-bottom:
+    6px;
+
+  color:
+    #7da8cf;
+
+  font-size:
+    9px;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    0.1em;
+
+  text-transform:
+    uppercase;
+}
+
+
+.onboarding-coachmark h2 {
+  margin:
+    0 0 7px;
+
+  color:
+    #eef3f8;
+
+  font-size:
+    15px;
+}
+
+
+.onboarding-coachmark p {
+  margin:
+    0;
+
+  color:
+    #9ca8b5;
+
+  font-size:
+    11px;
+
+  line-height:
+    1.6;
+}
+
+
+.onboarding-click-hint {
+  margin-top:
+    14px;
+
+  color:
+    #93badf;
+
+  font-size:
+    10px;
+}
+
+
+/* ======================================================
+   Buttons
+   ====================================================== */
+
+.onboarding-primary-button,
+.onboarding-secondary-button {
+  position:
+    relative;
+
+  z-index:
+    2;
+
+  min-height:
+    35px;
+
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  padding:
+    7px 14px;
+
+  border-radius:
+    6px;
+
+  font-size:
+    11px;
+
+  font-weight:
+    600;
+
+  cursor:
+    pointer;
+
+  pointer-events:
+    auto;
+}
+
+
+.onboarding-primary-button {
+  background:
+    #dce7f1;
+
+  color:
+    #17202a;
+
+  border:
+    1px solid
+    #dce7f1;
+
+  box-shadow:
+    0 0 18px
+    rgba(
+      158,
+      203,
+      242,
+      0.18
+    );
+}
+
+
+.onboarding-primary-button:hover {
+  background:
+    #f1f7fc;
+
+  border-color:
+    #f1f7fc;
+}
+
+
+.onboarding-secondary-button {
+  background:
+    transparent;
+
+  color:
+    #a7b1bd;
+
+  border:
+    1px solid
+    #3d4855;
+}
+
+
+.onboarding-secondary-button:hover {
+  background:
+    #252c35;
+
+  color:
+    #ffffff;
+}
+
+
+.onboarding-coachmark-actions {
+  position:
+    relative;
+
+  z-index:
+    2;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    flex-end;
+
+  gap:
+    8px;
+
+  margin-top:
+    15px;
+
+  pointer-events:
+    auto;
+}
+
+
+/* ======================================================
+   Loading
+   ====================================================== */
+
+.onboarding-loading-card {
+  position:
+    fixed;
+
+  top:
+    50%;
+
+  left:
+    50%;
+
+  z-index:
+    100010;
+
+  transform:
+    translate(
+      -50%,
+      -50%
+    );
+
+  padding:
+    14px 18px;
+
+  background:
+    #191e25;
+
+  color:
+    #aeb9c5;
+
+  border:
+    1px solid
+    #3c4857;
+
+  border-radius:
+    8px;
+
+  font-size:
+    11px;
+
+  pointer-events:
+    auto;
+}
+
+
+/* ======================================================
+   Debug Button
+   ====================================================== */
+
+.onboarding-debug-button {
+  position:
+    fixed;
+
+  right:
+    18px;
+
+  bottom:
+    18px;
+
+  z-index:
+    1000;
+
+  padding:
+    7px 10px;
+
+  background:
+    #26313d;
+
+  color:
+    #b8cce0;
+
+  border:
+    1px solid
+    #3f5266;
+
+  border-radius:
+    6px;
+
+  cursor:
+    pointer;
+}
+
+
+/* ======================================================
+   Tablet / Narrow Desktop
+   ====================================================== */
+
+@media (
+  min-width: 601px
+) and (
+  max-width: 1000px
+) {
+  .onboarding-coachmark {
+    padding:
+      17px;
+  }
+
+
+  .onboarding-coachmark h2 {
+    font-size:
+      15px;
+  }
+
+
+  .onboarding-coachmark p {
+    font-size:
+      11px;
+  }
+}
+
+
+/* ======================================================
+   Mobile
+   ====================================================== */
+
+@media (
+  max-width: 600px
+) {
+  .onboarding-top-controls {
+    top:
+      10px;
+
+    right:
+      10px;
+
+    gap:
+      8px;
+  }
+
+
+  .onboarding-step-counter {
+    padding:
+      6px 9px;
+
+    font-size:
+      9px;
+  }
+
+
+  .onboarding-skip-button {
+    top:
+      10px;
+
+    right:
+      10px;
+
+    min-height:
+      32px;
+
+    padding:
+      6px 11px;
+  }
+
+
+  .onboarding-welcome-card {
+    width:
+      calc(
+        100vw -
+        24px
+      );
+
+    padding:
+      24px 20px;
+  }
+
+
+  .onboarding-welcome-card h1 {
+    font-size:
+      22px;
+  }
+
+
+  .onboarding-welcome-card p {
+    font-size:
+      12px;
+  }
+
+
+  .onboarding-coachmark {
+  /*
+   * Actual width is calculated by OnboardingOverlay.
+   *
+   * This prevents another CSS width rule from fighting
+   * with the runtime positioning logic.
+   */
+  width:
+    auto;
+
+  min-width:
+    0;
+
+  max-width:
+    calc(
+      100vw -
+      24px
+    );
+
+  box-sizing:
+    border-box;
+
+  padding:
+    16px;
+
+  border-radius:
+    9px;
+
+  overflow-wrap:
+    anywhere;
+
+  word-break:
+    normal;
+}
+
+
+  .onboarding-coachmark h2 {
+    margin-bottom:
+      9px;
+
+    font-size:
+      18px;
+
+    line-height:
+      1.3;
+  }
+
+
+  .onboarding-coachmark p {
+    font-size:
+      14px;
+
+    line-height:
+      1.5;
+  }
+
+  .onboarding-coachmark p,
+  .onboarding-coachmark h2,
+  .onboarding-click-hint {
+    max-width:
+      100%;
+
+    overflow-wrap:
+      anywhere;
+  }
+
+
+  .onboarding-coachmark-eyebrow {
+    font-size:
+      9px;
+  }
+
+
+  .onboarding-click-hint {
+    font-size:
+      10px;
+  }
+
+
+  .onboarding-primary-button,
+  .onboarding-secondary-button {
+    min-height:
+      38px;
+
+    padding:
+      8px 14px;
+
+    font-size:
+      12px;
+  }
+
+
+  /*
+   * On mobile, arrows still stay near corners rather
+   * than being centered.
+   */
+
+  .onboarding-coachmark--bottom::before,
+  .onboarding-coachmark--top::before {
+    left:
+      calc(
+        var(
+          --onboarding-arrow-x,
+          28px
+        ) -
+        5px
+      );
+  }
+
+
+  .onboarding-coachmark--left::before,
+  .onboarding-coachmark--right::before {
+    top:
+      calc(
+        var(
+          --onboarding-arrow-y,
+          28px
+        ) -
+        5px
+      );
+  }
+}
+
+.onboarding-skip-button:disabled {
+  opacity:
+    0.55;
+
+  cursor:
+    wait;
+
+  pointer-events:
+    none;
+}

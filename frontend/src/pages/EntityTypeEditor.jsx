@@ -12,67 +12,150 @@ import {
 } from "react-i18next";
 
 import WorldLayout from "../components/WorldLayout";
-import { API_URL } from "../config/api";
-import { apiFetch } from "../utils/apiFetch";
+
+import {
+  API_URL,
+} from "../config/api";
+
+import {
+  apiFetch,
+} from "../utils/apiFetch";
+
+import {
+  useOnboarding,
+} from "../onboarding/OnboardingContext";
+
 
 function EntityTypeEditor() {
   const {
     worldId,
     entityTypeId,
-  } = useParams();
+  } =
+    useParams();
 
-  const { t } =
+
+  const {
+    t,
+  } =
     useTranslation();
+
+
+  const {
+    currentStep,
+
+    nextStep,
+
+    setTutorialFieldId,
+  } =
+    useOnboarding();
+
+
+  // ====================================================
+  // State
+  // ====================================================
 
   const [
     world,
     setWorld,
-  ] = useState(null);
+  ] =
+    useState(
+      null
+    );
+
 
   const [
     entityType,
     setEntityType,
-  ] = useState(null);
+  ] =
+    useState(
+      null
+    );
+
 
   const [
     entityTypes,
     setEntityTypes,
-  ] = useState([]);
+  ] =
+    useState(
+      []
+    );
+
 
   const [
     showFieldForm,
     setShowFieldForm,
-  ] = useState(false);
+  ] =
+    useState(
+      false
+    );
+
 
   const [
     editingFieldId,
     setEditingFieldId,
-  ] = useState(null);
+  ] =
+    useState(
+      null
+    );
+
 
   const [
     fieldLabel,
     setFieldLabel,
-  ] = useState("");
+  ] =
+    useState(
+      ""
+    );
+
 
   const [
     fieldType,
     setFieldType,
-  ] = useState("text");
+  ] =
+    useState(
+      "text"
+    );
+
 
   const [
     fieldRequired,
     setFieldRequired,
-  ] = useState(false);
+  ] =
+    useState(
+      false
+    );
+
 
   const [
     referenceEntityTypeId,
     setReferenceEntityTypeId,
-  ] = useState("");
+  ] =
+    useState(
+      ""
+    );
+
 
   const [
     selectOptions,
     setSelectOptions,
-  ] = useState([""]);
+  ] =
+    useState([
+      "",
+    ]);
+
+
+  const [
+    tutorialCreatedFieldId,
+    setTutorialCreatedFieldId,
+  ] =
+    useState(
+      null
+    );
+
+
+  // ====================================================
+  // Fetch World
+  // ====================================================
 
   async function fetchWorld() {
     try {
@@ -81,14 +164,24 @@ function EntityTypeEditor() {
           `${API_URL.worlds}/${worldId}`
         );
 
-      setWorld(data);
-    } catch (error) {
+
+      setWorld(
+        data
+      );
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to fetch world:",
         error
       );
     }
   }
+
+
+  // ====================================================
+  // Fetch Entity Type
+  // ====================================================
 
   async function fetchEntityType() {
     try {
@@ -97,14 +190,24 @@ function EntityTypeEditor() {
           `${API_URL.entityTypes}/${entityTypeId}`
         );
 
-      setEntityType(data);
-    } catch (error) {
+
+      setEntityType(
+        data
+      );
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to fetch entity type:",
         error
       );
     }
   }
+
+
+  // ====================================================
+  // Fetch Entity Types
+  // ====================================================
 
   async function fetchEntityTypes() {
     try {
@@ -113,35 +216,209 @@ function EntityTypeEditor() {
           `${API_URL.entityTypes}/world/${worldId}`
         );
 
+
       setEntityTypes(
-        Array.isArray(data)
+        Array.isArray(
+          data
+        )
           ? data
           : []
       );
-    } catch (error) {
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to fetch entity types:",
         error
       );
 
-      setEntityTypes([]);
+
+      setEntityTypes(
+        []
+      );
     }
   }
 
+
+  // ====================================================
+  // Reset Field Form
+  // ====================================================
+
   function resetFieldForm() {
-    setEditingFieldId(null);
-    setFieldLabel("");
-    setFieldType("text");
-    setFieldRequired(false);
-    setReferenceEntityTypeId("");
-    setSelectOptions([""]);
-    setShowFieldForm(false);
+    setEditingFieldId(
+      null
+    );
+
+
+    setFieldLabel(
+      ""
+    );
+
+
+    setFieldType(
+      "text"
+    );
+
+
+    setFieldRequired(
+      false
+    );
+
+
+    setReferenceEntityTypeId(
+      ""
+    );
+
+
+    setSelectOptions([
+      "",
+    ]);
+
+
+    setShowFieldForm(
+      false
+    );
   }
+
+
+  // ====================================================
+  // Start Add Field
+  // ====================================================
 
   function startAddField() {
     resetFieldForm();
-    setShowFieldForm(true);
+
+
+    const isTutorialStep =
+      currentStep?.id ===
+      "open-add-field";
+
+
+    if (
+      isTutorialStep
+    ) {
+      setFieldLabel(
+        t(
+          "onboarding.tutorialFieldName"
+        )
+      );
+
+
+      setFieldType(
+        "number"
+      );
+
+
+      setFieldRequired(
+        false
+      );
+    }
+
+
+    setShowFieldForm(
+      true
+    );
   }
+
+
+  // ====================================================
+  // Advance After Tutorial Field Form Mounts
+  // ====================================================
+
+  useEffect(
+    () => {
+      if (
+        !showFieldForm ||
+        currentStep?.id !==
+          "open-add-field"
+      ) {
+        return;
+      }
+
+
+      let cancelled =
+        false;
+
+
+      let frameId =
+        null;
+
+
+      let attempts =
+        0;
+
+
+      function waitForFieldForm() {
+        if (
+          cancelled
+        ) {
+          return;
+        }
+
+
+        const panel =
+          document.querySelector(
+            '[data-onboarding="field-form-panel"]'
+          );
+
+
+        if (
+          panel
+        ) {
+          nextStep();
+
+          return;
+        }
+
+
+        attempts +=
+          1;
+
+
+        if (
+          attempts <
+          60
+        ) {
+          frameId =
+            window.requestAnimationFrame(
+              waitForFieldForm
+            );
+        }
+      }
+
+
+      frameId =
+        window.requestAnimationFrame(
+          waitForFieldForm
+        );
+
+
+      return () => {
+        cancelled =
+          true;
+
+
+        if (
+          frameId !==
+          null
+        ) {
+          window.cancelAnimationFrame(
+            frameId
+          );
+        }
+      };
+    },
+    [
+      showFieldForm,
+      currentStep?.id,
+      nextStep,
+    ]
+  );
+
+
+  // ====================================================
+  // Edit Field
+  // ====================================================
 
   function startEditField(
     field
@@ -150,71 +427,105 @@ function EntityTypeEditor() {
       field._id
     );
 
+
     setFieldLabel(
       field.label
     );
+
 
     setFieldType(
       field.type
     );
 
+
     setFieldRequired(
-      field.required || false
+      field.required ||
+      false
     );
+
 
     setReferenceEntityTypeId(
       field.referenceEntityTypeId ||
-        ""
+      ""
     );
+
 
     setSelectOptions(
       field.options &&
-        field.options.length > 0
-        ? [...field.options]
-        : [""]
+        field.options.length >
+          0
+        ? [
+            ...field.options,
+          ]
+        : [
+            "",
+          ]
     );
 
-    setShowFieldForm(true);
+
+    setShowFieldForm(
+      true
+    );
   }
+
+
+  // ====================================================
+  // Select Options
+  // ====================================================
 
   function updateSelectOption(
     index,
     value
   ) {
     setSelectOptions(
-      (currentOptions) => {
+      (
+        currentOptions
+      ) => {
         const updatedOptions = [
           ...currentOptions,
         ];
 
-        updatedOptions[index] =
+
+        updatedOptions[
+          index
+        ] =
           value;
+
 
         return updatedOptions;
       }
     );
   }
 
+
   function addSelectOption() {
     setSelectOptions(
-      (currentOptions) => [
+      (
+        currentOptions
+      ) => [
         ...currentOptions,
         "",
       ]
     );
   }
 
+
   function removeSelectOption(
     index
   ) {
     setSelectOptions(
-      (currentOptions) => {
+      (
+        currentOptions
+      ) => {
         if (
           currentOptions.length ===
           1
         ) {
-          return [""];
+          return [
+            "",
+          ];
         }
+
 
         return currentOptions.filter(
           (
@@ -228,14 +539,44 @@ function EntityTypeEditor() {
     );
   }
 
+
+  // ====================================================
+  // Save Field
+  // ====================================================
+
   async function saveField(
     event
   ) {
     event.preventDefault();
 
-    if (!fieldLabel.trim()) {
+
+    if (
+      !fieldLabel.trim()
+    ) {
       return;
     }
+
+
+    const isTutorialCreation =
+      currentStep?.id ===
+        "confirm-add-field" &&
+      !editingFieldId;
+
+
+    const previousFieldIds =
+      new Set(
+        (
+          entityType?.fields ||
+          []
+        ).map(
+          (
+            field
+          ) =>
+            String(
+              field._id
+            )
+        )
+      );
 
 
     const body = {
@@ -260,10 +601,14 @@ function EntityTypeEditor() {
         "select"
           ? selectOptions
               .map(
-                (option) =>
+                (
+                  option
+                ) =>
                   option.trim()
               )
-              .filter(Boolean)
+              .filter(
+                Boolean
+              )
           : [],
     };
 
@@ -297,8 +642,56 @@ function EntityTypeEditor() {
       );
 
 
+      if (
+        isTutorialCreation
+      ) {
+        const createdField =
+          (
+            updatedEntityType
+              ?.fields ||
+            []
+          ).find(
+            (
+              field
+            ) =>
+              !previousFieldIds.has(
+                String(
+                  field._id
+                )
+              )
+          );
+
+
+        if (
+          createdField?._id
+        ) {
+          setTutorialCreatedFieldId(
+            createdField._id
+          );
+
+
+          setTutorialFieldId(
+            createdField._id
+          );
+        } else {
+          console.warn(
+            "Tutorial field was created, but its ID could not be resolved."
+          );
+        }
+      }
+
+
       resetFieldForm();
-    } catch (error) {
+
+
+      if (
+        isTutorialCreation
+      ) {
+        nextStep();
+      }
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to save field:",
         error
@@ -312,6 +705,11 @@ function EntityTypeEditor() {
     }
   }
 
+
+  // ====================================================
+  // Delete Field
+  // ====================================================
+
   async function deleteField(
     fieldId
   ) {
@@ -323,7 +721,9 @@ function EntityTypeEditor() {
       );
 
 
-    if (!confirmed) {
+    if (
+      !confirmed
+    ) {
       return;
     }
 
@@ -350,7 +750,9 @@ function EntityTypeEditor() {
       ) {
         resetFieldForm();
       }
-    } catch (error) {
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to delete field:",
         error
@@ -364,14 +766,29 @@ function EntityTypeEditor() {
     }
   }
 
-  useEffect(() => {
-    fetchWorld();
-    fetchEntityType();
-    fetchEntityTypes();
-  }, [
-    entityTypeId,
-    worldId,
-  ]);
+
+  // ====================================================
+  // Load
+  // ====================================================
+
+  useEffect(
+    () => {
+      fetchWorld();
+
+      fetchEntityType();
+
+      fetchEntityTypes();
+    },
+    [
+      entityTypeId,
+      worldId,
+    ]
+  );
+
+
+  // ====================================================
+  // Loading
+  // ====================================================
 
   if (
     !world ||
@@ -386,23 +803,39 @@ function EntityTypeEditor() {
     );
   }
 
+
+  // ====================================================
+  // Render
+  // ====================================================
+
   return (
     <WorldLayout
-      worldId={worldId}
-      worldName={world.name}
-      backTo={`/world/${worldId}/entity-types`}
+      worldId={
+        worldId
+      }
+      worldName={
+        world.name
+      }
+      backTo={
+        `/world/${worldId}/entity-types`
+      }
     >
       <div className="schema-header">
         <div>
           <div className="schema-title-row">
             <span className="schema-icon">
-              {entityType.icon}
+              {
+                entityType.icon
+              }
             </span>
 
             <h1>
-              {entityType.name}
+              {
+                entityType.name
+              }
             </h1>
           </div>
+
 
           <p>
             {entityType.description ||
@@ -412,8 +845,11 @@ function EntityTypeEditor() {
           </p>
         </div>
 
+
         <button
+          type="button"
           className="create-button"
+          data-onboarding="add-field-button"
           onClick={
             startAddField
           }
@@ -424,12 +860,17 @@ function EntityTypeEditor() {
         </button>
       </div>
 
-      <div className="schema-section">
+
+      <div
+        className="schema-section"
+        data-onboarding="schema-fields-section"
+      >
         <h2>
           {t(
             "schema.fields"
           )}
         </h2>
+
 
         <p className="schema-help">
           {t(
@@ -437,8 +878,12 @@ function EntityTypeEditor() {
           )}
         </p>
 
+
         <div className="schema-field-list">
-          <div className="schema-field built-in-field">
+          <div
+            className="schema-field built-in-field"
+            data-onboarding="built-in-name-field"
+          >
             <div>
               <strong>
                 {t(
@@ -447,6 +892,7 @@ function EntityTypeEditor() {
               </strong>
             </div>
 
+
             <span className="field-type-badge">
               {t(
                 "fieldTypes.text"
@@ -454,78 +900,111 @@ function EntityTypeEditor() {
             </span>
           </div>
 
+
           {entityType.fields.map(
-            (field) => (
-              <div
-                className="schema-field"
-                key={field._id}
-              >
-                <div>
-                  <strong>
-                    {field.label}
-                  </strong>
+            (
+              field
+            ) => {
+              const isTutorialField =
+                String(
+                  tutorialCreatedFieldId ||
+                  ""
+                ) ===
+                String(
+                  field._id
+                );
 
-                  {field.type ===
-                    "select" &&
-                    field.options
-                      ?.length >
-                      0 && (
-                      <div className="field-options-preview">
-                        {field.options.join(
-                          " · "
+
+              return (
+                <div
+                  className="schema-field"
+                  key={
+                    field._id
+                  }
+                  data-onboarding={
+                    isTutorialField
+                      ? "tutorial-created-field"
+                      : undefined
+                  }
+                >
+                  <div>
+                    <strong>
+                      {
+                        field.label
+                      }
+                    </strong>
+
+
+                    {field.type ===
+                      "select" &&
+                      field.options
+                        ?.length >
+                        0 && (
+                        <div className="field-options-preview">
+                          {field.options.join(
+                            " · "
+                          )}
+                        </div>
+                      )}
+                  </div>
+
+
+                  <div className="field-meta">
+                    {field.required && (
+                      <span className="required-badge">
+                        {t(
+                          "schema.required"
                         )}
-                      </div>
+                      </span>
                     )}
-                </div>
 
-                <div className="field-meta">
-                  {field.required && (
-                    <span className="required-badge">
+
+                    <span className="field-type-badge">
                       {t(
-                        "schema.required"
+                        `fieldTypes.${field.type}`
                       )}
                     </span>
-                  )}
 
-                  <span className="field-type-badge">
-                    {t(
-                      `fieldTypes.${field.type}`
-                    )}
-                  </span>
 
-                  <button
-                    className="small-action-button"
-                    onClick={() =>
-                      startEditField(
-                        field
-                      )
-                    }
-                  >
-                    {t(
-                      "schema.edit"
-                    )}
-                  </button>
+                    <button
+                      type="button"
+                      className="small-action-button"
+                      onClick={() =>
+                        startEditField(
+                          field
+                        )
+                      }
+                    >
+                      {t(
+                        "schema.edit"
+                      )}
+                    </button>
 
-                  <button
-                    className="small-action-button danger"
-                    onClick={() =>
-                      deleteField(
-                        field._id
-                      )
-                    }
-                  >
-                    {t(
-                      "schema.delete"
-                    )}
-                  </button>
+
+                    <button
+                      type="button"
+                      className="small-action-button danger"
+                      onClick={() =>
+                        deleteField(
+                          field._id
+                        )
+                      }
+                    >
+                      {t(
+                        "schema.delete"
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )
+              );
+            }
           )}
         </div>
 
+
         {entityType.fields
-          .length === 0 && (
+          .length ===
+          0 && (
           <div className="schema-empty">
             {t(
               "schema.empty"
@@ -534,8 +1013,12 @@ function EntityTypeEditor() {
         )}
       </div>
 
+
       {showFieldForm && (
-        <div className="create-panel schema-create-panel">
+        <div
+          className="create-panel schema-create-panel"
+          data-onboarding="field-form-panel"
+        >
           <h2>
             {editingFieldId
               ? t(
@@ -545,6 +1028,7 @@ function EntityTypeEditor() {
                   "schema.createField"
                 )}
           </h2>
+
 
           <form
             onSubmit={
@@ -557,7 +1041,9 @@ function EntityTypeEditor() {
               )}
             </label>
 
+
             <input
+              data-onboarding="tutorial-field-name"
               value={
                 fieldLabel
               }
@@ -573,14 +1059,17 @@ function EntityTypeEditor() {
               }
             />
 
+
             <label>
               {t(
                 "schema.fieldType"
               )}
             </label>
 
+
             <select
               className="field-select"
+              data-onboarding="tutorial-field-type"
               value={
                 fieldType
               }
@@ -635,6 +1124,7 @@ function EntityTypeEditor() {
               </option>
             </select>
 
+
             {fieldType ===
               "select" && (
               <div className="select-options-editor">
@@ -643,6 +1133,7 @@ function EntityTypeEditor() {
                     "schema.options"
                   )}
                 </label>
+
 
                 {selectOptions.map(
                   (
@@ -670,12 +1161,11 @@ function EntityTypeEditor() {
                         ) =>
                           updateSelectOption(
                             index,
-                            event
-                              .target
-                              .value
+                            event.target.value
                           )
                         }
                       />
+
 
                       <button
                         type="button"
@@ -692,6 +1182,7 @@ function EntityTypeEditor() {
                   )
                 )}
 
+
                 <button
                   type="button"
                   className="add-option-button"
@@ -706,6 +1197,7 @@ function EntityTypeEditor() {
               </div>
             )}
 
+
             {fieldType ===
               "entity-reference" && (
               <>
@@ -714,6 +1206,7 @@ function EntityTypeEditor() {
                     "schema.referenceType"
                   )}
                 </label>
+
 
                 <select
                   className="field-select"
@@ -724,8 +1217,7 @@ function EntityTypeEditor() {
                     event
                   ) =>
                     setReferenceEntityTypeId(
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                 >
@@ -735,8 +1227,11 @@ function EntityTypeEditor() {
                     )}
                   </option>
 
+
                   {entityTypes.map(
-                    (type) => (
+                    (
+                      type
+                    ) => (
                       <option
                         key={
                           type._id
@@ -754,7 +1249,11 @@ function EntityTypeEditor() {
               </>
             )}
 
-            <label className="checkbox-row">
+
+            <label
+              className="checkbox-row"
+              data-onboarding="tutorial-field-required"
+            >
               <input
                 type="checkbox"
                 checked={
@@ -764,8 +1263,7 @@ function EntityTypeEditor() {
                   event
                 ) =>
                   setFieldRequired(
-                    event.target
-                      .checked
+                    event.target.checked
                   )
                 }
               />
@@ -774,6 +1272,7 @@ function EntityTypeEditor() {
                 "schema.requiredField"
               )}
             </label>
+
 
             <div className="form-buttons">
               <button
@@ -788,9 +1287,11 @@ function EntityTypeEditor() {
                 )}
               </button>
 
+
               <button
                 type="submit"
                 className="save-button"
+                data-onboarding="confirm-add-field"
               >
                 {editingFieldId
                   ? t(
@@ -807,5 +1308,6 @@ function EntityTypeEditor() {
     </WorldLayout>
   );
 }
+
 
 export default EntityTypeEditor;

@@ -123,10 +123,26 @@
     "descriptionPlaceholder": "这个世界是什么样子的呢？",
     "cancel": "取消",
     "create": "确认创建世界",
+    "creating": "正在创建……",
+    "loading": "正在加载世界……",
+    "loadFailed": "无法加载世界。",
+    "createFailed": "创建世界失败。",
     "emptyTitle": "暂无世界",
     "emptyDescription": "创建你的第一个世界来开始吧。",
     "noDescription": "暂无描述。",
-    "updated": "更新于"
+    "updated": "更新于",
+
+    "moreActions": "更多操作",
+    "delete": "删除世界",
+    "deleteTitle": "删除世界",
+    "deleteWarning": "你即将永久删除这个世界。",
+    "deleteDataWarning": "此操作无法撤销。这个世界中的实体类型、实体、目录、文档、关系与相关分析数据都会被永久删除。",
+    "typeToDelete": "请输入“{{phrase}}”以确认删除：",
+    "deleteConfirmationPhrase": "删除世界",
+    "deleteWorld": "删除世界",
+    "deleting": "正在删除……",
+    "deleteFailed": "删除世界失败。",
+    "closeDeleteDialog": "关闭删除确认窗口"
   },
   "workspace": {
     "loading": "正在加载世界...",
@@ -505,5 +521,127 @@
     "suggestionsTitle": "录入建议",
     "suggestionsDescription": "逐条检查识别结果，确认后再写入当前世界的记录。",
     "suggestionsEmpty": "没有发现新的结构化变更。"
+  },
+  "onboarding": {
+    "skip": "跳过引导",
+    "start": "开始引导",
+    "next": "下一步",
+    "previous": "上一步",
+    "guide": "新手引导",
+    "findingTarget": "正在准备下一步……",
+    "clickHighlighted": "点击高亮区域继续",
+    "stepCounter": "步骤 {{current}} / {{total}}",
+
+    "welcomeTitle": "欢迎来到 Mimoria",
+    "welcomeDescription": "Mimoria 当前仍处于 Beta 开发阶段。接下来我们会带你快速完成一次最基本的世界观工作流：创建世界、定义实体类型、创建实体、编写文档，并体验智能录入。你可以随时在右上角跳过引导。",
+
+    "createWorldTitle": "先创建一个世界",
+    "createWorldDescription": "世界是 Mimoria 中所有设定内容的容器。点击右上方高亮的“新建世界”按钮开始。",
+    "preparing": "正在准备……",
+
+    "tutorialWorldTitle": "这是你的新手世界",
+    "tutorialWorldName": "新手世界",
+    "tutorialWorldDescription": "这是一个用于体验 Mimoria 基本世界观工作流程的临时教程世界。",
+
+    "confirmWorldTitle": "创建你的第一个世界",
+    "confirmWorldDescription": "我们已经帮你填写好了一个示例世界。点击高亮的“确认创建世界”，亲手完成第一次创建。",
+
+    "entityTypesTitle": "接下来认识实体类型",
+    "entityTypesDescription": "实体类型决定角色、地点、物品等资料可以拥有怎样的字段。点击高亮的“实体类型”继续。",
+
+    "createEntityTypeTitle": "创建一个实体类型",
+    "createEntityTypeDescription": "实体类型就像资料模板。角色、地点、组织等资料可以拥有不同的字段。点击“新建实体类型”开始。",
+
+    "tutorialEntityTypeName": "角色",
+    "tutorialEntityTypeDescription": "用于记录这个世界中的人物与角色。",
+
+    "entityTypeNameTitle": "实体类型名称",
+    "entityTypeNameDescription": "名称决定这种资料在 Mimoria 中如何被识别。教程已经为你准备好了“角色”。",
+
+    "entityTypeIconTitle": "实体类型图标",
+    "entityTypeIconDescription": "图标可以帮助你更快地区分不同类型。Mimoria 支持 Emoji 图标，这里使用 👤。",
+
+    "entityTypeDescriptionTitle": "实体类型说明",
+    "entityTypeDescriptionDescription": "描述可以帮助你理解这种类型适合记录什么资料。它不会限制实体本身的字段。",
+
+    "confirmEntityTypeTitle": "创建实体类型",
+    "confirmEntityTypeDescription": "名称、图标和说明已经准备好了。点击高亮的“创建实体类型”完成创建。",
+
+    "openEntityTypeTitle": "打开刚创建的实体类型",
+    "openEntityTypeDescription": "角色类型已经创建完成。点击高亮的“角色”卡片，接下来我们会为它定义字段。",
+
+    "fieldsOverviewTitle": "字段决定实体能保存什么",
+    "fieldsOverviewDescription": "每种实体类型都可以拥有自己的字段。“名称”是 Mimoria 自动提供的基础字段，下面我们再添加一个自定义字段。",
+
+    "addFieldTitle": "添加一个自定义字段",
+    "addFieldDescription": "点击“添加字段”。我们会给角色加入一个简单的年龄字段。",
+
+    "tutorialFieldName": "年龄",
+
+    "fieldNameTitle": "字段名称",
+    "fieldNameDescription": "字段名称代表需要记录的信息。教程已经填入“年龄”。",
+
+    "fieldTypeTitle": "字段类型",
+    "fieldTypeDescription": "字段类型决定数据如何填写和保存。年龄适合使用“数字”类型。",
+
+    "fieldRequiredTitle": "是否必填",
+    "fieldRequiredDescription": "启用必填后，创建实体时必须填写这个字段。这里先保持年龄为非必填项。",
+
+    "confirmFieldTitle": "创建字段",
+    "confirmFieldDescription": "字段已经设置完成。点击高亮的“添加字段”保存它。",
+
+    "fieldCreatedTitle": "字段已经生效",
+    "fieldCreatedDescription": "现在所有“角色”实体都会拥有这个年龄字段。修改实体类型后，对应实体表单也会跟着变化。",
+
+    "entitiesNextTitle": "接下来创建一个实体",
+    "entitiesNextDescription": "实体是你世界中真正的角色、地点、物品等资料。点击左侧高亮的“实体”继续。",
+    "tutorialEntityName": "艾琳",
+
+    "entitiesOverviewTitle": "这里是实体工作区",
+    "entitiesOverviewDescription": "实体是世界中真正存在的角色、地点、物品等资料。它们会按照你刚才定义的实体类型来填写。",
+
+    "createEntityTitle": "创建你的第一个实体",
+    "createEntityDescription": "点击“新建实体”。我们用刚才创建的“角色”类型做一个示例。",
+
+    "entityTypeSelectionTitle": "选择实体类型",
+    "entityTypeSelectionDescription": "实体类型决定这个实体拥有哪些字段。教程已经选择了刚刚创建的“角色”。",
+
+    "entityNameTitle": "实体名称",
+    "entityNameDescription": "每个实体都有一个名称。教程已经为这个示例角色填写了“艾琳”。",
+
+    "entityCustomFieldTitle": "自定义字段会自动出现在这里",
+    "entityCustomFieldDescription": "还记得刚才创建的“年龄”字段吗？它已经自动出现在角色表单中。教程为艾琳填写了 24。",
+
+    "confirmCreateEntityTitle": "创建这个角色",
+    "confirmCreateEntityDescription": "这个示例角色已经准备好了。点击高亮的“创建”按钮保存实体。",
+
+    "entityDetailTitle": "实体详情",
+    "entityDetailDescription": "创建完成后，Mimoria 会在这里显示实体详情。你定义的所有字段以及对应的数据都会显示在这里。",
+
+    "editEntityTitle": "实体也可以随时修改",
+    "editEntityDescription": "点击“编辑”，我们看看保存后的资料如何再次修改。",
+
+    "editEntityFieldTitle": "修改自定义字段",
+    "editEntityFieldDescription": "实体类型中的字段会生成对应的编辑控件。你可以修改年龄或其他资料。",
+
+    "saveEntityEditTitle": "保存修改",
+    "saveEntityEditDescription": "点击“保存修改”。之后的任何编辑也会使用相同的方式保存。",
+
+    "entityTreeTitle": "实体资源树",
+    "entityTreeDescription": "创建的实体会出现在左侧资源树中。之后你可以创建文件夹、重新整理层级，并通过拖拽组织大量资料。",
+    "secondaryWorkspaceTitle": "这是第二工作区",
+    "secondaryWorkspaceDescription": "在宽屏模式，Mimoria 可以同时显示两个工作区。这样你可以一边查看实体，一边打开文档、实体类型或其他资料。",
+
+    "workspaceSplitterTitle": "调整两个工作区的宽度",
+    "workspaceSplitterDescription": "拖动中间的工作区分隔条，可以改变主工作区和第二工作区各自占用的空间。",
+
+    "dockHandleTitle": "工作区可以拖动停靠",
+    "dockHandleDescription": "左侧导航中的可停靠工作区带有拖动手柄。你可以从这里拖动工作区，而不需要离开当前页面。",
+
+    "dockingAreaTitle": "这里是停靠区域",
+    "dockingAreaDescription": "把可停靠的工作区拖到第二工作区，就可以在右侧打开它。之后也可以通过第二工作区顶部的选择器切换内容。",
+
+    "documentsNextTitle": "接下来认识文档",
+    "documentsNextDescription": "文档用于编写剧情、章节、世界历史和其他长篇内容。点击左侧高亮的“文档”继续。"
   }
 }

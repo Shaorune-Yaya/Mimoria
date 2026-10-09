@@ -26,8 +26,18 @@ import {
 
 import WorldLayout from "../components/WorldLayout";
 import EmbeddedWorkspaceLayout from "../components/EmbeddedWorkspaceLayout";
-import { API_URL } from "../config/api";
-import { apiFetch } from "../utils/apiFetch";
+
+import {
+  useOnboarding,
+} from "../onboarding/OnboardingContext";
+
+import {
+  API_URL,
+} from "../config/api";
+
+import {
+  apiFetch,
+} from "../utils/apiFetch";
 
 
 // ======================================================
@@ -303,6 +313,11 @@ function TreeRow({
         }
         className={
           rowClassName
+        }
+        data-onboarding={
+          isSelected
+            ? "selected-entity-tree-row"
+            : undefined
         }
         style={style}
         {...attributes}
@@ -587,6 +602,20 @@ function EntitiesPage({
     i18n,
   } = useTranslation();
 
+  const {
+    currentStep,
+
+    nextStep,
+
+    tutorialEntityTypeId,
+
+    tutorialFieldId,
+
+    tutorialEntityId,
+
+    setTutorialEntityId,
+  } =
+    useOnboarding();
 
   // ====================================================
   // Refs
@@ -2081,6 +2110,10 @@ function EntitiesPage({
       return;
     }
 
+    const isTutorialCreation =
+      currentStep?.id ===
+      "confirm-create-entity";
+
 
     try {
       const newEntity =
@@ -2126,7 +2159,23 @@ function EntitiesPage({
       );
 
 
+      if (
+        isTutorialCreation
+      ) {
+        setTutorialEntityId(
+          newEntity._id
+        );
+      }
+
+
       closeCreateForm();
+
+
+      if (
+        isTutorialCreation
+      ) {
+        nextStep();
+      }
     } catch (error) {
       console.error(
         "Failed to create entity:",
@@ -2145,33 +2194,233 @@ function EntitiesPage({
       null
     );
 
+
     setPendingSelectedEntityId(
       null
     );
+
 
     setIsEditingEntity(
       false
     );
 
-    setEditName("");
 
-    setEditValues({});
+    setEditName(
+      ""
+    );
+
+
+    setEditValues(
+      {}
+    );
+
+
+    const isTutorialStep =
+      currentStep?.id ===
+      "open-create-entity";
+
+
+    if (
+      isTutorialStep &&
+      tutorialEntityTypeId
+    ) {
+      const tutorialType =
+        entityTypes.find(
+          (
+            type
+          ) =>
+            String(
+              type._id
+            ) ===
+            String(
+              tutorialEntityTypeId
+            )
+        );
+
+
+      setSelectedEntityTypeId(
+        tutorialEntityTypeId
+      );
+
+
+      setName(
+        t(
+          "onboarding.tutorialEntityName"
+        )
+      );
+
+
+      const tutorialValues =
+        {};
+
+
+      if (
+        tutorialType
+      ) {
+        const tutorialField =
+          tutorialType.fields?.find(
+            (
+              field
+            ) =>
+              String(
+                field._id
+              ) ===
+              String(
+                tutorialFieldId
+              )
+          );
+
+
+        if (
+          tutorialField?.key
+        ) {
+          tutorialValues[
+            tutorialField.key
+          ] =
+            24;
+        }
+
+
+        tutorialType.fields?.forEach(
+          (
+            field
+          ) => {
+            if (
+              field.type ===
+              "entity-reference"
+            ) {
+              loadReferenceOptions(
+                field
+              );
+            }
+          }
+        );
+      }
+
+
+      setValues(
+        tutorialValues
+      );
+    } else {
+      setSelectedEntityTypeId(
+        ""
+      );
+
+
+      setName(
+        ""
+      );
+
+
+      setValues(
+        {}
+      );
+
+
+      setReferenceOptions(
+        {}
+      );
+    }
+
 
     setShowCreateForm(
       true
     );
-
-    setSelectedEntityTypeId(
-      ""
-    );
-
-    setName("");
-
-    setValues({});
-
-    setReferenceOptions({});
   }
 
+  // ====================================================
+  // Tutorial: Create Entity Form Mounted
+  // ====================================================
+
+  useEffect(
+    () => {
+      if (
+        !showCreateForm ||
+        currentStep?.id !==
+          "open-create-entity"
+      ) {
+        return;
+      }
+
+
+      let cancelled =
+        false;
+
+
+      let frameId =
+        null;
+
+
+      let attempts =
+        0;
+
+
+      function waitForTutorialEntityForm() {
+        if (
+          cancelled
+        ) {
+          return;
+        }
+
+
+        const panel =
+          document.querySelector(
+            '[data-onboarding="create-entity-panel"]'
+          );
+
+
+        if (
+          panel
+        ) {
+          nextStep();
+
+          return;
+        }
+
+
+        attempts +=
+          1;
+
+
+        if (
+          attempts <
+          60
+        ) {
+          frameId =
+            window.requestAnimationFrame(
+              waitForTutorialEntityForm
+            );
+        }
+      }
+
+
+      frameId =
+        window.requestAnimationFrame(
+          waitForTutorialEntityForm
+        );
+
+
+      return () => {
+        cancelled =
+          true;
+
+
+        if (
+          frameId !==
+          null
+        ) {
+          window.cancelAnimationFrame(
+            frameId
+          );
+        }
+      };
+    },
+    [
+      showCreateForm,
+      currentStep?.id,
+      nextStep,
+    ]
+  );
 
   function closeCreateForm() {
     setShowCreateForm(
@@ -2342,6 +2591,10 @@ function EntitiesPage({
       entityOverride ||
       selectedDetailEntity;
 
+    const isTutorialEdit =
+      currentStep?.id ===
+      "open-edit-tutorial-entity";
+
 
     if (!targetEntity) {
       return;
@@ -2404,6 +2657,20 @@ function EntitiesPage({
         }
       );
     }
+
+        if (
+      isTutorialEdit
+    ) {
+      window.requestAnimationFrame(
+        () => {
+          window.requestAnimationFrame(
+            () => {
+              nextStep();
+            }
+          );
+        }
+      );
+    }
   }
 
 
@@ -2432,6 +2699,11 @@ function EntitiesPage({
     ) {
       return;
     }
+
+
+    const isTutorialSave =
+      currentStep?.id ===
+      "confirm-edit-tutorial-entity";
 
 
     try {
@@ -2474,19 +2746,38 @@ function EntitiesPage({
         false
       );
 
-      setEditName("");
 
-      setEditValues({});
+      setEditName(
+        ""
+      );
 
-      setReferenceOptions({});
+
+      setEditValues(
+        {}
+      );
+
+
+      setReferenceOptions(
+        {}
+      );
 
 
       await fetchTree();
-    } catch (error) {
+
+
+      if (
+        isTutorialSave
+      ) {
+        nextStep();
+      }
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to update entity:",
         error
       );
+
 
       alert(
         error.message
@@ -2955,6 +3246,7 @@ function EntitiesPage({
           <button
             type="button"
             className="tree-add-button"
+            data-onboarding="tree-new-entity-button"
             onClick={
               openCreateForm
             }
@@ -3320,7 +3612,10 @@ function EntitiesPage({
           Page Header
           ================================================== */}
 
-      <div className="entity-page-header">
+      <div
+        className="entity-page-header"
+        data-onboarding="entities-page-header"
+      >
         <div>
           <h1>
             {
@@ -3360,7 +3655,9 @@ function EntitiesPage({
         {!showCreateForm &&
           !isEditingEntity && (
             <button
+              type="button"
               className="create-button"
+              data-onboarding="new-entity-button"
               onClick={
                 openCreateForm
               }
@@ -3389,7 +3686,10 @@ function EntitiesPage({
           ================================================== */}
 
       {showCreateForm && (
-        <div className="create-panel entity-create-panel">
+        <div
+          className="create-panel entity-create-panel"
+          data-onboarding="create-entity-panel"
+        >
           <form
             onSubmit={
               createEntity
@@ -3403,6 +3703,7 @@ function EntitiesPage({
 
             <select
               className="field-select"
+              data-onboarding="tutorial-entity-type"
               value={
                 selectedEntityTypeId
               }
@@ -3468,6 +3769,7 @@ function EntitiesPage({
 
                 <input
                   type="text"
+                  data-onboarding="tutorial-entity-name"
                   value={
                     name
                   }
@@ -3483,11 +3785,31 @@ function EntitiesPage({
 
 
                 {selectedEntityType.fields.map(
-                  (field) => (
+                  (
+                    field
+                  ) => (
                     <div
                       className="dynamic-field"
                       key={
                         field._id
+                      }
+                      data-onboarding={
+                        String(
+                          field._id
+                        ) ===
+                          String(
+                            tutorialFieldId ||
+                            ""
+                          ) ||
+                        (
+                          !tutorialFieldId &&
+                          currentStep?.id ===
+                            "tutorial-entity-custom-field" &&
+                          field.type ===
+                            "number"
+                        )
+                          ? "tutorial-entity-custom-field"
+                          : undefined
                       }
                     >
                       <label>
@@ -3530,6 +3852,7 @@ function EntitiesPage({
               <button
                 type="submit"
                 className="save-button"
+                data-onboarding="confirm-create-entity"
                 disabled={
                   !selectedEntityTypeId
                 }
@@ -3552,7 +3875,10 @@ function EntitiesPage({
         isEditingEntity &&
         selectedDetailEntity &&
         detailEntityType && (
-          <div className="create-panel entity-edit-panel">
+          <div
+            className="create-panel entity-edit-panel"
+            data-onboarding="tutorial-entity-edit-panel"
+          >
             <form
               onSubmit={
                 saveEntityEdit
@@ -3599,11 +3925,31 @@ function EntitiesPage({
 
 
               {detailEntityType.fields.map(
-                (field) => (
+                (
+                  field
+                ) => (
                   <div
                     className="dynamic-field"
                     key={
                       field._id
+                    }
+                    data-onboarding={
+                      String(
+                        field._id
+                      ) ===
+                        String(
+                          tutorialFieldId ||
+                          ""
+                        ) ||
+                      (
+                        !tutorialFieldId &&
+                        currentStep?.id ===
+                          "tutorial-entity-edit-field" &&
+                        field.type ===
+                          "number"
+                      )
+                        ? "tutorial-entity-edit-field"
+                        : undefined
                     }
                   >
                     <label>
@@ -3644,6 +3990,7 @@ function EntitiesPage({
                 <button
                   type="submit"
                   className="save-button"
+                  data-onboarding="confirm-edit-tutorial-entity"
                 >
                   {t(
                     "entities.saveChanges"
@@ -3663,7 +4010,10 @@ function EntitiesPage({
         !isEditingEntity &&
         selectedDetailEntity &&
         detailEntityType && (
-          <div className="entity-detail-panel">
+          <div
+            className="entity-detail-panel"
+            data-onboarding="tutorial-entity-detail"
+          >
             <div className="entity-detail-panel-header">
               <div className="entity-detail-title">
                 <div className="entity-detail-icon">
@@ -3691,6 +4041,7 @@ function EntitiesPage({
               <button
                 type="button"
                 className="small-action-button"
+                data-onboarding="tutorial-entity-edit-button"
                 onClick={
                   () =>
                     startEditEntity(

@@ -12,6 +12,10 @@ import {
   isDockableWorkspaceView,
 } from "../config/workspaceViews";
 
+import {
+  useOnboarding,
+} from "../onboarding/OnboardingContext";
+
 
 const MIN_SPLIT_PERCENT =
   25;
@@ -40,6 +44,16 @@ function WorldLayout({
 }) {
   const workspaceSplitRef =
     useRef(null);
+
+
+  const {
+    active:
+      onboardingActive,
+
+    currentStep:
+      onboardingStep,
+  } =
+    useOnboarding();
 
 
   // ======================================================
@@ -203,6 +217,95 @@ function WorldLayout({
       false
     );
   }
+
+
+  // ======================================================
+  // Onboarding Mobile Navigation
+  //
+  // Desktop has a permanently visible WorldSidebar.
+  //
+  // Mobile hides that sidebar inside the navigation drawer.
+  // Whenever onboarding reaches a navigation step whose
+  // target lives inside WorldSidebar, automatically open
+  // the drawer so the real target can mount.
+  // ======================================================
+
+  useEffect(
+    () => {
+      if (
+        !onboardingActive ||
+        !onboardingStep?.id
+      ) {
+        return;
+      }
+
+
+      const sidebarTutorialSteps =
+        new Set([
+          "entity-types-nav",
+          "entities-nav",
+          "documents-nav",
+          "smart-import-nav",
+        ]);
+
+
+      if (
+        !sidebarTutorialSteps.has(
+          onboardingStep.id
+        )
+      ) {
+        return;
+      }
+
+
+      const mobileQuery =
+        window.matchMedia(
+          "(max-width: 760px)"
+        );
+
+
+      function syncTutorialDrawer() {
+        if (
+          mobileQuery.matches
+        ) {
+          setMobileMenuOpen(
+            true
+          );
+        }
+      }
+
+
+      /*
+      * Open immediately when the onboarding step begins.
+      */
+      syncTutorialDrawer();
+
+
+      /*
+      * Also handle:
+      *
+      * desktop -> mobile
+      *
+      * while the same tutorial step is still active.
+      */
+      mobileQuery.addEventListener(
+        "change",
+        syncTutorialDrawer
+      );
+
+
+      return () => {
+        mobileQuery.removeEventListener(
+          "change",
+          syncTutorialDrawer
+        );
+      };
+    },
+    [
+      onboardingActive,
+      onboardingStep?.id,
+    ]
+  );
 
 
   // ======================================================
@@ -738,6 +841,7 @@ function WorldLayout({
                       ? "workspace-splitter active"
                       : "workspace-splitter"
                   }
+                  data-onboarding="workspace-splitter"
                   onPointerDown={
                     beginResize
                   }
@@ -757,6 +861,7 @@ function WorldLayout({
                       ? "workspace-secondary-wrapper dock-target-active"
                       : "workspace-secondary-wrapper"
                   }
+                  data-onboarding="secondary-workspace"
                   onDragOver={
                     handleDockDragOver
                   }

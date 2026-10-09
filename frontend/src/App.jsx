@@ -27,6 +27,11 @@ import ProtectedRoute from "./auth/ProtectedRoute";
 
 import "./styles/index.css";
 
+import {
+  OnboardingProvider,
+} from "./onboarding/OnboardingContext";
+
+import OnboardingOverlay from "./onboarding/OnboardingOverlay";
 
 function Protected({
   children,
@@ -43,125 +48,128 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          {/* Public Auth Routes */}
+        <OnboardingProvider>
+            <Routes>
+              {/* Public Auth Routes */}
 
-          <Route
-            path="/login"
-            element={
-              <LoginPage />
-            }
-          />
+              <Route
+                path="/login"
+                element={
+                  <LoginPage />
+                }
+              />
 
-          <Route
-            path="/register"
-            element={
-              <RegisterPage />
-            }
-          />
+              <Route
+                path="/register"
+                element={
+                  <RegisterPage />
+                }
+              />
 
-          <Route
-            path="/verify-email"
-            element={
-              <VerifyEmailPage />
-            }
-          />
+              <Route
+                path="/verify-email"
+                element={
+                  <VerifyEmailPage />
+                }
+              />
 
-          <Route
-            path="/account"
-            element={
-              <Protected>
-                <AccountPage />
-              </Protected>
-            }
-          />
-          
-          <Route
-            path="/forgot-password"
-            element={
-              <ForgotPasswordPage />
-            }
-          />
+              <Route
+                path="/account"
+                element={
+                  <Protected>
+                    <AccountPage />
+                  </Protected>
+                }
+              />
 
-          <Route
-            path="/reset-password"
-            element={
-              <ResetPasswordPage />
-            }
-          />
+              <Route
+                path="/forgot-password"
+                element={
+                  <ForgotPasswordPage />
+                }
+              />
 
-
-          {/* Protected Routes */}
-
-          <Route
-            path="/"
-            element={
-              <Protected>
-                <WorldsPage />
-              </Protected>
-            }
-          />
+              <Route
+                path="/reset-password"
+                element={
+                  <ResetPasswordPage />
+                }
+              />
 
 
-          <Route
-            path="/world/:worldId"
-            element={
-              <Protected>
-                <WorldWorkspace />
-              </Protected>
-            }
-          />
+              {/* Protected Routes */}
+
+              <Route
+                path="/"
+                element={
+                  <Protected>
+                    <WorldsPage />
+                  </Protected>
+                }
+              />
 
 
-          <Route
-            path="/world/:worldId/entity-types"
-            element={
-              <Protected>
-                <EntityTypesPage />
-              </Protected>
-            }
-          />
+              <Route
+                path="/world/:worldId"
+                element={
+                  <Protected>
+                    <WorldWorkspace />
+                  </Protected>
+                }
+              />
 
 
-          <Route
-            path="/world/:worldId/entity-types/:entityTypeId"
-            element={
-              <Protected>
-                <EntityTypeEditor />
-              </Protected>
-            }
-          />
+              <Route
+                path="/world/:worldId/entity-types"
+                element={
+                  <Protected>
+                    <EntityTypesPage />
+                  </Protected>
+                }
+              />
 
 
-          <Route
-            path="/world/:worldId/entities"
-            element={
-              <Protected>
-                <EntitiesPage />
-              </Protected>
-            }
-          />
+              <Route
+                path="/world/:worldId/entity-types/:entityTypeId"
+                element={
+                  <Protected>
+                    <EntityTypeEditor />
+                  </Protected>
+                }
+              />
 
 
-          <Route
-            path="/world/:worldId/documents"
-            element={
-              <Protected>
-                <DocumentsPage />
-              </Protected>
-            }
-          />
+              <Route
+                path="/world/:worldId/entities"
+                element={
+                  <Protected>
+                    <EntitiesPage />
+                  </Protected>
+                }
+              />
 
 
-          <Route
-            path="/world/:worldId/smart-import"
-            element={
-              <Protected>
-                <SmartImportPage />
-              </Protected>
-            }
-          />
-        </Routes>
+              <Route
+                path="/world/:worldId/documents"
+                element={
+                  <Protected>
+                    <DocumentsPage />
+                  </Protected>
+                }
+              />
+
+
+              <Route
+                path="/world/:worldId/smart-import"
+                element={
+                  <Protected>
+                    <SmartImportPage />
+                  </Protected>
+                }
+              />
+            </Routes>
+          <OnboardingOverlay />
+        </OnboardingProvider>
       </AuthProvider>
     </BrowserRouter>
   );

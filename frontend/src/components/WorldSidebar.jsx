@@ -189,6 +189,21 @@ function WorldSidebar({
       >
         <button
           type="button"
+          data-onboarding={
+            view.id ===
+              "entity-types"
+              ? "entity-types-nav"
+              : view.id ===
+                  "entities"
+                ? "entities-nav"
+                : view.id ===
+                    "documents"
+                  ? "documents-nav"
+                  : view.id ===
+                      "smart-import"
+                    ? "smart-import-nav"
+                    : undefined
+          }
           className={[
             "sidebar-item",
             "sidebar-item-navigation",
@@ -238,6 +253,15 @@ function WorldSidebar({
             "drawer" && (
           <span
             className="sidebar-dock-handle"
+            data-onboarding={
+              view.id ===
+                "entities"
+                ? "entities-dock-handle"
+                : view.id ===
+                    "documents"
+                  ? "documents-dock-handle"
+                  : undefined
+            }
             draggable
             role="button"
             tabIndex={0}

@@ -13,6 +13,7 @@ import {
 } from "react-i18next";
 
 import WorldLayout from "../components/WorldLayout";
+
 import EmbeddedWorkspaceLayout from "../components/EmbeddedWorkspaceLayout";
 
 import {
@@ -23,11 +24,14 @@ import {
   apiFetch,
 } from "../utils/apiFetch";
 
+import {
+  useOnboarding,
+} from "../onboarding/OnboardingContext";
+
 
 function EntityTypesPage({
   embedded = false,
 }) {
-
   const {
     worldId,
   } =
@@ -43,6 +47,22 @@ function EntityTypesPage({
   } =
     useTranslation();
 
+
+  const {
+    currentStep,
+
+    nextStep,
+
+    tutorialEntityTypeId,
+
+    setTutorialEntityTypeId,
+  } =
+    useOnboarding();
+
+
+  // ====================================================
+  // State
+  // ====================================================
 
   const [
     world,
@@ -195,6 +215,151 @@ function EntityTypesPage({
 
 
   // ====================================================
+  // Open Create Entity Type
+  // ====================================================
+
+  function openCreateEntityType() {
+    setErrorMessage(
+      ""
+    );
+
+
+    const isTutorialStep =
+      currentStep?.id ===
+      "open-create-entity-type";
+
+
+    if (
+      isTutorialStep
+    ) {
+      setName(
+        t(
+          "onboarding.tutorialEntityTypeName"
+        )
+      );
+
+
+      setIcon(
+        "👤"
+      );
+
+
+      setDescription(
+        t(
+          "onboarding.tutorialEntityTypeDescription"
+        )
+      );
+    }
+
+
+    setShowCreateForm(
+      true
+    );
+  }
+
+
+  // ====================================================
+  // Advance After Create Form Mounts
+  //
+  // Step:
+  // open-create-entity-type
+  //
+  // The tutorial only moves forward once the actual form
+  // exists in the DOM.
+  // ====================================================
+
+  useEffect(
+    () => {
+      if (
+        !showCreateForm ||
+        currentStep?.id !==
+          "open-create-entity-type"
+      ) {
+        return;
+      }
+
+
+      let cancelled =
+        false;
+
+
+      let frameId =
+        null;
+
+
+      let attempts =
+        0;
+
+
+      function waitForForm() {
+        if (
+          cancelled
+        ) {
+          return;
+        }
+
+
+        const panel =
+          document.querySelector(
+            '[data-onboarding="create-entity-type-panel"]'
+          );
+
+
+        if (
+          panel
+        ) {
+          nextStep();
+
+          return;
+        }
+
+
+        attempts +=
+          1;
+
+
+        if (
+          attempts <
+          60
+        ) {
+          frameId =
+            window.requestAnimationFrame(
+              waitForForm
+            );
+        }
+      }
+
+
+      frameId =
+        window.requestAnimationFrame(
+          waitForForm
+        );
+
+
+      return () => {
+        cancelled =
+          true;
+
+
+        if (
+          frameId !==
+          null
+        ) {
+          window.cancelAnimationFrame(
+            frameId
+          );
+        }
+      };
+    },
+    [
+      showCreateForm,
+      currentStep?.id,
+      nextStep,
+    ]
+  );
+
+
+  // ====================================================
   // Create Entity Type
   // ====================================================
 
@@ -214,6 +379,11 @@ function EntityTypesPage({
     ) {
       return;
     }
+
+
+    const isTutorialCreation =
+      currentStep?.id ===
+      "confirm-create-entity-type";
 
 
     try {
@@ -251,6 +421,15 @@ function EntityTypesPage({
         );
 
 
+      if (
+        !newEntityType?._id
+      ) {
+        throw new Error(
+          "Created entity type did not return an ID."
+        );
+      }
+
+
       setEntityTypes(
         (
           current
@@ -259,6 +438,15 @@ function EntityTypesPage({
           newEntityType,
         ]
       );
+
+
+      if (
+        isTutorialCreation
+      ) {
+        setTutorialEntityTypeId(
+          newEntityType._id
+        );
+      }
 
 
       setName(
@@ -279,6 +467,13 @@ function EntityTypesPage({
       setShowCreateForm(
         false
       );
+
+
+      if (
+        isTutorialCreation
+      ) {
+        nextStep();
+      }
     } catch (
       error
     ) {
@@ -297,6 +492,37 @@ function EntityTypesPage({
         false
       );
     }
+  }
+
+
+  // ====================================================
+  // Cancel Create Entity Type
+  // ====================================================
+
+  function cancelCreateEntityType() {
+    setShowCreateForm(
+      false
+    );
+
+
+    setName(
+      ""
+    );
+
+
+    setDescription(
+      ""
+    );
+
+
+    setIcon(
+      "📄"
+    );
+
+
+    setErrorMessage(
+      ""
+    );
   }
 
 
@@ -363,13 +589,18 @@ function EntityTypesPage({
 
 
   // ====================================================
-  // Render
+  // Layout
   // ====================================================
 
   const LayoutComponent =
     embedded
       ? EmbeddedWorkspaceLayout
       : WorldLayout;
+
+
+  // ====================================================
+  // Render
+  // ====================================================
 
   return (
     <LayoutComponent
@@ -400,16 +631,10 @@ function EntityTypesPage({
         <button
           type="button"
           className="create-button"
-          onClick={() => {
-            setErrorMessage(
-              ""
-            );
-
-
-            setShowCreateForm(
-              true
-            );
-          }}
+          data-onboarding="new-entity-type"
+          onClick={
+            openCreateEntityType
+          }
         >
           {t(
             "entityTypes.newType"
@@ -434,7 +659,10 @@ function EntityTypesPage({
 
 
       {showCreateForm && (
-        <div className="create-panel">
+        <div
+          className="create-panel"
+          data-onboarding="create-entity-type-panel"
+        >
           <h2>
             {t(
               "entityTypes.createTitle"
@@ -456,6 +684,7 @@ function EntityTypesPage({
 
             <input
               type="text"
+              data-onboarding="entity-type-name"
               value={
                 name
               }
@@ -484,6 +713,7 @@ function EntityTypesPage({
 
             <input
               type="text"
+              data-onboarding="entity-type-icon"
               value={
                 icon
               }
@@ -515,6 +745,7 @@ function EntityTypesPage({
 
 
             <textarea
+              data-onboarding="entity-type-description"
               value={
                 description
               }
@@ -541,16 +772,9 @@ function EntityTypesPage({
                 disabled={
                   creating
                 }
-                onClick={() => {
-                  setShowCreateForm(
-                    false
-                  );
-
-
-                  setErrorMessage(
-                    ""
-                  );
-                }}
+                onClick={
+                  cancelCreateEntityType
+                }
               >
                 {t(
                   "worlds.cancel"
@@ -561,6 +785,7 @@ function EntityTypesPage({
               <button
                 type="submit"
                 className="save-button"
+                data-onboarding="confirm-create-entity-type"
                 disabled={
                   creating ||
                   !name.trim()
@@ -582,42 +807,59 @@ function EntityTypesPage({
         {entityTypes.map(
           (
             entityType
-          ) => (
-            <button
-              type="button"
-              className="entity-type-card"
-              key={
+          ) => {
+            const isTutorialEntityType =
+              String(
+                tutorialEntityTypeId ||
+                ""
+              ) ===
+              String(
                 entityType._id
-              }
-              onClick={() =>
-                openEntityType(
+              );
+
+
+            return (
+              <button
+                type="button"
+                className="entity-type-card"
+                key={
                   entityType._id
-                )
-              }
-            >
-              <div className="entity-type-icon">
-                {entityType.icon ||
-                  "📄"}
-              </div>
+                }
+                data-onboarding={
+                  isTutorialEntityType
+                    ? "tutorial-entity-type-card"
+                    : undefined
+                }
+                onClick={() =>
+                  openEntityType(
+                    entityType._id
+                  )
+                }
+              >
+                <div className="entity-type-icon">
+                  {entityType.icon ||
+                    "📄"}
+                </div>
 
 
-              <div className="entity-type-info">
-                <h2>
-                  {
-                    entityType.name
-                  }
-                </h2>
+                <div className="entity-type-info">
+                  <h2>
+                    {
+                      entityType.name
+                    }
+                  </h2>
 
 
-                <p>
-                  {entityType.description ||
-                    t(
-                      "entityTypes.noDescription"
-                    )}
-                </p>
-              </div>
-            </button>
-          )
+                  <p>
+                    {entityType.description ||
+                      t(
+                        "entityTypes.noDescription"
+                      )}
+                  </p>
+                </div>
+              </button>
+            );
+          }
         )}
       </div>
 

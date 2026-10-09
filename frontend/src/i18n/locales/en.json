@@ -123,10 +123,26 @@
     "descriptionPlaceholder": "What is this world like?",
     "cancel": "Cancel",
     "create": "Create World",
+    "creating": "Creating...",
+    "loading": "Loading worlds...",
+    "loadFailed": "Unable to load worlds.",
+    "createFailed": "Failed to create world.",
     "emptyTitle": "No Worlds Yet",
     "emptyDescription": "Create your first world to get started.",
     "noDescription": "No description yet.",
-    "updated": "Updated"
+    "updated": "Updated",
+
+    "moreActions": "More Actions",
+    "delete": "Delete World",
+    "deleteTitle": "Delete World",
+    "deleteWarning": "You are about to permanently delete this world.",
+    "deleteDataWarning": "This action cannot be undone. Entity Types, Entities, folders, Documents, relationships, and related analysis data in this world will be permanently deleted.",
+    "typeToDelete": "Type “{{phrase}}” to confirm:",
+    "deleteConfirmationPhrase": "delete world",
+    "deleteWorld": "Delete World",
+    "deleting": "Deleting...",
+    "deleteFailed": "Failed to delete world.",
+    "closeDeleteDialog": "Close delete confirmation"
   },
   "workspace": {
     "loading": "Loading world...",
@@ -505,5 +521,127 @@
     "suggestionsTitle": "Import Suggestions",
     "suggestionsDescription": "Review each recognized change before applying it to this world's Canon.",
     "suggestionsEmpty": "No new structured changes were found."
+  },
+  "onboarding": {
+    "skip": "Skip Tour",
+    "start": "Start Tour",
+    "next": "Next",
+    "previous": "Back",
+    "guide": "Getting Started",
+    "findingTarget": "Preparing the next step...",
+    "clickHighlighted": "Click the highlighted area to continue",
+    "stepCounter": "Step {{current}} / {{total}}",
+
+    "welcomeTitle": "Welcome to Mimoria",
+    "welcomeDescription": "Mimoria is currently in Beta development. This short tour will walk you through the basic worldbuilding workflow: creating a world, defining entity types, creating entities, writing documents, and trying Smart Import. You can skip the tour at any time from the top-right corner.",
+
+    "createWorldTitle": "Create your first world",
+    "createWorldDescription": "A world is the container for all of your setting data in Mimoria. Click the highlighted New World button to begin.",
+    "preparing": "Preparing...",
+
+    "tutorialWorldTitle": "This is your tutorial world",
+    "tutorialWorldName": "Tutorial World",
+    "tutorialWorldDescription": "A temporary tutorial world used to learn the basic Mimoria worldbuilding workflow.",
+
+    "confirmWorldTitle": "Create your first world",
+    "confirmWorldDescription": "We've filled in a sample world for you. Click the highlighted Create World button to complete your first world creation.",
+
+    "entityTypesTitle": "Next: Entity Types",
+    "entityTypesDescription": "Entity Types define what fields characters, locations, items, and other world data can contain. Click the highlighted Entity Types section to continue.",
+
+    "createEntityTypeTitle": "Create an Entity Type",
+    "createEntityTypeDescription": "Entity Types work like templates for your world data. Characters, locations, organizations, and other information can each have different fields. Click New Entity Type to begin.",
+
+    "tutorialEntityTypeName": "Character",
+    "tutorialEntityTypeDescription": "Used to store people and characters in this world.",
+
+    "entityTypeNameTitle": "Entity Type Name",
+    "entityTypeNameDescription": "The name identifies this type throughout Mimoria. We've prepared “Character” for the tutorial.",
+
+    "entityTypeIconTitle": "Entity Type Icon",
+    "entityTypeIconDescription": "Icons help you quickly distinguish different types. Mimoria supports Emoji icons, so we'll use 👤 here.",
+
+    "entityTypeDescriptionTitle": "Describe the Entity Type",
+    "entityTypeDescriptionDescription": "The description explains what this type is intended to store. It does not restrict the fields themselves.",
+
+    "confirmEntityTypeTitle": "Create the Entity Type",
+    "confirmEntityTypeDescription": "The name, icon, and description are ready. Click the highlighted Create Entity Type button to finish.",
+
+    "openEntityTypeTitle": "Open Your New Entity Type",
+    "openEntityTypeDescription": "The Character type is ready. Click the highlighted card so we can define its fields next.",
+
+    "fieldsOverviewTitle": "Fields Define Stored Information",
+    "fieldsOverviewDescription": "Each Entity Type can have its own fields. Name is a built-in Mimoria field. Next, we'll create a custom field.",
+
+    "addFieldTitle": "Add a Custom Field",
+    "addFieldDescription": "Click Add Field. We'll add a simple Age field to the Character type.",
+
+    "tutorialFieldName": "Age",
+
+    "fieldNameTitle": "Field Name",
+    "fieldNameDescription": "The field name describes the information being stored. We've prepared Age for the tutorial.",
+
+    "fieldTypeTitle": "Field Type",
+    "fieldTypeDescription": "The field type determines how the value is entered and stored. Age works well as a Number.",
+
+    "fieldRequiredTitle": "Required Field",
+    "fieldRequiredDescription": "Required fields must be filled when an entity is created. We'll leave Age optional for now.",
+
+    "confirmFieldTitle": "Create the Field",
+    "confirmFieldDescription": "The field is ready. Click the highlighted Add Field button to save it.",
+
+    "fieldCreatedTitle": "Your Field Is Ready",
+    "fieldCreatedDescription": "Every Character entity can now store an Age value. Entity forms automatically follow the fields defined here.",
+
+    "entitiesNextTitle": "Next: Create an Entity",
+    "entitiesNextDescription": "Entities are the actual characters, places, items, and other records in your world. Click the highlighted Entities section to continue.",
+    "tutorialEntityName": "Aerin",
+
+    "entitiesOverviewTitle": "This Is the Entities Workspace",
+    "entitiesOverviewDescription": "Entities are the actual characters, locations, items, and other records in your world. Their forms follow the Entity Types you define.",
+
+    "createEntityTitle": "Create Your First Entity",
+    "createEntityDescription": "Click New Entity. We'll create an example using the Character type you just made.",
+
+    "entityTypeSelectionTitle": "Choose an Entity Type",
+    "entityTypeSelectionDescription": "The Entity Type determines which fields this entity has. The tutorial has already selected your Character type.",
+
+    "entityNameTitle": "Entity Name",
+    "entityNameDescription": "Every entity has a name. We've prepared Aerin as the example character.",
+
+    "entityCustomFieldTitle": "Custom Fields Appear Automatically",
+    "entityCustomFieldDescription": "Remember the Age field you created? It now appears automatically in the Character form. We've entered 24 for Aerin.",
+
+    "confirmCreateEntityTitle": "Create the Character",
+    "confirmCreateEntityDescription": "The example character is ready. Click the highlighted Create button to save the entity.",
+
+    "entityDetailTitle": "Entity Details",
+    "entityDetailDescription": "After creation, Mimoria shows the entity's details here. Every field defined by its Entity Type can be displayed here.",
+
+    "editEntityTitle": "Entities Can Be Edited Anytime",
+    "editEntityDescription": "Click Edit to see how saved information can be changed.",
+
+    "editEntityFieldTitle": "Edit a Custom Field",
+    "editEntityFieldDescription": "Fields defined by the Entity Type automatically become editing controls. You can change Age or any other stored information.",
+
+    "saveEntityEditTitle": "Save Your Changes",
+    "saveEntityEditDescription": "Click Save Changes. Future edits work the same way.",
+
+    "entityTreeTitle": "The Entity Explorer",
+    "entityTreeDescription": "Created entities appear in the explorer on the left. You can create folders, reorganize hierarchy, and drag records to keep large worlds organized.",
+    "secondaryWorkspaceTitle": "This Is the Secondary Workspace",
+    "secondaryWorkspaceDescription": "On wide display mode, Mimoria can show two workspaces at once. You can keep Entities open while viewing Documents, Entity Types, or other information beside them.",
+
+    "workspaceSplitterTitle": "Resize the Workspaces",
+    "workspaceSplitterDescription": "Drag the divider between the two workspaces to control how much space each side uses.",
+
+    "dockHandleTitle": "Workspaces Can Be Docked",
+    "dockHandleDescription": "Dockable items in the left navigation have a drag handle. Drag from this handle when you want to open a workspace without leaving the current one.",
+
+    "dockingAreaTitle": "This Is the Docking Area",
+    "dockingAreaDescription": "Drop a dockable workspace here to open it in the secondary workspace. You can also switch its contents from the selector at the top of the secondary pane.",
+
+    "documentsNextTitle": "Next: Documents",
+    "documentsNextDescription": "Documents are for chapters, story writing, world history, and other long-form content. Click the highlighted Documents section to continue."
   }
 }

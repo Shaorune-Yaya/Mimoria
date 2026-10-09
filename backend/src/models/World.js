@@ -46,7 +46,23 @@ const worldSchema =
         default:
           "🌍",
       },
+      
+      // ==================================================
+      // World Settings
+      // ==================================================
 
+      settings: {
+        isOnboardingWorld: {
+          type:
+            Boolean,
+
+          default:
+            false,
+
+          index:
+            true,
+        },
+      },
 
       // ==================================================
       // Canon Version

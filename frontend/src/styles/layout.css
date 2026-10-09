@@ -302,6 +302,89 @@
   cursor: default;
 }
 
+/* ======================================================
+   Sidebar Dock Handle
+   ====================================================== */
+
+.sidebar-item-row {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+}
+
+
+.sidebar-item-navigation {
+  min-width: 0;
+
+  flex: 1;
+}
+
+
+.sidebar-dock-handle {
+  position: relative;
+
+  width: 22px;
+  min-width: 22px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-left: 2px;
+
+  border-radius:
+    var(--radius-sm);
+
+  cursor: grab;
+
+  opacity: 0.48;
+
+  transition:
+    background 0.12s ease,
+    opacity 0.12s ease;
+}
+
+
+.sidebar-dock-handle::before {
+  content: "⋮⋮";
+
+  display: block;
+
+  color:
+    var(--color-text-dim);
+
+  font-size: 11px;
+  line-height: 1;
+
+  letter-spacing: -3px;
+
+  transform:
+    rotate(90deg);
+}
+
+
+.sidebar-dock-handle:hover {
+  background:
+    var(--color-bg-hover);
+
+  opacity: 1;
+}
+
+
+.sidebar-dock-handle:active {
+  cursor: grabbing;
+}
+
+
+.sidebar-item-row:hover
+.sidebar-dock-handle {
+  opacity: 0.85;
+}
+
 .sidebar-dock-hint {
   opacity: 0;
 
