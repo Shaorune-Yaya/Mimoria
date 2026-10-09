@@ -95,6 +95,11 @@ const storySuggestionRoutes =
     "./routes/storySuggestionRoutes"
   );
 
+const smartImportRoutes =
+  require(
+    "./routes/smartImportRoutes"
+  );
+
 const {
   router:
     authRoutes,
@@ -158,9 +163,6 @@ app.use(
 
 // ======================================================
 // Existing API Routes
-//
-// These still use getDevUser() during the migration.
-// They will be protected by requireAuth in a later step.
 // ======================================================
 
 app.use(
@@ -214,6 +216,12 @@ app.use(
 app.use(
   "/api/story-suggestions",
   storySuggestionRoutes
+);
+
+
+app.use(
+  "/api/smart-import",
+  smartImportRoutes
 );
 
 

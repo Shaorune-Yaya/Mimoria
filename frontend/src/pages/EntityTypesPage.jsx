@@ -13,169 +13,323 @@ import {
 } from "react-i18next";
 
 import WorldLayout from "../components/WorldLayout";
-import { API_URL } from "../config/api";
+
+import {
+  API_URL,
+} from "../config/api";
+
+import {
+  apiFetch,
+} from "../utils/apiFetch";
+
 
 function EntityTypesPage() {
-  const { worldId } =
+  const {
+    worldId,
+  } =
     useParams();
+
 
   const navigate =
     useNavigate();
 
-  const { t } =
+
+  const {
+    t,
+  } =
     useTranslation();
+
 
   const [
     world,
     setWorld,
-  ] = useState(null);
+  ] =
+    useState(
+      null
+    );
+
 
   const [
     entityTypes,
     setEntityTypes,
-  ] = useState([]);
+  ] =
+    useState(
+      []
+    );
+
 
   const [
     showCreateForm,
     setShowCreateForm,
-  ] = useState(false);
+  ] =
+    useState(
+      false
+    );
+
 
   const [
     name,
     setName,
-  ] = useState("");
+  ] =
+    useState(
+      ""
+    );
+
 
   const [
     description,
     setDescription,
-  ] = useState("");
+  ] =
+    useState(
+      ""
+    );
+
 
   const [
     icon,
     setIcon,
-  ] = useState("");
+  ] =
+    useState(
+      "📄"
+    );
 
-  async function fetchWorld() {
+
+  const [
+    loading,
+    setLoading,
+  ] =
+    useState(
+      true
+    );
+
+
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] =
+    useState(
+      ""
+    );
+
+
+  const [
+    creating,
+    setCreating,
+  ] =
+    useState(
+      false
+    );
+
+
+  // ====================================================
+  // Load Page
+  // ====================================================
+
+  async function loadPage() {
     try {
-      const response =
-        await fetch(
-          `${API_URL.worlds}/${worldId}`
-        );
+      setLoading(
+        true
+      );
 
-      if (!response.ok) {
-        throw new Error(
-          "Failed to fetch world"
-        );
-      }
 
-      const data =
-        await response.json();
+      setErrorMessage(
+        ""
+      );
 
-      setWorld(data);
-    } catch (error) {
+
+      const [
+        worldData,
+        entityTypesData,
+      ] =
+        await Promise.all([
+          apiFetch(
+            `${API_URL.worlds}/${worldId}`
+          ),
+
+          apiFetch(
+            `${API_URL.entityTypes}/world/${worldId}`
+          ),
+        ]);
+
+
+      setWorld(
+        worldData
+      );
+
+
+      setEntityTypes(
+        Array.isArray(
+          entityTypesData
+        )
+          ? entityTypesData
+          : []
+      );
+    } catch (
+      error
+    ) {
       console.error(
-        "Failed to fetch world:",
+        "Failed to load Entity Types page:",
         error
+      );
+
+
+      setWorld(
+        null
+      );
+
+
+      setErrorMessage(
+        error.message ||
+        "Failed to load entity types"
+      );
+    } finally {
+      setLoading(
+        false
       );
     }
   }
 
-  async function fetchEntityTypes() {
-    try {
-      const response =
-        await fetch(
-          `${API_URL.entityTypes}/world/${worldId}`
-        );
 
-      if (!response.ok) {
-        throw new Error(
-          "Failed to fetch entity types"
-        );
-      }
-
-      const data =
-        await response.json();
-
-      setEntityTypes(data);
-    } catch (error) {
-      console.error(
-        "Failed to fetch entity types:",
-        error
-      );
-    }
-  }
+  // ====================================================
+  // Create Entity Type
+  // ====================================================
 
   async function createEntityType(
     event
   ) {
     event.preventDefault();
 
-    if (!name.trim()) {
+
+    const normalizedName =
+      name.trim();
+
+
+    if (
+      !normalizedName ||
+      creating
+    ) {
       return;
     }
 
+
     try {
-      const response =
-        await fetch(
+      setCreating(
+        true
+      );
+
+
+      setErrorMessage(
+        ""
+      );
+
+
+      const newEntityType =
+        await apiFetch(
           API_URL.entityTypes,
           {
-            method: "POST",
+            method:
+              "POST",
 
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body: JSON.stringify({
+            body: {
               worldId,
-              name: name.trim(),
+
+              name:
+                normalizedName,
+
               description:
                 description.trim(),
-              icon,
-            }),
+
+              icon:
+                icon ||
+                "📄",
+            },
           }
         );
 
-      if (!response.ok) {
-        const errorData =
-          await response.json();
-
-        throw new Error(
-          errorData.message ||
-            "Failed to create entity type"
-        );
-      }
-
-      const newEntityType =
-        await response.json();
 
       setEntityTypes(
-        (current) => [
+        (
+          current
+        ) => [
           ...current,
           newEntityType,
         ]
       );
 
-      setName("");
-      setDescription("");
-      setIcon("📄");
-      setShowCreateForm(false);
-    } catch (error) {
+
+      setName(
+        ""
+      );
+
+
+      setDescription(
+        ""
+      );
+
+
+      setIcon(
+        "📄"
+      );
+
+
+      setShowCreateForm(
+        false
+      );
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to create entity type:",
         error
       );
 
-      alert(error.message);
+
+      setErrorMessage(
+        error.message ||
+        "Failed to create entity type"
+      );
+    } finally {
+      setCreating(
+        false
+      );
     }
   }
 
-  useEffect(() => {
-    fetchWorld();
-    fetchEntityTypes();
-  }, [worldId]);
 
-  if (!world) {
+  // ====================================================
+  // Navigation
+  // ====================================================
+
+  function openEntityType(
+    entityTypeId
+  ) {
+    navigate(
+      `/world/${worldId}/entity-types/${entityTypeId}`
+    );
+  }
+
+
+  // ====================================================
+  // Initial Load
+  // ====================================================
+
+  useEffect(
+    () => {
+      loadPage();
+    },
+    [
+      worldId,
+    ]
+  );
+
+
+  // ====================================================
+  // Loading
+  // ====================================================
+
+  if (
+    loading
+  ) {
     return (
       <div className="workspace-loading">
         {t(
@@ -185,18 +339,46 @@ function EntityTypesPage() {
     );
   }
 
+
+  // ====================================================
+  // Error
+  // ====================================================
+
+  if (
+    !world
+  ) {
+    return (
+      <div className="workspace-loading">
+        {errorMessage ||
+          t(
+            "workspace.notFound"
+          )}
+      </div>
+    );
+  }
+
+
+  // ====================================================
+  // Render
+  // ====================================================
+
   return (
     <WorldLayout
-      worldId={worldId}
-      worldName={world.name}
+      worldId={
+        worldId
+      }
+      worldName={
+        world.name
+      }
     >
-      <div className="entity-page-header">
+      <div className="page-header">
         <div>
           <h1>
             {t(
               "entityTypes.title"
             )}
           </h1>
+
 
           <p>
             {t(
@@ -205,19 +387,42 @@ function EntityTypesPage() {
           </p>
         </div>
 
+
         <button
+          type="button"
           className="create-button"
-          onClick={() =>
+          onClick={() => {
+            setErrorMessage(
+              ""
+            );
+
+
             setShowCreateForm(
               true
-            )
-          }
+            );
+          }}
         >
           {t(
             "entityTypes.newType"
           )}
         </button>
       </div>
+
+
+      {errorMessage && (
+        <div
+          className="error-message"
+          style={{
+            marginBottom:
+              "16px",
+          }}
+        >
+          {
+            errorMessage
+          }
+        </div>
+      )}
+
 
       {showCreateForm && (
         <div className="create-panel">
@@ -226,6 +431,7 @@ function EntityTypesPage() {
               "entityTypes.createTitle"
             )}
           </h2>
+
 
           <form
             onSubmit={
@@ -238,18 +444,27 @@ function EntityTypesPage() {
               )}
             </label>
 
+
             <input
               type="text"
-              value={name}
+              value={
+                name
+              }
+              disabled={
+                creating
+              }
               placeholder={t(
                 "entityTypes.namePlaceholder"
               )}
-              onChange={(event) =>
+              onChange={(
+                event
+              ) =>
                 setName(
                   event.target.value
                 )
               }
             />
+
 
             <label>
               {t(
@@ -257,18 +472,31 @@ function EntityTypesPage() {
               )}
             </label>
 
+
             <input
               type="text"
-              value={icon}
-              placeholder={t(
-                "entityTypes.setEmoji"
-              )}
-              onChange={(event) =>
+              value={
+                icon
+              }
+              disabled={
+                creating
+              }
+              onChange={(
+                event
+              ) =>
                 setIcon(
                   event.target.value
                 )
               }
             />
+
+
+            <small>
+              {t(
+                "entityTypes.setEmoji"
+              )}
+            </small>
+
 
             <label>
               {t(
@@ -276,55 +504,85 @@ function EntityTypesPage() {
               )}
             </label>
 
+
             <textarea
-              value={description}
+              value={
+                description
+              }
+              disabled={
+                creating
+              }
               placeholder={t(
                 "entityTypes.descriptionPlaceholder"
               )}
-              onChange={(event) =>
+              onChange={(
+                event
+              ) =>
                 setDescription(
                   event.target.value
                 )
               }
             />
 
+
             <div className="form-buttons">
               <button
                 type="button"
                 className="cancel-button"
-                onClick={() =>
+                disabled={
+                  creating
+                }
+                onClick={() => {
                   setShowCreateForm(
                     false
-                  )
-                }
+                  );
+
+
+                  setErrorMessage(
+                    ""
+                  );
+                }}
               >
                 {t(
                   "worlds.cancel"
                 )}
               </button>
 
+
               <button
                 type="submit"
                 className="save-button"
+                disabled={
+                  creating ||
+                  !name.trim()
+                }
               >
-                {t(
-                  "entityTypes.create"
-                )}
+                {creating
+                  ? "..."
+                  : t(
+                      "entityTypes.create"
+                    )}
               </button>
             </div>
           </form>
         </div>
       )}
 
+
       <div className="entity-type-grid">
         {entityTypes.map(
-          (entityType) => (
-            <div
+          (
+            entityType
+          ) => (
+            <button
+              type="button"
               className="entity-type-card"
-              key={entityType._id}
+              key={
+                entityType._id
+              }
               onClick={() =>
-                navigate(
-                  `/world/${worldId}/entity-types/${entityType._id}`
+                openEntityType(
+                  entityType._id
                 )
               }
             >
@@ -333,10 +591,14 @@ function EntityTypesPage() {
                   "📄"}
               </div>
 
-              <div>
+
+              <div className="entity-type-info">
                 <h2>
-                  {entityType.name}
+                  {
+                    entityType.name
+                  }
                 </h2>
+
 
                 <p>
                   {entityType.description ||
@@ -345,10 +607,11 @@ function EntityTypesPage() {
                     )}
                 </p>
               </div>
-            </div>
+            </button>
           )
         )}
       </div>
+
 
       {entityTypes.length ===
         0 && (
@@ -358,6 +621,7 @@ function EntityTypesPage() {
               "entityTypes.emptyTitle"
             )}
           </h2>
+
 
           <p>
             {t(
@@ -369,5 +633,6 @@ function EntityTypesPage() {
     </WorldLayout>
   );
 }
+
 
 export default EntityTypesPage;

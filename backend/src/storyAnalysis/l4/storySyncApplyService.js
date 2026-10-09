@@ -378,6 +378,213 @@ function findFieldByKey(
   );
 }
 
+// ======================================================
+// Draft Entity Resolution
+//
+// Smart Import can persist dependent suggestions before
+// their target Entity exists.
+//
+// Once the create-entity suggestion is accepted, its
+// appliedResult contains the real Entity ID.
+//
+// Dependent field/relation suggestions resolve that ID
+// here.
+// ======================================================
+
+function normalizeDraftEntityKey(
+  value
+) {
+  return String(
+    value || ""
+  )
+    .normalize(
+      "NFKC"
+    )
+    .trim()
+    .toLowerCase();
+}
+
+
+async function resolveAcceptedDraftEntity({
+  candidate,
+
+  draftEntityKey,
+
+  session = null,
+}) {
+  const normalizedKey =
+    normalizeDraftEntityKey(
+      draftEntityKey
+    );
+
+
+  if (
+    !normalizedKey
+  ) {
+    return null;
+  }
+
+
+  let query =
+    StorySyncCandidate.findOne({
+      worldId:
+        candidate.worldId,
+
+      documentId:
+        candidate.documentId,
+
+      kind:
+        "create-entity",
+
+      status:
+        "accepted",
+
+      "payload.draftEntityKey":
+        normalizedKey,
+    });
+
+
+  if (
+    session
+  ) {
+    query =
+      query.session(
+        session
+      );
+  }
+
+
+  const createCandidate =
+    await query;
+
+
+  const entityId =
+    createCandidate
+      ?.appliedResult
+      ?.entityId ??
+    null;
+
+
+  if (
+    !entityId
+  ) {
+    return null;
+  }
+
+
+  return ensureEntityInWorld({
+    entityId,
+
+    worldId:
+      candidate.worldId,
+
+    session,
+  });
+}
+
+
+async function resolveCandidateEntityReference({
+  candidate,
+
+  entityId = null,
+
+  draftEntityKey = null,
+
+  entityName = null,
+
+  session = null,
+}) {
+  /*
+   * Canonical ID always has priority.
+   */
+  if (
+    entityId
+  ) {
+    return ensureEntityInWorld({
+      entityId,
+
+      worldId:
+        candidate.worldId,
+
+      session,
+    });
+  }
+
+
+  /*
+   * Then resolve the accepted create-entity dependency.
+   */
+  if (
+    draftEntityKey
+  ) {
+    const draftEntity =
+      await resolveAcceptedDraftEntity({
+        candidate,
+
+        draftEntityKey,
+
+        session,
+      });
+
+
+    if (
+      draftEntity
+    ) {
+      return draftEntity;
+    }
+
+
+    throw new StorySyncApplyDeferredError(
+      `Entity dependency "${entityName || draftEntityKey}" has not been created yet.`,
+      {
+        requiredDependency:
+          "create-entity",
+
+        draftEntityKey,
+
+        entityName:
+          entityName ??
+        null,
+      }
+    );
+  }
+
+
+  throw new StorySyncApplyDeferredError(
+    "This suggestion does not yet have a materialized Entity target.",
+    {
+      entityName:
+        entityName ??
+      null,
+    }
+  );
+}
+
+
+function findFieldByConcept(
+  entityType,
+  fieldConcept
+) {
+  if (
+    !entityType ||
+    !fieldConcept
+  ) {
+    return null;
+  }
+
+
+  return (
+    entityType
+      .fields
+      .find(
+        (field) =>
+          field
+            .canonicalConcept ===
+          fieldConcept
+      ) ||
+    null
+  );
+}
 
 // ======================================================
 // Field Value Validation
@@ -618,22 +825,37 @@ async function validateFieldValue({
 
 async function applyFieldUpdate({
   candidate,
+
   session = null,
 }) {
   const payload =
     candidate.payload ||
     {};
 
-  const entity =
-    await ensureEntityInWorld({
-      entityId:
-        payload.targetEntityId,
 
-      worldId:
-        candidate.worldId,
+  // ----------------------------------------------------
+  // Resolve Existing / Draft Entity
+  // ----------------------------------------------------
+
+  const entity =
+    await resolveCandidateEntityReference({
+      candidate,
+
+      entityId:
+        payload
+          .targetEntityId,
+
+      draftEntityKey:
+        payload
+          .targetDraftEntityKey,
+
+      entityName:
+        payload
+          .targetEntityName,
 
       session,
     });
+
 
   const entityType =
     await ensureEntityTypeInWorld({
@@ -646,31 +868,79 @@ async function applyFieldUpdate({
       session,
     });
 
-  const field =
-    findFieldByKey(
-      entityType,
-      payload.fieldKey
-    );
+
+  // ----------------------------------------------------
+  // Resolve Schema Field
+  //
+  // Existing suggestions use fieldKey.
+  //
+  // Draft Smart Import suggestions may only know the
+  // language-independent canonical fieldConcept.
+  // ----------------------------------------------------
+
+  let field =
+    payload.fieldKey
+      ? findFieldByKey(
+          entityType,
+
+          payload.fieldKey
+        )
+      : null;
+
+
+  if (
+    !field &&
+    payload
+      .fieldConcept
+  ) {
+    field =
+      findFieldByConcept(
+        entityType,
+
+        payload
+          .fieldConcept
+      );
+  }
+
 
   if (
     !field
   ) {
-    throw new StorySyncApplyError(
-      "Target schema field no longer exists.",
+    throw new StorySyncApplyDeferredError(
+      "The required schema field does not exist yet.",
       {
-        code:
-          "FIELD_NOT_FOUND",
+        requiredDependency:
+          "create-schema-field",
 
-        statusCode:
-          404,
+        entityTypeId:
+          String(
+            entityType._id
+          ),
 
-        details: {
-          fieldKey:
-            payload.fieldKey,
-        },
+        entityTypeName:
+          entityType.name,
+
+        fieldKey:
+          payload
+            .fieldKey ??
+        null,
+
+        fieldConcept:
+          payload
+            .fieldConcept ??
+        null,
+
+        targetEntityId:
+          String(
+            entity._id
+          ),
+
+        targetEntityName:
+          entity.name,
       }
     );
   }
+
 
   const validatedValue =
     await validateFieldValue({
@@ -685,19 +955,59 @@ async function applyFieldUpdate({
       session,
     });
 
+
   const previousValue =
     entity.values.get(
       field.key
     );
 
-  entity.values.set(
-    field.key,
-    validatedValue
-  );
 
-  await entity.save({
-    session,
-  });
+  /*
+   * Keep the existing idempotent behavior, but avoid a
+   * pointless DB save when the value already matches.
+   */
+  const previousComparable =
+    previousValue instanceof
+      mongoose.Types.ObjectId
+      ? String(
+          previousValue
+        )
+      : previousValue;
+
+
+  const nextComparable =
+    validatedValue instanceof
+      mongoose.Types.ObjectId
+      ? String(
+          validatedValue
+        )
+      : validatedValue;
+
+
+  const alreadyMatches =
+    JSON.stringify(
+      previousComparable
+    ) ===
+    JSON.stringify(
+      nextComparable
+    );
+
+
+  if (
+    !alreadyMatches
+  ) {
+    entity.values.set(
+      field.key,
+
+      validatedValue
+    );
+
+
+    await entity.save({
+      session,
+    });
+  }
+
 
   return {
     appliedKind:
@@ -706,12 +1016,30 @@ async function applyFieldUpdate({
     entityId:
       entity._id,
 
+    entityName:
+      entity.name,
+
+    resolvedFromDraft:
+      Boolean(
+        payload
+          .targetDraftEntityKey &&
+        !payload
+          .targetEntityId
+      ),
+
+    draftEntityKey:
+      payload
+        .targetDraftEntityKey ??
+      null,
+
     fieldKey:
       field.key,
 
     fieldConcept:
-      field.canonicalConcept ??
-      payload.fieldConcept ??
+      field
+        .canonicalConcept ??
+      payload
+        .fieldConcept ??
       null,
 
     previousValue,
@@ -719,9 +1047,14 @@ async function applyFieldUpdate({
     value:
       validatedValue,
 
+    changed:
+      !alreadyMatches,
+
     graphImpact: {
       type:
-        "entity-updated",
+        alreadyMatches
+          ? "entity-present"
+          : "entity-updated",
 
       entityIds: [
         entity._id,
@@ -1350,6 +1683,11 @@ async function applyCreateEntity({
     entityId:
       entity._id,
 
+    draftEntityKey:
+        payload
+            .draftEntityKey ??
+        null,
+    
     entityTypeId:
       entityType._id,
 
@@ -1399,40 +1737,70 @@ async function applyCreateEntity({
 
 async function applyRelationUpdate({
   candidate,
+
   session = null,
 }) {
   const payload =
     candidate.payload ||
     {};
 
-  const subject =
-    await ensureEntityInWorld({
-      entityId:
-        payload.subjectEntityId,
 
-      worldId:
-        candidate.worldId,
+  // ----------------------------------------------------
+  // Resolve Existing / Draft Subject
+  // ----------------------------------------------------
+
+  const subject =
+    await resolveCandidateEntityReference({
+      candidate,
+
+      entityId:
+        payload
+          .subjectEntityId,
+
+      draftEntityKey:
+        payload
+          .subjectDraftEntityKey,
+
+      entityName:
+        payload
+          .subjectName,
 
       session,
     });
+
+
+  // ----------------------------------------------------
+  // Resolve Existing / Draft Object
+  // ----------------------------------------------------
 
   const object =
-    await ensureEntityInWorld({
-      entityId:
-        payload.objectEntityId,
+    await resolveCandidateEntityReference({
+      candidate,
 
-      worldId:
-        candidate.worldId,
+      entityId:
+        payload
+          .objectEntityId,
+
+      draftEntityKey:
+        payload
+          .objectDraftEntityKey,
+
+      entityName:
+        payload
+          .objectName,
 
       session,
     });
+
 
   const relationType =
     normalizeRelationType(
-      payload.relationConcept ||
+      payload
+        .relationConcept ||
       candidate.relationConcept ||
       candidate.relationType
     );
+
 
   if (
     !relationType
@@ -1465,6 +1833,7 @@ async function applyRelationUpdate({
       relationType,
     });
 
+
   if (
     session
   ) {
@@ -1474,8 +1843,10 @@ async function applyRelationUpdate({
       );
   }
 
+
   let relation =
     await relationQuery;
+
 
   let created =
     false;
@@ -1531,8 +1902,10 @@ async function applyRelationUpdate({
         }
       );
 
+
     relation =
       relations[0];
+
 
     created =
       true;
@@ -1551,23 +1924,26 @@ async function applyRelationUpdate({
     subjectEntityId:
       subject._id,
 
+    subjectName:
+      subject.name,
+
+    subjectDraftEntityKey:
+      payload
+        .subjectDraftEntityKey ??
+      null,
+
     objectEntityId:
       object._id,
 
+    objectName:
+      object.name,
+
+    objectDraftEntityKey:
+      payload
+        .objectDraftEntityKey ??
+      null,
+
     created,
-
-
-    // --------------------------------------------------
-    // GRAPH EXTENSION POINT
-    //
-    // Future:
-    //
-    // Entity   = graph node
-    // Relation = graph edge
-    //
-    // This payload can be consumed by cache invalidation,
-    // websocket updates, graph projection, Neo4j sync, etc.
-    // --------------------------------------------------
 
     graphImpact: {
       type:
@@ -1586,7 +1962,6 @@ async function applyRelationUpdate({
 
       relationType,
     },
-
 
     timelineImpact:
       null,
@@ -1760,11 +2135,11 @@ function didCanonicalStateChange(
     candidate.kind
   ) {
     case "field-update":
-      /*
-       * field-update always writes the requested canonical
-       * value when it reaches the mutation layer.
-       */
-      return true;
+        return (
+            appliedResult
+            .changed !==
+            false
+        );
 
 
     case "create-select-option":

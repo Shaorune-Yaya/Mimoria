@@ -12,57 +12,130 @@ import {
 } from "react-i18next";
 
 import WorldLayout from "../components/WorldLayout";
-import { API_URL } from "../config/api";
+
+import {
+  API_URL,
+} from "../config/api";
+
+import {
+  apiFetch,
+} from "../utils/apiFetch";
+
 
 function WorldWorkspace() {
-  const { worldId } =
+  const {
+    worldId,
+  } =
     useParams();
 
-  const { t } =
+
+  const {
+    t,
+  } =
     useTranslation();
+
 
   const [
     world,
     setWorld,
-  ] = useState(null);
+  ] =
+    useState(
+      null
+    );
+
 
   const [
     loading,
     setLoading,
-  ] = useState(true);
+  ] =
+    useState(
+      true
+    );
+
+
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] =
+    useState(
+      ""
+    );
+
+
+  // ====================================================
+  // Load World
+  // ====================================================
 
   async function fetchWorld() {
     try {
-      const response =
-        await fetch(
+      setLoading(
+        true
+      );
+
+
+      setErrorMessage(
+        ""
+      );
+
+
+      const data =
+        await apiFetch(
           `${API_URL.worlds}/${worldId}`
         );
 
-      if (!response.ok) {
-        throw new Error(
-          "Failed to fetch world"
-        );
-      }
 
-      const data =
-        await response.json();
-
-      setWorld(data);
-    } catch (error) {
+      setWorld(
+        data
+      );
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to fetch world:",
         error
       );
+
+
+      setWorld(
+        null
+      );
+
+
+      setErrorMessage(
+        error.message ||
+        t(
+          "workspace.notFound"
+        )
+      );
     } finally {
-      setLoading(false);
+      setLoading(
+        false
+      );
     }
   }
 
-  useEffect(() => {
-    fetchWorld();
-  }, [worldId]);
 
-  if (loading) {
+  // ====================================================
+  // Initial Load
+  // ====================================================
+
+  useEffect(
+    () => {
+      fetchWorld();
+    },
+    [
+      worldId,
+    ]
+  );
+
+
+  // ====================================================
+  // Loading
+  // ====================================================
+
+  if (
+    loading
+  ) {
     return (
       <div className="workspace-loading">
         {t(
@@ -72,20 +145,37 @@ function WorldWorkspace() {
     );
   }
 
-  if (!world) {
+
+  // ====================================================
+  // Error / Not Found
+  // ====================================================
+
+  if (
+    !world
+  ) {
     return (
       <div className="workspace-loading">
-        {t(
-          "workspace.notFound"
-        )}
+        {errorMessage ||
+          t(
+            "workspace.notFound"
+          )}
       </div>
     );
   }
 
+
+  // ====================================================
+  // Render
+  // ====================================================
+
   return (
     <WorldLayout
-      worldId={worldId}
-      worldName={world.name}
+      worldId={
+        worldId
+      }
+      worldName={
+        world.name
+      }
     >
       <div className="workspace-welcome">
         <div className="workspace-world-icon">
@@ -93,9 +183,11 @@ function WorldWorkspace() {
             "🌍"}
         </div>
 
+
         <h1>
           {world.name}
         </h1>
+
 
         <p>
           {world.description ||
@@ -103,6 +195,7 @@ function WorldWorkspace() {
               "worlds.noDescription"
             )}
         </p>
+
 
         <div className="workspace-placeholder">
           {t(
@@ -113,5 +206,6 @@ function WorldWorkspace() {
     </WorldLayout>
   );
 }
+
 
 export default WorldWorkspace;

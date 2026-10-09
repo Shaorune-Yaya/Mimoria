@@ -57,37 +57,77 @@ function addError(
 
 
 // ======================================================
-// Kind-Specific Validators
+// Field Update
+//
+// A field update may target:
+//
+// 1. Existing Entity
+//    targetEntityId
+//
+// 2. Draft Entity
+//    targetDraftEntityKey
+//
+// A field may also be identified by:
+//
+// 1. Existing schema fieldKey
+// 2. Canonical fieldConcept
+//
+// This allows Smart Import to preserve facts before the
+// target entity/schema has been materialized.
 // ======================================================
 
 function validateFieldUpdate(
   suggestion,
   errors
 ) {
-  if (
-    !hasValue(
+  const hasTargetEntity =
+    hasValue(
       suggestion
         .targetEntityId
-    )
+    );
+
+
+  const hasDraftTarget =
+    hasValue(
+      suggestion
+        .targetDraftEntityKey
+    );
+
+
+  if (
+    !hasTargetEntity &&
+    !hasDraftTarget
   ) {
     addError(
       errors,
       "targetEntityId",
-      "field-update requires targetEntityId."
+      "field-update requires targetEntityId or targetDraftEntityKey."
     );
   }
 
 
-  if (
-    !hasValue(
+  const hasFieldKey =
+    hasValue(
       suggestion
         .fieldKey
-    )
+    );
+
+
+  const hasFieldConcept =
+    hasValue(
+      suggestion
+        .fieldConcept
+    );
+
+
+  if (
+    !hasFieldKey &&
+    !hasFieldConcept
   ) {
     addError(
       errors,
       "fieldKey",
-      "field-update requires fieldKey."
+      "field-update requires fieldKey or fieldConcept."
     );
   }
 
@@ -105,20 +145,37 @@ function validateFieldUpdate(
 }
 
 
+// ======================================================
+// Relation Update
+//
+// Each side can independently reference either:
+//
+// entityId
+// draftEntityKey
+// ======================================================
+
 function validateRelationUpdate(
   suggestion,
   errors
 ) {
-  if (
-    !hasValue(
+  const hasSubject =
+    hasValue(
       suggestion
         .subjectEntityId
-    )
+    ) ||
+    hasValue(
+      suggestion
+        .subjectDraftEntityKey
+    );
+
+
+  if (
+    !hasSubject
   ) {
     addError(
       errors,
       "subjectEntityId",
-      "relation-update requires subjectEntityId."
+      "relation-update requires subjectEntityId or subjectDraftEntityKey."
     );
   }
 
@@ -137,20 +194,32 @@ function validateRelationUpdate(
   }
 
 
-  if (
-    !hasValue(
+  const hasObject =
+    hasValue(
       suggestion
         .objectEntityId
-    )
+    ) ||
+    hasValue(
+      suggestion
+        .objectDraftEntityKey
+    );
+
+
+  if (
+    !hasObject
   ) {
     addError(
       errors,
       "objectEntityId",
-      "relation-update requires objectEntityId."
+      "relation-update requires objectEntityId or objectDraftEntityKey."
     );
   }
 }
 
+
+// ======================================================
+// Event
+// ======================================================
 
 function validateEventHistory(
   suggestion,
@@ -171,6 +240,10 @@ function validateEventHistory(
 }
 
 
+// ======================================================
+// Create Entity
+// ======================================================
+
 function validateCreateEntity(
   suggestion,
   errors
@@ -189,6 +262,10 @@ function validateCreateEntity(
   }
 }
 
+
+// ======================================================
+// Create Schema Field
+// ======================================================
 
 function validateCreateSchemaField(
   suggestion,
@@ -251,6 +328,10 @@ function validateCreateSchemaField(
 }
 
 
+// ======================================================
+// Create Select Option
+// ======================================================
+
 function validateCreateSelectOption(
   suggestion,
   errors
@@ -271,9 +352,9 @@ function validateCreateSelectOption(
 
   if (
     suggestion.value ===
-    undefined ||
+      undefined ||
     suggestion.value ===
-    null
+      null
   ) {
     addError(
       errors,

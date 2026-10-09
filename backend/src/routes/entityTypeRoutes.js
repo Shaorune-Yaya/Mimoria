@@ -1,22 +1,29 @@
-const express = require(
-  "express"
-);
+const express =
+  require(
+    "express"
+  );
 
-const crypto = require(
-  "crypto"
-);
+const crypto =
+  require(
+    "crypto"
+  );
 
 
-const EntityType = require(
-  "../models/EntityType"
-);
+const World =
+  require(
+    "../models/World"
+  );
+
+const EntityType =
+  require(
+    "../models/EntityType"
+  );
 
 
 const {
-  getDevUser,
-  getOwnedWorld,
+  requireAuth,
 } = require(
-  "../utils/devUser"
+  "../middleware/requireAuth"
 );
 
 
@@ -32,7 +39,214 @@ const router =
 
 
 // ======================================================
-// Get all Entity Types belonging to a World
+// Authentication
+// ======================================================
+
+router.use(
+  requireAuth
+);
+
+
+// ======================================================
+// Ownership Helpers
+// ======================================================
+
+async function findOwnedWorld(
+  worldId,
+  userId
+) {
+  if (
+    !worldId ||
+    !userId
+  ) {
+    return null;
+  }
+
+
+  return World.findOne({
+    _id:
+      worldId,
+
+    ownerId:
+      userId,
+  });
+}
+
+
+async function findOwnedEntityType({
+  entityTypeId,
+  userId,
+}) {
+  const entityType =
+    await EntityType.findById(
+      entityTypeId
+    );
+
+
+  if (
+    !entityType
+  ) {
+    return null;
+  }
+
+
+  const world =
+    await findOwnedWorld(
+      entityType.worldId,
+      userId
+    );
+
+
+  if (
+    !world
+  ) {
+    return null;
+  }
+
+
+  return {
+    entityType,
+    world,
+  };
+}
+
+
+// ======================================================
+// Field Helpers
+// ======================================================
+
+function cleanSelectOptions(
+  options
+) {
+  if (
+    !Array.isArray(
+      options
+    )
+  ) {
+    return [];
+  }
+
+
+  const seen =
+    new Set();
+
+
+  const result =
+    [];
+
+
+  for (
+    const option of
+    options
+  ) {
+    const normalized =
+      String(
+        option
+      )
+        .trim();
+
+
+    if (
+      !normalized
+    ) {
+      continue;
+    }
+
+
+    const key =
+      normalized
+        .toLocaleLowerCase();
+
+
+    if (
+      seen.has(
+        key
+      )
+    ) {
+      continue;
+    }
+
+
+    seen.add(
+      key
+    );
+
+
+    result.push(
+      normalized
+    );
+  }
+
+
+  return result;
+}
+
+
+// ======================================================
+// Validate Entity Type Reference
+//
+// referenceEntityTypeId must refer to an EntityType in
+// the exact same owned World.
+// ======================================================
+
+async function validateReferenceEntityType({
+  world,
+  type,
+  referenceEntityTypeId,
+}) {
+  if (
+    type !==
+      "entity-reference" ||
+    !referenceEntityTypeId
+  ) {
+    return {
+      referenceEntityTypeId:
+        null,
+    };
+  }
+
+
+  let referencedType;
+
+
+  try {
+    referencedType =
+      await EntityType.findOne({
+        _id:
+          referenceEntityTypeId,
+
+        worldId:
+          world._id,
+      });
+  } catch {
+    return {
+      error:
+        "Invalid referenced Entity Type",
+    };
+  }
+
+
+  if (
+    !referencedType
+  ) {
+    return {
+      error:
+        "Referenced Entity Type not found",
+    };
+  }
+
+
+  return {
+    referenceEntityTypeId:
+      referencedType._id,
+  };
+}
+
+
+// ======================================================
+// Get All Entity Types in World
+//
+// GET /api/entity-types/world/:worldId
 // ======================================================
 
 router.get(
@@ -43,14 +257,10 @@ router.get(
     res
   ) => {
     try {
-      const user =
-        await getDevUser();
-
-
       const world =
-        await getOwnedWorld(
+        await findOwnedWorld(
           req.params.worldId,
-          user._id
+          req.user._id
         );
 
 
@@ -62,6 +272,9 @@ router.get(
           .json({
             message:
               "World not found",
+
+            code:
+              "WORLD_NOT_FOUND",
           });
       }
 
@@ -78,17 +291,19 @@ router.get(
           });
 
 
-      res.json(
+      return res.json(
         entityTypes
       );
-    } catch (error) {
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to get entity types:",
         error
       );
 
 
-      res
+      return res
         .status(500)
         .json({
           message:
@@ -103,7 +318,9 @@ router.get(
 
 
 // ======================================================
-// Create an Entity Type
+// Create Entity Type
+//
+// POST /api/entity-types
 // ======================================================
 
 router.post(
@@ -114,10 +331,6 @@ router.post(
     res
   ) => {
     try {
-      const user =
-        await getDevUser();
-
-
       const {
         worldId,
         name,
@@ -125,7 +338,8 @@ router.post(
         icon,
         canonicalConcept,
       } =
-        req.body;
+        req.body ||
+        {};
 
 
       if (
@@ -136,27 +350,40 @@ router.post(
           .json({
             message:
               "worldId is required",
+
+            code:
+              "WORLD_ID_REQUIRED",
           });
       }
 
 
+      const normalizedName =
+        String(
+          name ||
+          ""
+        )
+          .trim();
+
+
       if (
-        !name ||
-        !name.trim()
+        !normalizedName
       ) {
         return res
           .status(400)
           .json({
             message:
               "Entity type name is required",
+
+            code:
+              "ENTITY_TYPE_NAME_REQUIRED",
           });
       }
 
 
       const world =
-        await getOwnedWorld(
+        await findOwnedWorld(
           worldId,
-          user._id
+          req.user._id
         );
 
 
@@ -168,6 +395,9 @@ router.post(
           .json({
             message:
               "World not found",
+
+            code:
+              "WORLD_NOT_FOUND",
           });
       }
 
@@ -178,11 +408,20 @@ router.post(
             world._id,
 
           name:
-            name.trim(),
+            normalizedName,
 
-          description,
+          description:
+            typeof description ===
+            "string"
+              ? description
+              : "",
 
-          icon,
+          icon:
+            typeof icon ===
+              "string" &&
+            icon.trim()
+              ? icon.trim()
+              : "📄",
 
           canonicalConcept:
             canonicalConcept ||
@@ -208,19 +447,21 @@ router.post(
         canonVersion;
 
 
-      res
+      return res
         .status(201)
         .json(
           dto
         );
-    } catch (error) {
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to create entity type:",
         error
       );
 
 
-      res
+      return res
         .status(500)
         .json({
           message:
@@ -235,7 +476,9 @@ router.post(
 
 
 // ======================================================
-// Get one Entity Type
+// Get One Entity Type
+//
+// GET /api/entity-types/:id
 // ======================================================
 
 router.get(
@@ -246,58 +489,44 @@ router.get(
     res
   ) => {
     try {
-      const user =
-        await getDevUser();
+      const owned =
+        await findOwnedEntityType({
+          entityTypeId:
+            req.params.id,
 
-
-      const entityType =
-        await EntityType.findById(
-          req.params.id
-        );
+          userId:
+            req.user._id,
+        });
 
 
       if (
-        !entityType
+        !owned
       ) {
         return res
           .status(404)
           .json({
             message:
               "Entity type not found",
+
+            code:
+              "ENTITY_TYPE_NOT_FOUND",
           });
       }
 
 
-      const world =
-        await getOwnedWorld(
-          entityType.worldId,
-          user._id
-        );
-
-
-      if (
-        !world
-      ) {
-        return res
-          .status(404)
-          .json({
-            message:
-              "Entity type not found",
-          });
-      }
-
-
-      res.json(
-        entityType
+      return res.json(
+        owned.entityType
       );
-    } catch (error) {
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to get entity type:",
         error
       );
 
 
-      res
+      return res
         .status(500)
         .json({
           message:
@@ -312,7 +541,9 @@ router.get(
 
 
 // ======================================================
-// Add a field to an Entity Type
+// Add Field
+//
+// POST /api/entity-types/:id/fields
 // ======================================================
 
 router.post(
@@ -323,10 +554,6 @@ router.post(
     res
   ) => {
     try {
-      const user =
-        await getDevUser();
-
-
       const {
         label,
         type,
@@ -335,18 +562,29 @@ router.post(
         options,
         canonicalConcept,
       } =
-        req.body;
+        req.body ||
+        {};
+
+
+      const normalizedLabel =
+        String(
+          label ||
+          ""
+        )
+          .trim();
 
 
       if (
-        !label ||
-        !label.trim()
+        !normalizedLabel
       ) {
         return res
           .status(400)
           .json({
             message:
               "Field label is required",
+
+            code:
+              "FIELD_LABEL_REQUIRED",
           });
       }
 
@@ -359,55 +597,55 @@ router.post(
           .json({
             message:
               "Field type is required",
+
+            code:
+              "FIELD_TYPE_REQUIRED",
           });
       }
 
 
-      const entityType =
-        await EntityType.findById(
-          req.params.id
-        );
+      const owned =
+        await findOwnedEntityType({
+          entityTypeId:
+            req.params.id,
+
+          userId:
+            req.user._id,
+        });
 
 
       if (
-        !entityType
+        !owned
       ) {
         return res
           .status(404)
           .json({
             message:
               "Entity type not found",
+
+            code:
+              "ENTITY_TYPE_NOT_FOUND",
           });
       }
 
 
-      const world =
-        await getOwnedWorld(
-          entityType.worldId,
-          user._id
-        );
-
-
-      if (
-        !world
-      ) {
-        return res
-          .status(404)
-          .json({
-            message:
-              "Entity type not found",
-          });
-      }
+      const {
+        entityType,
+        world,
+      } =
+        owned;
 
 
       const duplicate =
         entityType.fields.find(
           (field) =>
-            field.label
+            String(
+              field.label ||
+              ""
+            )
               .trim()
               .toLowerCase() ===
-            label
-              .trim()
+            normalizedLabel
               .toLowerCase()
         );
 
@@ -420,6 +658,34 @@ router.post(
           .json({
             message:
               "A field with this name already exists",
+
+            code:
+              "FIELD_NAME_DUPLICATE",
+          });
+      }
+
+
+      const referenceValidation =
+        await validateReferenceEntityType({
+          world,
+
+          type,
+
+          referenceEntityTypeId,
+        });
+
+
+      if (
+        referenceValidation.error
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              referenceValidation.error,
+
+            code:
+              "REFERENCE_ENTITY_TYPE_INVALID",
           });
       }
 
@@ -433,31 +699,11 @@ router.post(
           )}`;
 
 
-      const cleanedOptions =
-        type ===
-        "select"
-          ? (
-              options ||
-              []
-            )
-              .map(
-                (option) =>
-                  String(
-                    option
-                  )
-                    .trim()
-              )
-              .filter(
-                Boolean
-              )
-          : [];
-
-
       const newField = {
         key,
 
         label:
-          label.trim(),
+          normalizedLabel,
 
         type,
 
@@ -471,14 +717,16 @@ router.post(
           null,
 
         referenceEntityTypeId:
-          type ===
-          "entity-reference"
-            ? referenceEntityTypeId ||
-              null
-            : null,
+          referenceValidation
+            .referenceEntityTypeId,
 
         options:
-          cleanedOptions,
+          type ===
+          "select"
+            ? cleanSelectOptions(
+                options
+              )
+            : [],
 
         order:
           entityType
@@ -511,19 +759,21 @@ router.post(
         canonVersion;
 
 
-      res
+      return res
         .status(201)
         .json(
           dto
         );
-    } catch (error) {
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to add field:",
         error
       );
 
 
-      res
+      return res
         .status(500)
         .json({
           message:
@@ -538,7 +788,9 @@ router.post(
 
 
 // ======================================================
-// Update an existing field
+// Update Existing Field
+//
+// PUT /api/entity-types/:id/fields/:fieldId
 // ======================================================
 
 router.put(
@@ -549,10 +801,6 @@ router.put(
     res
   ) => {
     try {
-      const user =
-        await getDevUser();
-
-
       const {
         label,
         type,
@@ -561,44 +809,40 @@ router.put(
         options,
         canonicalConcept,
       } =
-        req.body;
+        req.body ||
+        {};
 
 
-      const entityType =
-        await EntityType.findById(
-          req.params.id
-        );
+      const owned =
+        await findOwnedEntityType({
+          entityTypeId:
+            req.params.id,
+
+          userId:
+            req.user._id,
+        });
 
 
       if (
-        !entityType
+        !owned
       ) {
         return res
           .status(404)
           .json({
             message:
               "Entity type not found",
+
+            code:
+              "ENTITY_TYPE_NOT_FOUND",
           });
       }
 
 
-      const world =
-        await getOwnedWorld(
-          entityType.worldId,
-          user._id
-        );
-
-
-      if (
-        !world
-      ) {
-        return res
-          .status(404)
-          .json({
-            message:
-              "Entity type not found",
-          });
-      }
+      const {
+        entityType,
+        world,
+      } =
+        owned;
 
 
       const field =
@@ -617,19 +861,32 @@ router.put(
           .json({
             message:
               "Field not found",
+
+            code:
+              "FIELD_NOT_FOUND",
           });
       }
 
 
+      const normalizedLabel =
+        String(
+          label ||
+          ""
+        )
+          .trim();
+
+
       if (
-        !label ||
-        !label.trim()
+        !normalizedLabel
       ) {
         return res
           .status(400)
           .json({
             message:
               "Field label is required",
+
+            code:
+              "FIELD_LABEL_REQUIRED",
           });
       }
 
@@ -642,6 +899,9 @@ router.put(
           .json({
             message:
               "Field type is required",
+
+            code:
+              "FIELD_TYPE_REQUIRED",
           });
       }
 
@@ -651,18 +911,19 @@ router.put(
           (
             otherField
           ) =>
-            otherField
-              ._id
-              .toString() !==
-              field
-                ._id
-                .toString() &&
-            otherField
-              .label
+            String(
+              otherField._id
+            ) !==
+              String(
+                field._id
+              ) &&
+            String(
+              otherField.label ||
+              ""
+            )
               .trim()
               .toLowerCase() ===
-              label
-                .trim()
+              normalizedLabel
                 .toLowerCase()
         );
 
@@ -675,15 +936,45 @@ router.put(
           .json({
             message:
               "A field with this name already exists",
+
+            code:
+              "FIELD_NAME_DUPLICATE",
+          });
+      }
+
+
+      const referenceValidation =
+        await validateReferenceEntityType({
+          world,
+
+          type,
+
+          referenceEntityTypeId,
+        });
+
+
+      if (
+        referenceValidation.error
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              referenceValidation.error,
+
+            code:
+              "REFERENCE_ENTITY_TYPE_INVALID",
           });
       }
 
 
       field.label =
-        label.trim();
+        normalizedLabel;
+
 
       field.type =
         type;
+
 
       field.required =
         Boolean(
@@ -692,8 +983,10 @@ router.put(
 
 
       /*
-       * If canonicalConcept is omitted by the existing
-       * frontend, preserve the current semantic mapping.
+       * Existing frontend may omit canonicalConcept.
+       *
+       * Preserve the old semantic mapping unless the
+       * request explicitly includes the property.
        */
       if (
         canonicalConcept !==
@@ -706,30 +999,16 @@ router.put(
 
 
       field.referenceEntityTypeId =
-        type ===
-        "entity-reference"
-          ? referenceEntityTypeId ||
-            null
-          : null;
+        referenceValidation
+          .referenceEntityTypeId;
 
 
       field.options =
         type ===
         "select"
-          ? (
-              options ||
-              []
+          ? cleanSelectOptions(
+              options
             )
-              .map(
-                (option) =>
-                  String(
-                    option
-                  )
-                    .trim()
-              )
-              .filter(
-                Boolean
-              )
           : [];
 
 
@@ -750,17 +1029,19 @@ router.put(
         canonVersion;
 
 
-      res.json(
+      return res.json(
         dto
       );
-    } catch (error) {
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to update field:",
         error
       );
 
 
-      res
+      return res
         .status(500)
         .json({
           message:
@@ -775,7 +1056,9 @@ router.put(
 
 
 // ======================================================
-// Delete a field
+// Delete Field
+//
+// DELETE /api/entity-types/:id/fields/:fieldId
 // ======================================================
 
 router.delete(
@@ -786,45 +1069,36 @@ router.delete(
     res
   ) => {
     try {
-      const user =
-        await getDevUser();
+      const owned =
+        await findOwnedEntityType({
+          entityTypeId:
+            req.params.id,
 
-
-      const entityType =
-        await EntityType.findById(
-          req.params.id
-        );
+          userId:
+            req.user._id,
+        });
 
 
       if (
-        !entityType
+        !owned
       ) {
         return res
           .status(404)
           .json({
             message:
               "Entity type not found",
+
+            code:
+              "ENTITY_TYPE_NOT_FOUND",
           });
       }
 
 
-      const world =
-        await getOwnedWorld(
-          entityType.worldId,
-          user._id
-        );
-
-
-      if (
-        !world
-      ) {
-        return res
-          .status(404)
-          .json({
-            message:
-              "Entity type not found",
-          });
-      }
+      const {
+        entityType,
+        world,
+      } =
+        owned;
 
 
       const field =
@@ -843,6 +1117,9 @@ router.delete(
           .json({
             message:
               "Field not found",
+
+            code:
+              "FIELD_NOT_FOUND",
           });
       }
 
@@ -867,17 +1144,19 @@ router.delete(
         canonVersion;
 
 
-      res.json(
+      return res.json(
         dto
       );
-    } catch (error) {
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to delete field:",
         error
       );
 
 
-      res
+      return res
         .status(500)
         .json({
           message:

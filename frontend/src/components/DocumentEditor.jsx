@@ -26,6 +26,10 @@ import {
   API_URL,
 } from "../config/api";
 
+import {
+  apiFetch,
+} from "../utils/apiFetch";
+
 import EntityMentionHighlighter, {
   ENTITY_MENTION_REFRESH_META,
 } from "../extensions/EntityMentionHighlighter";
@@ -301,154 +305,126 @@ function DocumentEditor({
 
 
   async function saveSnapshot(
-    documentId,
-    snapshot,
-    revision,
-    {
-      silent = false,
-    } = {}
+  documentId,
+  snapshot,
+  revision,
+  {
+    silent = false,
+  } = {}
+) {
+  if (
+    !documentId ||
+    !snapshot
   ) {
+    return;
+  }
+
+
+  try {
     if (
-      !documentId ||
-      !snapshot
+      !silent &&
+      mountedRef.current &&
+      currentDocumentIdRef.current ===
+        documentId
     ) {
-      return;
-    }
-
-
-    try {
-      if (
-        !silent &&
-        mountedRef.current &&
-        currentDocumentIdRef.current ===
-          documentId
-      ) {
-        setSaveState(
-          "saving"
-        );
-
-
-        setSaveError(
-          ""
-        );
-      }
-
-
-      const response =
-        await fetch(
-          `${API_URL.documents}/${documentId}/content`,
-          {
-            method:
-              "PUT",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify({
-                content:
-                  snapshot.content,
-
-                plainText:
-                  snapshot.plainText,
-              }),
-
-            keepalive:
-              silent,
-          }
-        );
-
-
-      if (
-        !response.ok
-      ) {
-        const data =
-          await response
-            .json()
-            .catch(
-              () => ({})
-            );
-
-
-        throw new Error(
-          data.message ||
-            t(
-              "documents.saveFailed"
-            )
-        );
-      }
-
-
-      const data =
-        await response.json();
-
-
-      const savedDocument =
-        data.document;
-
-
-      if (
-        savedDocument &&
-        onSaved
-      ) {
-        onSaved(
-          savedDocument
-        );
-      }
-
-
-      if (
-        !silent &&
-        mountedRef.current &&
-        currentDocumentIdRef.current ===
-          documentId
-      ) {
-        if (
-          revisionRef.current ===
-          revision
-        ) {
-          setSaveState(
-            "saved"
-          );
-
-
-          latestSnapshotRef.current =
-            null;
-        } else {
-          setSaveState(
-            "dirty"
-          );
-        }
-      }
-    } catch (error) {
-      console.error(
-        "Failed to auto-save document:",
-        error
+      setSaveState(
+        "saving"
       );
 
 
+      setSaveError(
+        ""
+      );
+    }
+
+
+    const data =
+      await apiFetch(
+        `${API_URL.documents}/${documentId}/content`,
+        {
+          method:
+            "PUT",
+
+          body: {
+            content:
+              snapshot.content,
+
+            plainText:
+              snapshot.plainText,
+          },
+
+          keepalive:
+            silent,
+        }
+      );
+
+
+    const savedDocument =
+      data.document;
+
+
+    if (
+      savedDocument &&
+      onSaved
+    ) {
+      onSaved(
+        savedDocument
+      );
+    }
+
+
+    if (
+      !silent &&
+      mountedRef.current &&
+      currentDocumentIdRef.current ===
+        documentId
+    ) {
       if (
-        !silent &&
-        mountedRef.current &&
-        currentDocumentIdRef.current ===
-          documentId
+        revisionRef.current ===
+        revision
       ) {
         setSaveState(
-          "error"
+          "saved"
         );
 
 
-        setSaveError(
-          error.message ||
-            t(
-              "documents.saveFailed"
-            )
+        latestSnapshotRef.current =
+          null;
+      } else {
+        setSaveState(
+          "dirty"
         );
       }
     }
+  } catch (
+    error
+  ) {
+    console.error(
+      "Failed to auto-save document:",
+      error
+    );
+
+
+    if (
+      !silent &&
+      mountedRef.current &&
+      currentDocumentIdRef.current ===
+        documentId
+    ) {
+      setSaveState(
+        "error"
+      );
+
+
+      setSaveError(
+        error.message ||
+        t(
+          "documents.saveFailed"
+        )
+      );
+    }
   }
+}
 
 
   function scheduleSave(
@@ -832,23 +808,10 @@ function DocumentEditor({
 
     async function loadEntities() {
       try {
-        const response =
-          await fetch(
+        const data =
+          await apiFetch(
             `${API_URL.entities}/world/${worldId}`
           );
-
-
-        if (
-          !response.ok
-        ) {
-          throw new Error(
-            "Failed to load Entities for document mentions."
-          );
-        }
-
-
-        const data =
-          await response.json();
 
 
         if (
@@ -881,6 +844,29 @@ function DocumentEditor({
           "Failed to load Entity mentions:",
           error
         );
+
+
+        if (
+          cancelled
+        ) {
+          return;
+        }
+
+
+        entitiesRef.current =
+          [];
+
+
+        if (
+          !editor.isDestroyed
+        ) {
+          editor.view.dispatch(
+            editor.state.tr.setMeta(
+              ENTITY_MENTION_REFRESH_META,
+              true
+            )
+          );
+        }
       }
     }
 

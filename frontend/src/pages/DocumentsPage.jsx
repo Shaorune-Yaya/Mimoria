@@ -27,10 +27,19 @@ import {
 
 import WorldLayout from "../components/WorldLayout";
 import DocumentEditor from "../components/DocumentEditor";
-import StorySuggestionsPanel from "../components/StorySuggestionsPanel";
 
-import { API_URL } from "../config/api";
+import {
+  API_URL,
+} from "../config/api";
 
+import {
+  apiFetch,
+} from "../utils/apiFetch";
+
+
+// ======================================================
+// Document Tree Row
+// ======================================================
 
 function DocumentTreeRow({
   node,
@@ -57,14 +66,17 @@ function DocumentTreeRow({
     activeNodeId ===
     node._id;
 
+
   const isFolder =
     node.kind ===
     "folder";
+
 
   const isSelected =
     !isFolder &&
     selectedDocumentId ===
       node.documentId?._id;
+
 
   const isRenaming =
     editingNodeId ===
@@ -74,16 +86,19 @@ function DocumentTreeRow({
   const {
     attributes,
     listeners,
+
     setNodeRef:
       setDragRef,
-    isDragging,
-  } = useDraggable({
-    id:
-      node._id,
 
-    disabled:
-      isRenaming,
-  });
+    isDragging,
+  } =
+    useDraggable({
+      id:
+        node._id,
+
+      disabled:
+        isRenaming,
+    });
 
 
   const {
@@ -92,13 +107,14 @@ function DocumentTreeRow({
 
     isOver:
       isBeforeOver,
-  } = useDroppable({
-    id:
-      `before:${node._id}`,
+  } =
+    useDroppable({
+      id:
+        `before:${node._id}`,
 
-    disabled:
-      isActive,
-  });
+      disabled:
+        isActive,
+    });
 
 
   const {
@@ -107,14 +123,15 @@ function DocumentTreeRow({
 
     isOver:
       isInsideOver,
-  } = useDroppable({
-    id:
-      `inside:${node._id}`,
+  } =
+    useDroppable({
+      id:
+        `inside:${node._id}`,
 
-    disabled:
-      isActive ||
-      !isFolder,
-  });
+      disabled:
+        isActive ||
+        !isFolder,
+    });
 
 
   const {
@@ -123,13 +140,14 @@ function DocumentTreeRow({
 
     isOver:
       isAfterOver,
-  } = useDroppable({
-    id:
-      `after:${node._id}`,
+  } =
+    useDroppable({
+      id:
+        `after:${node._id}`,
 
-    disabled:
-      isActive,
-  });
+      disabled:
+        isActive,
+    });
 
 
   const style = {
@@ -175,8 +193,12 @@ function DocumentTreeRow({
       ? "drop-after"
       : "",
   ]
-    .filter(Boolean)
-    .join(" ");
+    .filter(
+      Boolean
+    )
+    .join(
+      " "
+    );
 
 
   return (
@@ -235,6 +257,7 @@ function DocumentTreeRow({
           ) => {
             event.stopPropagation();
 
+
             if (
               isFolder
             ) {
@@ -266,6 +289,7 @@ function DocumentTreeRow({
             <span className="explorer-icon">
               {icon}
             </span>
+
 
             <input
               autoFocus
@@ -302,16 +326,19 @@ function DocumentTreeRow({
                 ) {
                   event.preventDefault();
 
+
                   onRenameSubmit(
                     node
                   );
                 }
+
 
                 if (
                   event.key ===
                   "Escape"
                 ) {
                   event.preventDefault();
+
 
                   onRenameCancel();
                 }
@@ -339,6 +366,7 @@ function DocumentTreeRow({
             <span className="explorer-icon">
               {icon}
             </span>
+
 
             <span className="explorer-name">
               {
@@ -376,6 +404,7 @@ function DocumentTreeRow({
               ) => {
                 event.stopPropagation();
 
+
                 if (
                   isFolder
                 ) {
@@ -404,6 +433,7 @@ function DocumentTreeRow({
                 event
               ) => {
                 event.stopPropagation();
+
 
                 onContextMenu(
                   event,
@@ -444,16 +474,21 @@ function DocumentTreeRow({
 }
 
 
+// ======================================================
+// Root Drop Zone
+// ======================================================
+
 function DocumentRootDropZone({
   t,
 }) {
   const {
     setNodeRef,
     isOver,
-  } = useDroppable({
-    id:
-      "document-root:end",
-  });
+  } =
+    useDroppable({
+      id:
+        "document-root:end",
+    });
 
 
   return (
@@ -475,148 +510,126 @@ function DocumentRootDropZone({
 }
 
 
+// ======================================================
+// Documents Page
+// ======================================================
+
 function DocumentsPage() {
   const {
     worldId,
-  } = useParams();
+  } =
+    useParams();
 
 
   const {
     t,
-    i18n,
-  } = useTranslation();
+  } =
+    useTranslation();
 
 
   const menuRef =
-    useRef(null);
+    useRef(
+      null
+    );
 
 
   const [
     world,
     setWorld,
-  ] = useState(null);
+  ] =
+    useState(
+      null
+    );
 
 
   const [
     treeNodes,
     setTreeNodes,
-  ] = useState([]);
+  ] =
+    useState(
+      []
+    );
 
 
   const [
     loading,
     setLoading,
-  ] = useState(true);
+  ] =
+    useState(
+      true
+    );
 
 
   const [
     error,
     setError,
-  ] = useState("");
+  ] =
+    useState(
+      ""
+    );
 
 
   const [
     selectedDocument,
     setSelectedDocument,
-  ] = useState(null);
+  ] =
+    useState(
+      null
+    );
 
 
   const [
     showCreateDocument,
     setShowCreateDocument,
-  ] = useState(false);
+  ] =
+    useState(
+      false
+    );
 
 
   const [
     documentTitle,
     setDocumentTitle,
-  ] = useState("");
+  ] =
+    useState(
+      ""
+    );
 
 
   const [
     documentParentId,
     setDocumentParentId,
-  ] = useState(null);
-
-
-  const [
-    storySuggestions,
-    setStorySuggestions,
-  ] = useState([]);
-
-
-  const [
-    storyAnalysisState,
-    setStoryAnalysisState,
-  ] = useState(
-    "idle"
-  );
-
-
-  const [
-    storyAnalysisError,
-    setStoryAnalysisError,
-  ] = useState("");
-
-
-  const [
-    storyAnalysisMeta,
-    setStoryAnalysisMeta,
-  ] = useState({
-    documentNeedsAnalysis:
-      false,
-
-    canonNeedsAnalysis:
-      false,
-
-    needsAnalysis:
-      false,
-
-    worldCanonVersion:
-      null,
-
-    lastAnalyzedCanonVersion:
-      null,
-  });
-
-
-  const [
-    storySuggestionActionId,
-    setStorySuggestionActionId,
-  ] = useState(null);
-
-
-  const [
-    entityTypes,
-    setEntityTypes,
-  ] = useState([]);
-
-  const [
-    editorSaveState,
-    setEditorSaveState,
-  ] = useState(
-    "saved"
-  );
+  ] =
+    useState(
+      null
+    );
 
 
   const [
     expandedFolders,
     setExpandedFolders,
-  ] = useState(
-    () => new Set()
-  );
+  ] =
+    useState(
+      () =>
+        new Set()
+    );
 
 
   const [
     activeNodeId,
     setActiveNodeId,
-  ] = useState(null);
+  ] =
+    useState(
+      null
+    );
 
 
   const activeDocumentNode =
     activeNodeId
       ? treeNodes.find(
-          (node) =>
+          (
+            node
+          ) =>
             node._id ===
             activeNodeId
         )
@@ -626,209 +639,131 @@ function DocumentsPage() {
   const [
     showFolderForm,
     setShowFolderForm,
-  ] = useState(false);
+  ] =
+    useState(
+      false
+    );
 
 
   const [
     folderName,
     setFolderName,
-  ] = useState("");
+  ] =
+    useState(
+      ""
+    );
 
 
   const [
     folderParentId,
     setFolderParentId,
-  ] = useState(null);
+  ] =
+    useState(
+      null
+    );
 
 
   const [
     editingNodeId,
     setEditingNodeId,
-  ] = useState(null);
+  ] =
+    useState(
+      null
+    );
 
 
   const [
     editingName,
     setEditingName,
-  ] = useState("");
+  ] =
+    useState(
+      ""
+    );
 
 
   const [
     deleteTarget,
     setDeleteTarget,
-  ] = useState(null);
+  ] =
+    useState(
+      null
+    );
 
 
   const [
     contextMenu,
     setContextMenu,
-  ] = useState(null);
+  ] =
+    useState(
+      null
+    );
 
 
   const [
     actionError,
     setActionError,
-  ] = useState("");
-
-
-  useEffect(() => {
-    loadPage();
-  }, [
-    worldId,
-  ]);
-
-
-  useEffect(() => {
-    loadEntityTypes();
-  }, [
-    worldId,
-  ]);
-
-
-  useEffect(() => {
-    function handleOutsideClick(
-      event
-    ) {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(
-          event.target
-        )
-      ) {
-        setContextMenu(
-          null
-        );
-      }
-    }
-
-
-    document.addEventListener(
-      "mousedown",
-      handleOutsideClick
-    );
-
-
-    return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleOutsideClick
-      );
-    };
-  }, []);
-
-
-  useEffect(() => {
-    setStorySuggestions(
-      []
-    );
-
-
-    setStoryAnalysisError(
+  ] =
+    useState(
       ""
     );
 
 
-    setStoryAnalysisState(
-      "idle"
-    );
+  // ====================================================
+  // Initial Load
+  // ====================================================
+
+  useEffect(
+    () => {
+      loadPage();
+    },
+    [
+      worldId,
+    ]
+  );
 
 
-    setStoryAnalysisMeta({
-      documentNeedsAnalysis:
-        false,
+  // ====================================================
+  // Close Context Menu
+  // ====================================================
 
-      canonNeedsAnalysis:
-        false,
-
-      needsAnalysis:
-        false,
-
-      worldCanonVersion:
-        null,
-
-      lastAnalyzedCanonVersion:
-        null,
-    });
-
-
-    if (
-      !selectedDocument?._id
-    ) {
-      return;
-    }
-
-
-    if (
-      selectedDocument
-        .contentVersion !==
-      selectedDocument
-        .syncedVersion
-    ) {
-      return;
-    }
-
-
-    if (
-      !selectedDocument
-        .syncedVersion
-    ) {
-      return;
-    }
-
-
-    loadStorySuggestions(
-      selectedDocument._id
-    );
-  }, [
-    selectedDocument?._id,
-    selectedDocument?.contentVersion,
-    selectedDocument?.syncedVersion,
-  ]);
-
-
-  async function loadEntityTypes() {
-    try {
-      const response =
-        await fetch(
-          `${API_URL.entityTypes}/world/${worldId}`
-        );
-
-
-      if (
-        !response.ok
+  useEffect(
+    () => {
+      function handleOutsideClick(
+        event
       ) {
-        throw new Error(
-          t(
-            "documents.entityTypesLoadFailed"
+        if (
+          menuRef.current &&
+          !menuRef.current.contains(
+            event.target
           )
-        );
+        ) {
+          setContextMenu(
+            null
+          );
+        }
       }
 
 
-      const data =
-        await response.json();
-
-
-      setEntityTypes(
-        Array.isArray(
-          data
-        )
-          ? data
-          : []
-      );
-    } catch (loadError) {
-      console.error(
-        "Failed to load Entity Types for Story Suggestions:",
-        loadError
+      document.addEventListener(
+        "mousedown",
+        handleOutsideClick
       );
 
 
-      setEntityTypes(
-        []
-      );
-    }
-  }
+      return () => {
+        document.removeEventListener(
+          "mousedown",
+          handleOutsideClick
+        );
+      };
+    },
+    []
+  );
 
+
+  // ====================================================
+  // Load Page
+  // ====================================================
 
   async function loadPage() {
     try {
@@ -843,48 +778,18 @@ function DocumentsPage() {
 
 
       const [
-        worldResponse,
-        treeResponse,
+        worldData,
+        treeData,
       ] =
         await Promise.all([
-          fetch(
+          apiFetch(
             `${API_URL.worlds}/${worldId}`
           ),
 
-          fetch(
+          apiFetch(
             `${API_URL.documentTree}/world/${worldId}`
           ),
         ]);
-
-
-      if (
-        !worldResponse.ok
-      ) {
-        throw new Error(
-          t(
-            "workspace.notFound"
-          )
-        );
-      }
-
-
-      if (
-        !treeResponse.ok
-      ) {
-        throw new Error(
-          t(
-            "documents.loadError"
-          )
-        );
-      }
-
-
-      const worldData =
-        await worldResponse.json();
-
-
-      const treeData =
-        await treeResponse.json();
 
 
       const safeTree =
@@ -909,17 +814,23 @@ function DocumentsPage() {
         new Set(
           safeTree
             .filter(
-              (node) =>
+              (
+                node
+              ) =>
                 node.kind ===
                 "folder"
             )
             .map(
-              (node) =>
+              (
+                node
+              ) =>
                 node._id
             )
         )
       );
-    } catch (loadError) {
+    } catch (
+      loadError
+    ) {
       console.error(
         "Failed to load Documents:",
         loadError
@@ -928,9 +839,9 @@ function DocumentsPage() {
 
       setError(
         loadError.message ||
-          t(
-            "documents.loadError"
-          )
+        t(
+          "documents.loadError"
+        )
       );
     } finally {
       setLoading(
@@ -940,30 +851,19 @@ function DocumentsPage() {
   }
 
 
+  // ====================================================
+  // Refresh Tree
+  // ====================================================
+
   async function refreshTree(
     preferredDocumentId =
       null
   ) {
     try {
-      const response =
-        await fetch(
+      const data =
+        await apiFetch(
           `${API_URL.documentTree}/world/${worldId}`
         );
-
-
-      if (
-        !response.ok
-      ) {
-        throw new Error(
-          t(
-            "documents.loadError"
-          )
-        );
-      }
-
-
-      const data =
-        await response.json();
 
 
       const safeData =
@@ -984,14 +884,18 @@ function DocumentsPage() {
         selectedDocument?._id;
 
 
-      if (!currentId) {
+      if (
+        !currentId
+      ) {
         return;
       }
 
 
       const node =
         safeData.find(
-          (item) =>
+          (
+            item
+          ) =>
             item.kind ===
               "document" &&
             item.documentId?._id ===
@@ -1003,15 +907,21 @@ function DocumentsPage() {
         node?.documentId
       ) {
         setSelectedDocument(
-          (current) => {
+          (
+            current
+          ) => {
             if (
               current?._id ===
-              node.documentId._id &&
-              (current.contentVersion ??
-                0) >
-                (node.documentId
-                  .contentVersion ??
-                  0)
+                node.documentId._id &&
+              (
+                current.contentVersion ??
+                0
+              ) >
+                (
+                  node.documentId
+                    .contentVersion ??
+                  0
+                )
             ) {
               return current;
             }
@@ -1036,13 +946,17 @@ function DocumentsPage() {
 
       setActionError(
         refreshError.message ||
-          t(
-            "documents.loadError"
-          )
+        t(
+          "documents.loadError"
+        )
       );
     }
   }
 
+
+  // ====================================================
+  // Tree Helpers
+  // ====================================================
 
   function getParentId(
     node
@@ -1070,71 +984,84 @@ function DocumentsPage() {
 
 
   const nodesByParent =
-    useMemo(() => {
-      const map =
-        new Map();
+    useMemo(
+      () => {
+        const map =
+          new Map();
 
 
-      for (
-        const node of
-        treeNodes
-      ) {
-        const parentId =
-          getParentId(
-            node
-          );
-
-
-        const key =
-          parentId
-            ? String(
-                parentId
-              )
-            : "root";
-
-
-        if (
-          !map.has(
-            key
-          )
+        for (
+          const node of
+          treeNodes
         ) {
-          map.set(
-            key,
-            []
+          const parentId =
+            getParentId(
+              node
+            );
+
+
+          const key =
+            parentId
+              ? String(
+                  parentId
+                )
+              : "root";
+
+
+          if (
+            !map.has(
+              key
+            )
+          ) {
+            map.set(
+              key,
+              []
+            );
+          }
+
+
+          map
+            .get(
+              key
+            )
+            .push(
+              node
+            );
+        }
+
+
+        for (
+          const children of
+          map.values()
+        ) {
+          children.sort(
+            (
+              a,
+              b
+            ) =>
+              (
+                a.order ??
+                0
+              ) -
+              (
+                b.order ??
+                0
+              )
           );
         }
 
 
-        map
-          .get(
-            key
-          )
-          .push(
-            node
-          );
-      }
-
-
-      for (
-        const children of
-        map.values()
-      ) {
-        children.sort(
-          (a, b) =>
-            (a.order ?? 0) -
-            (b.order ?? 0)
-        );
-      }
-
-
-      return map;
-    }, [
-      treeNodes,
-    ]);
+        return map;
+      },
+      [
+        treeNodes,
+      ]
+    );
 
 
   function getChildren(
-    parentId = null
+    parentId =
+      null
   ) {
     const key =
       parentId
@@ -1147,7 +1074,8 @@ function DocumentsPage() {
     return (
       nodesByParent.get(
         key
-      ) || []
+      ) ||
+      []
     );
   }
 
@@ -1156,7 +1084,9 @@ function DocumentsPage() {
     folderId
   ) {
     setExpandedFolders(
-      (current) => {
+      (
+        current
+      ) => {
         const next =
           new Set(
             current
@@ -1184,6 +1114,10 @@ function DocumentsPage() {
   }
 
 
+  // ====================================================
+  // Select Document
+  // ====================================================
+
   async function selectDocument(
     node
   ) {
@@ -1199,7 +1133,9 @@ function DocumentsPage() {
       node.documentId?._id;
 
 
-    if (!documentId) {
+    if (
+      !documentId
+    ) {
       return;
     }
 
@@ -1230,31 +1166,24 @@ function DocumentsPage() {
 
 
     try {
-      const response =
-        await fetch(
+      const freshDocument =
+        await apiFetch(
           `${API_URL.documents}/${documentId}`
         );
 
 
-      if (
-        !response.ok
-      ) {
-        return;
-      }
-
-
-      const freshDocument =
-        await response.json();
-
-
       setSelectedDocument(
-        (current) =>
+        (
+          current
+        ) =>
           current?._id ===
           freshDocument._id
             ? freshDocument
             : current
       );
-    } catch (loadError) {
+    } catch (
+      loadError
+    ) {
       console.error(
         "Failed to refresh selected document:",
         loadError
@@ -1262,6 +1191,10 @@ function DocumentsPage() {
     }
   }
 
+
+  // ====================================================
+  // Move Document Node
+  // ====================================================
 
   async function moveDocumentNode(
     nodeId,
@@ -1274,52 +1207,27 @@ function DocumentsPage() {
       );
 
 
-      const response =
-        await fetch(
-          `${API_URL.documentTree}/${nodeId}/move`,
-          {
-            method:
-              "PUT",
+      await apiFetch(
+        `${API_URL.documentTree}/${nodeId}/move`,
+        {
+          method:
+            "PUT",
 
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify({
-                parentId,
-                index,
-              }),
-          }
-        );
-
-
-      if (
-        !response.ok
-      ) {
-        const data =
-          await response
-            .json()
-            .catch(
-              () => ({})
-            );
-
-
-        throw new Error(
-          data.message ||
-            t(
-              "documents.moveFailed"
-            )
-        );
-      }
+          body: {
+            parentId,
+            index,
+          },
+        }
+      );
 
 
       if (
         parentId
       ) {
         setExpandedFolders(
-          (current) => {
+          (
+            current
+          ) => {
             const next =
               new Set(
                 current
@@ -1338,7 +1246,9 @@ function DocumentsPage() {
 
 
       await refreshTree();
-    } catch (moveError) {
+    } catch (
+      moveError
+    ) {
       console.error(
         "Failed to move document node:",
         moveError
@@ -1347,9 +1257,9 @@ function DocumentsPage() {
 
       setActionError(
         moveError.message ||
-          t(
-            "documents.moveFailed"
-          )
+        t(
+          "documents.moveFailed"
+        )
       );
     }
   }
@@ -1370,7 +1280,9 @@ function DocumentsPage() {
       getChildren(
         parentId
       ).filter(
-        (node) =>
+        (
+          node
+        ) =>
           node._id !==
           draggedId
       );
@@ -1378,7 +1290,9 @@ function DocumentsPage() {
 
     const targetIndex =
       siblings.findIndex(
-        (node) =>
+        (
+          node
+        ) =>
           node._id ===
           targetNode._id
       );
@@ -1415,7 +1329,8 @@ function DocumentsPage() {
     const {
       active,
       over,
-    } = event;
+    } =
+      event;
 
 
     setActiveNodeId(
@@ -1423,7 +1338,9 @@ function DocumentsPage() {
     );
 
 
-    if (!over) {
+    if (
+      !over
+    ) {
       return;
     }
 
@@ -1448,7 +1365,9 @@ function DocumentsPage() {
         getChildren(
           null
         ).filter(
-          (node) =>
+          (
+            node
+          ) =>
             node._id !==
             draggedId
         );
@@ -1516,13 +1435,17 @@ function DocumentsPage() {
 
     const targetNode =
       treeNodes.find(
-        (node) =>
+        (
+          node
+        ) =>
           node._id ===
           targetNodeId
       );
 
 
-    if (!targetNode) {
+    if (
+      !targetNode
+    ) {
       return;
     }
 
@@ -1543,7 +1466,9 @@ function DocumentsPage() {
         getChildren(
           targetNode._id
         ).filter(
-          (node) =>
+          (
+            node
+          ) =>
             node._id !==
             draggedId
         );
@@ -1599,8 +1524,13 @@ function DocumentsPage() {
   }
 
 
+  // ====================================================
+  // Create Document
+  // ====================================================
+
   function openCreateDocument(
-    parentId = null
+    parentId =
+      null
   ) {
     setSelectedDocument(
       null
@@ -1641,7 +1571,9 @@ function DocumentsPage() {
       parentId
     ) {
       setExpandedFolders(
-        (current) => {
+        (
+          current
+        ) => {
           const next =
             new Set(
               current
@@ -1687,7 +1619,9 @@ function DocumentsPage() {
       documentTitle.trim();
 
 
-    if (!title) {
+    if (
+      !title
+    ) {
       return;
     }
 
@@ -1698,60 +1632,31 @@ function DocumentsPage() {
       );
 
 
-      const response =
-        await fetch(
+      const newDocument =
+        await apiFetch(
           API_URL.documents,
           {
             method:
               "POST",
 
-            headers: {
-              "Content-Type":
-                "application/json",
+            body: {
+              worldId,
+              title,
+
+              parentId:
+                documentParentId,
             },
-
-            body:
-              JSON.stringify({
-                worldId,
-
-                title,
-
-                parentId:
-                  documentParentId,
-              }),
           }
         );
-
-
-      if (
-        !response.ok
-      ) {
-        const data =
-          await response
-            .json()
-            .catch(
-              () => ({})
-            );
-
-
-        throw new Error(
-          data.message ||
-            t(
-              "documents.createFailed"
-            )
-        );
-      }
-
-
-      const newDocument =
-        await response.json();
 
 
       if (
         documentParentId
       ) {
         setExpandedFolders(
-          (current) => {
+          (
+            current
+          ) => {
             const next =
               new Set(
                 current
@@ -1780,7 +1685,9 @@ function DocumentsPage() {
       await refreshTree(
         newDocument._id
       );
-    } catch (createError) {
+    } catch (
+      createError
+    ) {
       console.error(
         "Failed to create document:",
         createError
@@ -1789,16 +1696,21 @@ function DocumentsPage() {
 
       setActionError(
         createError.message ||
-          t(
-            "documents.createFailed"
-          )
+        t(
+          "documents.createFailed"
+        )
       );
     }
   }
 
 
+  // ====================================================
+  // Create Folder
+  // ====================================================
+
   function openFolderForm(
-    parentId = null
+    parentId =
+      null
   ) {
     setFolderParentId(
       parentId
@@ -1824,7 +1736,9 @@ function DocumentsPage() {
       parentId
     ) {
       setExpandedFolders(
-        (current) => {
+        (
+          current
+        ) => {
           const next =
             new Set(
               current
@@ -1870,7 +1784,9 @@ function DocumentsPage() {
       folderName.trim();
 
 
-    if (!name) {
+    if (
+      !name
+    ) {
       return;
     }
 
@@ -1881,57 +1797,28 @@ function DocumentsPage() {
       );
 
 
-      const response =
-        await fetch(
+      const folder =
+        await apiFetch(
           `${API_URL.documentTree}/folders`,
           {
             method:
               "POST",
 
-            headers: {
-              "Content-Type":
-                "application/json",
+            body: {
+              worldId,
+              name,
+
+              parentId:
+                folderParentId,
             },
-
-            body:
-              JSON.stringify({
-                worldId,
-
-                name,
-
-                parentId:
-                  folderParentId,
-              }),
           }
         );
 
 
-      if (
-        !response.ok
-      ) {
-        const data =
-          await response
-            .json()
-            .catch(
-              () => ({})
-            );
-
-
-        throw new Error(
-          data.message ||
-            t(
-              "documents.createFolderFailed"
-            )
-        );
-      }
-
-
-      const folder =
-        await response.json();
-
-
       setExpandedFolders(
-        (current) => {
+        (
+          current
+        ) => {
           const next =
             new Set(
               current
@@ -1961,7 +1848,9 @@ function DocumentsPage() {
 
 
       await refreshTree();
-    } catch (createError) {
+    } catch (
+      createError
+    ) {
       console.error(
         "Failed to create document folder:",
         createError
@@ -1970,13 +1859,17 @@ function DocumentsPage() {
 
       setActionError(
         createError.message ||
-          t(
-            "documents.createFolderFailed"
-          )
+        t(
+          "documents.createFolderFailed"
+        )
       );
     }
   }
 
+
+  // ====================================================
+  // Rename
+  // ====================================================
 
   function startRename(
     node
@@ -1987,7 +1880,8 @@ function DocumentsPage() {
 
 
     setEditingName(
-      node.name || ""
+      node.name ||
+      ""
     );
 
 
@@ -2026,37 +1920,34 @@ function DocumentsPage() {
       editingName.trim();
 
 
-    if (!name) {
+    if (
+      !name
+    ) {
       cancelRename();
+
 
       return;
     }
 
 
     try {
-      let response;
+      let updated;
 
 
       if (
         node.kind ===
         "folder"
       ) {
-        response =
-          await fetch(
+        updated =
+          await apiFetch(
             `${API_URL.documentTree}/${node._id}/name`,
             {
               method:
                 "PUT",
 
-              headers: {
-                "Content-Type":
-                  "application/json",
+              body: {
+                name,
               },
-
-              body:
-                JSON.stringify({
-                  name,
-                }),
             }
           );
       } else {
@@ -2064,55 +1955,27 @@ function DocumentsPage() {
           node.documentId?._id;
 
 
-        if (!documentId) {
+        if (
+          !documentId
+        ) {
           return;
         }
 
 
-        response =
-          await fetch(
+        updated =
+          await apiFetch(
             `${API_URL.documents}/${documentId}/title`,
             {
               method:
                 "PUT",
 
-              headers: {
-                "Content-Type":
-                  "application/json",
+              body: {
+                title:
+                  name,
               },
-
-              body:
-                JSON.stringify({
-                  title:
-                    name,
-                }),
             }
           );
       }
-
-
-      if (
-        !response.ok
-      ) {
-        const data =
-          await response
-            .json()
-            .catch(
-              () => ({})
-            );
-
-
-        throw new Error(
-          data.message ||
-            t(
-              "documents.renameFailed"
-            )
-        );
-      }
-
-
-      const updated =
-        await response.json();
 
 
       cancelRename();
@@ -2125,7 +1988,9 @@ function DocumentsPage() {
           node.documentId?._id
       ) {
         setSelectedDocument(
-          (current) => ({
+          (
+            current
+          ) => ({
             ...current,
 
             title:
@@ -2137,7 +2002,9 @@ function DocumentsPage() {
 
 
       await refreshTree();
-    } catch (renameError) {
+    } catch (
+      renameError
+    ) {
       console.error(
         "Failed to rename document item:",
         renameError
@@ -2146,13 +2013,17 @@ function DocumentsPage() {
 
       setActionError(
         renameError.message ||
-          t(
-            "documents.renameFailed"
-          )
+        t(
+          "documents.renameFailed"
+        )
       );
     }
   }
 
+
+  // ====================================================
+  // Delete
+  // ====================================================
 
   function requestDelete(
     node
@@ -2181,65 +2052,49 @@ function DocumentsPage() {
 
 
   async function confirmDelete() {
-    if (!deleteTarget) {
+    if (
+      !deleteTarget
+    ) {
       return;
     }
 
 
     try {
-      let response;
+      setActionError(
+        ""
+      );
 
 
       if (
         deleteTarget.kind ===
         "folder"
       ) {
-        response =
-          await fetch(
-            `${API_URL.documentTree}/${deleteTarget._id}`,
-            {
-              method:
-                "DELETE",
-            }
-          );
+        await apiFetch(
+          `${API_URL.documentTree}/${deleteTarget._id}`,
+          {
+            method:
+              "DELETE",
+          }
+        );
       } else {
         const documentId =
           deleteTarget
             .documentId?._id;
 
 
-        if (!documentId) {
+        if (
+          !documentId
+        ) {
           return;
         }
 
 
-        response =
-          await fetch(
-            `${API_URL.documents}/${documentId}`,
-            {
-              method:
-                "DELETE",
-            }
-          );
-      }
-
-
-      if (
-        !response.ok
-      ) {
-        const data =
-          await response
-            .json()
-            .catch(
-              () => ({})
-            );
-
-
-        throw new Error(
-          data.message ||
-            t(
-              "documents.deleteFailed"
-            )
+        await apiFetch(
+          `${API_URL.documents}/${documentId}`,
+          {
+            method:
+              "DELETE",
+          }
         );
       }
 
@@ -2263,7 +2118,9 @@ function DocumentsPage() {
 
 
       await refreshTree();
-    } catch (deleteError) {
+    } catch (
+      deleteError
+    ) {
       console.error(
         "Failed to delete document item:",
         deleteError
@@ -2272,13 +2129,17 @@ function DocumentsPage() {
 
       setActionError(
         deleteError.message ||
-          t(
-            "documents.deleteFailed"
-          )
+        t(
+          "documents.deleteFailed"
+        )
       );
     }
   }
 
+
+  // ====================================================
+  // Context Menu
+  // ====================================================
 
   function openContextMenu(
     event,
@@ -2334,827 +2195,17 @@ function DocumentsPage() {
   }
 
 
-  function getStoryCandidateId(
-    candidate
-  ) {
-    return (
-      candidate?.id ||
-      candidate?._id ||
-      null
-    );
-  }
-
-
-  function getConceptLabel(
-    concept
-  ) {
-    if (!concept) {
-      return "";
-    }
-
-
-    const conceptKey =
-      String(
-        concept
-      )
-        .replace(
-          /\./gu,
-          "_"
-        );
-
-
-    const key =
-      `documents.concepts.${conceptKey}`;
-
-
-    return t(
-      key,
-      {
-        defaultValue:
-          String(
-            concept
-          )
-            .replace(
-              /^(?:field|relation|event|entityType)\./u,
-              ""
-            )
-            .replace(
-              /_/gu,
-              " "
-            ),
-      }
-    );
-  }
-
-
-  function getSuggestionKindLabel(
-    kind
-  ) {
-    const keyMap = {
-      "field-update":
-        "documents.suggestionKinds.fieldUpdate",
-
-      "relation-update":
-        "documents.suggestionKinds.relationUpdate",
-
-      "event-history":
-        "documents.suggestionKinds.eventHistory",
-
-      "create-entity":
-        "documents.suggestionKinds.createEntity",
-
-      "create-schema-field":
-        "documents.suggestionKinds.createSchemaField",
-
-      "create-select-option":
-        "documents.suggestionKinds.createSelectOption",
-    };
-
-
-    return t(
-      keyMap[kind] ||
-        "documents.suggestionKinds.unknown"
-    );
-  }
-
-
-  function replaceStorySuggestion(
-    updatedCandidate
-  ) {
-    const updatedId =
-      getStoryCandidateId(
-        updatedCandidate
-      );
-
-
-    if (
-      !updatedId
-    ) {
-      return;
-    }
-
-
-    setStorySuggestions(
-      (current) =>
-        current.map(
-          (item) =>
-            getStoryCandidateId(
-              item
-            ) ===
-            updatedId
-              ? updatedCandidate
-              : item
-        )
-    );
-  }
-
-
-  async function loadStorySuggestions(
-    documentId
-  ) {
-    if (!documentId) {
-      return;
-    }
-
-
-    try {
-      setStoryAnalysisError(
-        ""
-      );
-
-
-      const response =
-        await fetch(
-          `${API_URL.storySuggestions}/documents/${documentId}`
-        );
-
-
-      if (
-        !response.ok
-      ) {
-        const data =
-          await response
-            .json()
-            .catch(
-              () => ({})
-            );
-
-
-        throw new Error(
-          data.message ||
-            t(
-              "documents.storySuggestionsLoadFailed"
-            )
-        );
-      }
-
-
-      const data =
-        await response.json();
-
-
-      setStorySuggestions(
-        Array.isArray(
-          data.candidates
-        )
-          ? data.candidates
-          : []
-      );
-
-
-      setStoryAnalysisMeta({
-        documentNeedsAnalysis:
-          Boolean(
-            data.documentNeedsAnalysis
-          ),
-
-        canonNeedsAnalysis:
-          Boolean(
-            data.canonNeedsAnalysis
-          ),
-
-        needsAnalysis:
-          Boolean(
-            data.needsAnalysis
-          ),
-
-        worldCanonVersion:
-          data.worldCanonVersion ??
-          null,
-
-        lastAnalyzedCanonVersion:
-          data.lastAnalyzedCanonVersion ??
-          null,
-      });
-
-
-      setStoryAnalysisState(
-        "complete"
-      );
-    } catch (error) {
-      console.error(
-        "Failed to load Story Suggestions:",
-        error
-      );
-
-
-      setStoryAnalysisError(
-        error.message ||
-          t(
-            "documents.storySuggestionsLoadFailed"
-          )
-      );
-
-
-      setStoryAnalysisState(
-        "error"
-      );
-    }
-  }
-
-  async function analyzeStory() {
-    if (
-      !selectedDocument?._id
-    ) {
-      return;
-    }
-
-
-    if (
-      editorSaveState !==
-      "saved"
-    ) {
-      return;
-    }
-
-
-    try {
-      setStoryAnalysisState(
-        "analyzing"
-      );
-
-
-      setStoryAnalysisError(
-        ""
-      );
-
-
-      const response =
-        await fetch(
-          `${API_URL.storySuggestions}/documents/${selectedDocument._id}/analyze`,
-          {
-            method:
-              "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify({
-                locale:
-                  "auto",
-
-                forceLocale:
-                  false,
-
-                enabledPacks: [
-                  "furry",
-                  "sciFi",
-                ],
-
-                nsfwEnabled:
-                  false,
-              }),
-          }
-        );
-
-
-      if (
-        !response.ok
-      ) {
-        const data =
-          await response
-            .json()
-            .catch(
-              () => ({})
-            );
-
-
-        throw new Error(
-          data.message ||
-            t(
-              "documents.storyAnalysisFailed"
-            )
-        );
-      }
-
-
-      const data =
-        await response.json();
-
-
-      const analyzedDocument =
-        data.document;
-
-
-      const candidates =
-        Array.isArray(
-          data.candidates
-        )
-          ? data.candidates
-          : [];
-
-
-      setStorySuggestions(
-        candidates
-      );
-
-
-      setStoryAnalysisState(
-        "complete"
-      );
-
-
-      setStoryAnalysisMeta({
-        documentNeedsAnalysis:
-          Boolean(
-            analyzedDocument
-              ?.documentNeedsAnalysis
-          ),
-
-        canonNeedsAnalysis:
-          Boolean(
-            analyzedDocument
-              ?.canonNeedsAnalysis
-          ),
-
-        needsAnalysis:
-          Boolean(
-            analyzedDocument
-              ?.needsAnalysis
-          ),
-
-        worldCanonVersion:
-          analyzedDocument
-            ?.worldCanonVersion ??
-          null,
-
-        lastAnalyzedCanonVersion:
-          analyzedDocument
-            ?.lastAnalyzedCanonVersion ??
-          null,
-      });
-
-
-      if (
-        analyzedDocument
-      ) {
-        setSelectedDocument(
-          (current) => {
-            if (
-              !current ||
-              current._id !==
-                analyzedDocument.id
-            ) {
-              return current;
-            }
-
-
-            return {
-              ...current,
-
-              contentVersion:
-                analyzedDocument.contentVersion ??
-                current.contentVersion,
-
-              syncedVersion:
-                analyzedDocument.syncedVersion ??
-                current.syncedVersion,
-
-              lastAnalyzedCanonVersion:
-                analyzedDocument.lastAnalyzedCanonVersion ??
-                current.lastAnalyzedCanonVersion,
-
-              lastSyncedAt:
-                analyzedDocument.lastSyncedAt ??
-                current.lastSyncedAt,
-            };
-          }
-        );
-
-
-        setTreeNodes(
-          (currentNodes) =>
-            currentNodes.map(
-              (node) => {
-                if (
-                  node.kind !==
-                    "document" ||
-                  node.documentId?._id !==
-                    analyzedDocument.id
-                ) {
-                  return node;
-                }
-
-
-                return {
-                  ...node,
-
-                  documentId: {
-                    ...node.documentId,
-
-                    contentVersion:
-                      analyzedDocument.contentVersion ??
-                      node.documentId
-                        ?.contentVersion,
-
-                    syncedVersion:
-                      analyzedDocument.syncedVersion ??
-                      node.documentId
-                        ?.syncedVersion,
-
-                    lastAnalyzedCanonVersion:
-                      analyzedDocument.lastAnalyzedCanonVersion ??
-                      node.documentId
-                        ?.lastAnalyzedCanonVersion,
-
-                    lastSyncedAt:
-                      analyzedDocument.lastSyncedAt ??
-                      node.documentId
-                        ?.lastSyncedAt,
-                  },
-                };
-              }
-            )
-        );
-      }
-    } catch (error) {
-      console.error(
-        "Story analysis failed:",
-        error
-      );
-
-
-      setStoryAnalysisError(
-        error.message ||
-          t(
-            "documents.storyAnalysisFailed"
-          )
-      );
-
-
-      setStoryAnalysisState(
-        "error"
-      );
-    }
-  }
-
-
-  async function applyStorySuggestion(
-    candidate,
-    options = {}
-  ) {
-    const candidateId =
-      getStoryCandidateId(
-        candidate
-      );
-
-
-    if (
-      !candidateId
-    ) {
-      return false;
-    }
-
-
-    if (
-      candidate.kind ===
-        "event-history"
-    ) {
-      setStoryAnalysisError(
-        t(
-          "documents.timelineNotAvailable"
-        )
-      );
-
-
-      return false;
-    }
-
-
-    try {
-      setStorySuggestionActionId(
-        candidateId
-      );
-
-
-      setStoryAnalysisError(
-        ""
-      );
-
-
-      const requestBody = {
-        ...options,
-      };
-
-
-      const response =
-        await fetch(
-          `${API_URL.storySuggestions}/${candidateId}/apply`,
-          {
-            method:
-              "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify(
-                requestBody
-              ),
-          }
-        );
-
-
-      const data =
-        await response
-          .json()
-          .catch(
-            () => ({})
-          );
-
-
-      if (
-        !response.ok
-      ) {
-        if (
-          data.code ===
-            "STORY_SYNC_APPLY_DEFERRED"
-        ) {
-          throw new Error(
-            data.message ||
-              t(
-                "documents.suggestionDeferred"
-              )
-          );
-        }
-
-
-        throw new Error(
-          data.message ||
-            t(
-              "documents.storySuggestionApplyFailed"
-            )
-        );
-      }
-
-
-      if (
-        data.candidate
-      ) {
-        replaceStorySuggestion(
-          data.candidate
-        );
-      }
-
-
-      if (
-        data.recommendedEntityType
-      ) {
-        await loadEntityTypes();
-      }
-
-
-      if (
-        data.canonChanged
-      ) {
-        setStoryAnalysisMeta(
-          (current) => ({
-            ...current,
-
-            canonNeedsAnalysis:
-              true,
-
-            needsAnalysis:
-              true,
-
-            worldCanonVersion:
-              data.canonVersion ??
-              current.worldCanonVersion,
-          })
-        );
-      }
-
-
-      return true;
-    } catch (error) {
-      console.error(
-        "Failed to apply Story Suggestion:",
-        error
-      );
-
-
-      setStoryAnalysisError(
-        error.message ||
-          t(
-            "documents.storySuggestionApplyFailed"
-          )
-      );
-
-
-      return false;
-    } finally {
-      setStorySuggestionActionId(
-        null
-      );
-    }
-  }
-
-
-  async function editStorySuggestion(
-    candidate,
-    payloadPatch
-  ) {
-    const candidateId =
-      getStoryCandidateId(
-        candidate
-      );
-
-
-    if (
-      !candidateId
-    ) {
-      return false;
-    }
-
-
-    try {
-      setStorySuggestionActionId(
-        candidateId
-      );
-
-
-      setStoryAnalysisError(
-        ""
-      );
-
-
-      const response =
-        await fetch(
-          `${API_URL.storySuggestions}/${candidateId}`,
-          {
-            method:
-              "PATCH",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify({
-                payload:
-                  payloadPatch,
-              }),
-          }
-        );
-
-
-      const data =
-        await response
-          .json()
-          .catch(
-            () => ({})
-          );
-
-
-      if (
-        !response.ok
-      ) {
-        throw new Error(
-          data.message ||
-            t(
-              "documents.storySuggestionEditFailed"
-            )
-        );
-      }
-
-
-      if (
-        data.candidate
-      ) {
-        replaceStorySuggestion(
-          data.candidate
-        );
-      }
-
-
-      return true;
-    } catch (error) {
-      console.error(
-        "Failed to edit Story Suggestion:",
-        error
-      );
-
-
-      setStoryAnalysisError(
-        error.message ||
-          t(
-            "documents.storySuggestionEditFailed"
-          )
-      );
-
-
-      return false;
-    } finally {
-      setStorySuggestionActionId(
-        null
-      );
-    }
-  }
-
-  async function ignoreStorySuggestion(
-    candidate
-  ) {
-    const candidateId =
-      getStoryCandidateId(
-        candidate
-      );
-
-
-    if (
-      !candidateId
-    ) {
-      return;
-    }
-
-
-    try {
-      setStorySuggestionActionId(
-        candidateId
-      );
-
-
-      setStoryAnalysisError(
-        ""
-      );
-
-
-      const response =
-        await fetch(
-          `${API_URL.storySuggestions}/${candidateId}/ignore`,
-          {
-            method:
-              "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify({}),
-          }
-        );
-
-
-      const data =
-        await response
-          .json()
-          .catch(
-            () => ({})
-          );
-
-
-      if (
-        !response.ok
-      ) {
-        throw new Error(
-          data.message ||
-            t(
-              "documents.storySuggestionIgnoreFailed"
-            )
-        );
-      }
-
-
-      if (
-        data.candidate
-      ) {
-        replaceStorySuggestion(
-          data.candidate
-        );
-      }
-    } catch (error) {
-      console.error(
-        "Failed to ignore Story Suggestion:",
-        error
-      );
-
-
-      setStoryAnalysisError(
-        error.message ||
-          t(
-            "documents.storySuggestionIgnoreFailed"
-          )
-      );
-    } finally {
-      setStorySuggestionActionId(
-        null
-      );
-    }
-  }
-
+  // ====================================================
+  // Document Saved
+  // ====================================================
 
   function handleDocumentSaved(
     savedDocument
   ) {
     setSelectedDocument(
-      (current) =>
+      (
+        current
+      ) =>
         current?._id ===
         savedDocument._id
           ? savedDocument
@@ -3163,9 +2214,13 @@ function DocumentsPage() {
 
 
     setTreeNodes(
-      (currentNodes) =>
+      (
+        currentNodes
+      ) =>
         currentNodes.map(
-          (node) => {
+          (
+            node
+          ) => {
             if (
               node.kind !==
                 "document" ||
@@ -3191,9 +2246,15 @@ function DocumentsPage() {
   }
 
 
+  // ====================================================
+  // Render Tree
+  // ====================================================
+
   function renderTree(
-    parentId = null,
-    depth = 0
+    parentId =
+      null,
+    depth =
+      0
   ) {
     const children =
       getChildren(
@@ -3202,7 +2263,9 @@ function DocumentsPage() {
 
 
     return children.map(
-      (node) => (
+      (
+        node
+      ) => (
         <DocumentTreeRow
           key={
             node._id
@@ -3262,6 +2325,10 @@ function DocumentsPage() {
     );
   }
 
+
+  // ====================================================
+  // Explorer Sidebar
+  // ====================================================
 
   const explorerSidebar = (
     <DndContext
@@ -3539,37 +2606,16 @@ function DocumentsPage() {
   );
 
 
-  const documentNeedsAnalysis =
-    Boolean(
-      selectedDocument &&
-      selectedDocument
-        .contentVersion !==
-        selectedDocument
-          .syncedVersion
-    );
-
-
-  const canonNeedsAnalysis =
-    Boolean(
-      storyAnalysisMeta
-        .canonNeedsAnalysis
-    );
-
-
-  const storyNeedsSync =
-    Boolean(
-      documentNeedsAnalysis ||
-      canonNeedsAnalysis ||
-      storyAnalysisMeta
-        .needsAnalysis
-    );
-
+  // ====================================================
+  // Mobile
+  // ====================================================
 
   function closeMobileWorkspace() {
     if (
       showCreateDocument
     ) {
       closeCreateDocument();
+
 
       return;
     }
@@ -3580,6 +2626,10 @@ function DocumentsPage() {
     );
   }
 
+
+  // ====================================================
+  // Loading
+  // ====================================================
 
   if (
     loading &&
@@ -3594,6 +2644,10 @@ function DocumentsPage() {
     );
   }
 
+
+  // ====================================================
+  // Render
+  // ====================================================
 
   return (
     <>
@@ -3757,82 +2811,6 @@ function DocumentsPage() {
         {!showCreateDocument &&
           selectedDocument && (
             <div className="document-preview">
-              <div className="document-preview-toolbar">
-                <div className="document-preview-meta">
-                  {t(
-                    "documents.version"
-                  )}{" "}
-
-                  {
-                    selectedDocument.contentVersion
-                  }
-
-                  {" · "}
-
-                  {documentNeedsAnalysis
-                    ? t(
-                        "documents.storyNeedsAnalysis"
-                      )
-                    : canonNeedsAnalysis
-                      ? t(
-                          "documents.canonNeedsAnalysis"
-                        )
-                      : t(
-                          "documents.storyAnalyzed"
-                        )}
-                </div>
-
-
-                <button
-                  type="button"
-                  className={[
-                    "document-sync-button",
-
-                    storyNeedsSync
-                      ? "needs-analysis"
-                      : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  disabled={
-                    storyAnalysisState ===
-                      "analyzing" ||
-                    editorSaveState !==
-                      "saved"
-                  }
-                  title={
-                    editorSaveState !==
-                    "saved"
-                      ? t(
-                          "documents.analyzeAfterSave"
-                        )
-                      : t(
-                          "documents.analyzeStoryDescription"
-                        )
-                  }
-                  onClick={
-                    analyzeStory
-                  }
-                >
-                  {storyAnalysisState ===
-                  "analyzing"
-                    ? "…"
-                    : "◇"}
-
-                  {" "}
-
-                  {storyAnalysisState ===
-                  "analyzing"
-                    ? t(
-                        "documents.analyzingStory"
-                      )
-                    : t(
-                        "documents.analyzeStory"
-                      )}
-                </button>
-              </div>
-
-
               <DocumentEditor
                 key={
                   selectedDocument._id
@@ -3843,83 +2821,7 @@ function DocumentsPage() {
                 onSaved={
                   handleDocumentSaved
                 }
-                onSaveStateChange={
-                  setEditorSaveState
-                }
               />
-
-
-              <StorySuggestionsPanel
-                candidates={
-                  storySuggestions
-                }
-                entityTypes={
-                  entityTypes
-                }
-                analysisState={
-                  storyAnalysisState
-                }
-                analysisError={
-                  storyAnalysisError
-                }
-                actionCandidateId={
-                  storySuggestionActionId
-                }
-                language={
-                  i18n.language
-                }
-                t={
-                  t
-                }
-                getConceptLabel={
-                  getConceptLabel
-                }
-                getSuggestionKindLabel={
-                  getSuggestionKindLabel
-                }
-                onApply={
-                  applyStorySuggestion
-                }
-                onIgnore={
-                  ignoreStorySuggestion
-                }
-                onEdit={
-                  editStorySuggestion
-                }
-                onClearError={() =>
-                  setStoryAnalysisError(
-                    ""
-                  )
-                }
-              />
-
-
-              <footer className="document-preview-footer">
-                <span>
-                  {t(
-                    "documents.version"
-                  )}{" "}
-
-                  {
-                    selectedDocument.contentVersion
-                  }
-                </span>
-
-
-                <span>
-                  {documentNeedsAnalysis
-                    ? t(
-                        "documents.analysisPending"
-                      )
-                    : canonNeedsAnalysis
-                      ? t(
-                          "documents.canonAnalysisPending"
-                        )
-                      : t(
-                          "documents.analysisUpToDate"
-                        )}
-                </span>
-              </footer>
             </div>
           )}
 
@@ -3964,13 +2866,18 @@ function DocumentsPage() {
             <>
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
                   openCreateDocument(
                     contextMenu
                       .node
                       ._id
-                  )
-                }
+                  );
+
+
+                  setContextMenu(
+                    null
+                  );
+                }}
               >
                 {t(
                   "documents.newDocumentInside"

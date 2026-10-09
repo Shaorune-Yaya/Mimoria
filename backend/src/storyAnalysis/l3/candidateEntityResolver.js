@@ -17,6 +17,13 @@ const {
   "./entityTypeInference"
 );
 
+const {
+  buildDraftEntities,
+  enrichCandidatesWithDraftEntities,
+} = require(
+  "./draftEntityResolver"
+);
+
 
 // ======================================================
 // Entity Suggestion
@@ -75,6 +82,7 @@ function makeEntitySuggestion({
     confidence:
       Math.min(
         0.95,
+
         Math.max(
           candidate
             ?.confidence ??
@@ -175,6 +183,17 @@ function resolveSide({
     );
 
 
+  /*
+   * Existing Entity:
+   *
+   * use the real canonical entity.
+   *
+   * Missing Entity:
+   *
+   * emit a create-entity suggestion. A later pass will
+   * convert these missing entities into analysis-only
+   * draft entities.
+   */
   if (
     resolution.status ===
     "missing"
@@ -225,10 +244,15 @@ function resolveOneCandidate({
   };
 
 
+  // ----------------------------------------------------
+  // Subject
+  // ----------------------------------------------------
+
   const subject =
     resolveSide({
       hint:
-        candidate.subjectHint,
+        candidate
+          .subjectHint,
 
       role:
         "subject",
@@ -253,10 +277,15 @@ function resolveOneCandidate({
     subject.entityId;
 
 
+  // ----------------------------------------------------
+  // Object
+  // ----------------------------------------------------
+
   const object =
     resolveSide({
       hint:
-        candidate.objectHint,
+        candidate
+          .objectHint,
 
       role:
         "object",
@@ -294,7 +323,8 @@ function mergeTypeInference(
   incoming
 ) {
   /*
-   * Prefer intersected evidence.
+   * Intersected lexical + semantic evidence is stronger
+   * than semantic-only evidence.
    */
   if (
     incoming
@@ -308,9 +338,11 @@ function mergeTypeInference(
       incoming
         .likelyTypeConcept;
 
+
     existing.typeInferenceStatus =
       incoming
         .typeInferenceStatus;
+
 
     existing.typeInferenceConfidence =
       incoming
@@ -319,8 +351,8 @@ function mergeTypeInference(
 
 
   /*
-   * Same inferred type:
-   * preserve highest confidence.
+   * Same type:
+   * retain the strongest confidence.
    */
   if (
     incoming
@@ -338,6 +370,32 @@ function mergeTypeInference(
           .typeInferenceConfidence ||
         0
       );
+  }
+
+
+  /*
+   * If the existing suggestion has no type but the new
+   * evidence does, keep the inferred type.
+   */
+  if (
+    !existing
+      .likelyTypeConcept &&
+    incoming
+      .likelyTypeConcept
+  ) {
+    existing.likelyTypeConcept =
+      incoming
+        .likelyTypeConcept;
+
+
+    existing.typeInferenceStatus =
+      incoming
+        .typeInferenceStatus;
+
+
+    existing.typeInferenceConfidence =
+      incoming
+        .typeInferenceConfidence;
   }
 
 
@@ -375,7 +433,15 @@ function mergeTypeInference(
 
 
 // ======================================================
-// Deduplicate Suggestions
+// Deduplicate Entity Suggestions
+//
+// One entity can appear in several facts:
+//
+// Alice age = 24
+// Alice occupation = Alchemist
+// Alice member_of = Church
+//
+// They must become ONE draft/create-entity suggestion.
 // ======================================================
 
 function deduplicateEntitySuggestions(
@@ -394,7 +460,9 @@ function deduplicateEntitySuggestions(
         .normalizedName;
 
 
-    if (!key) {
+    if (
+      !key
+    ) {
       continue;
     }
 
@@ -415,7 +483,9 @@ function deduplicateEntitySuggestions(
 
           roles: [
             suggestion.role,
-          ],
+          ].filter(
+            Boolean
+          ),
 
           sourceConcepts:
             suggestion.sourceConcept
@@ -441,9 +511,12 @@ function deduplicateEntitySuggestions(
 
 
     if (
-      !existing.roles.includes(
-        suggestion.role
-      )
+      suggestion.role &&
+      !existing
+        .roles
+        .includes(
+          suggestion.role
+        )
     ) {
       existing.roles.push(
         suggestion.role
@@ -488,8 +561,13 @@ function deduplicateEntitySuggestions(
 
     existing.confidence =
       Math.max(
-        existing.confidence,
-        suggestion.confidence
+        existing
+          .confidence ||
+        0,
+
+        suggestion
+          .confidence ||
+        0
       );
 
 
@@ -519,11 +597,18 @@ function resolveCandidateEntities({
 
   unknownEntities = [],
 }) {
-  const entitySuggestions =
+  const rawEntitySuggestions =
     [];
 
 
-  const resolvedCandidates =
+  // ----------------------------------------------------
+  // Pass 1
+  //
+  // Resolve all references against real Canon entities.
+  // Missing references produce entity suggestions.
+  // ----------------------------------------------------
+
+  const initiallyResolvedCandidates =
     candidates.map(
       (candidate) =>
         resolveOneCandidate({
@@ -535,22 +620,81 @@ function resolveCandidateEntities({
 
           unknownEntities,
 
-          entitySuggestions,
+          entitySuggestions:
+            rawEntitySuggestions,
         })
     );
+
+
+  // ----------------------------------------------------
+  // Pass 2
+  //
+  // Merge repeated references to the same missing entity.
+  // ----------------------------------------------------
+
+  const entitySuggestions =
+    deduplicateEntitySuggestions(
+      rawEntitySuggestions
+    );
+
+
+  // ----------------------------------------------------
+  // Pass 3
+  //
+  // Convert missing entities into temporary draft
+  // entities so subsequent L3 passes can continue
+  // reasoning about them.
+  //
+  // Important:
+  //
+  // No MongoDB write happens here.
+  // No fake ObjectId is generated.
+  // ----------------------------------------------------
+
+  const draftEntities =
+    buildDraftEntities(
+      entitySuggestions
+    );
+
+
+  // ----------------------------------------------------
+  // Pass 4
+  //
+  // Attach draft identity back onto every candidate.
+  //
+  // Example:
+  //
+  // {
+  //   subjectHint: "Alice",
+  //   subjectEntityId: null,
+  //   subjectDraftEntityKey: "alice",
+  //   subjectTypeConcept: "entityType.character"
+  // }
+  // ----------------------------------------------------
+
+  const resolvedCandidates =
+    enrichCandidatesWithDraftEntities({
+      candidates:
+        initiallyResolvedCandidates,
+
+      draftEntities,
+    });
 
 
   return {
     candidates:
       resolvedCandidates,
 
-    entitySuggestions:
-      deduplicateEntitySuggestions(
-        entitySuggestions
-      ),
+    entitySuggestions,
+
+    draftEntities,
   };
 }
 
+
+// ======================================================
+// Exports
+// ======================================================
 
 module.exports = {
   makeEntitySuggestion,

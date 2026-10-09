@@ -13,6 +13,7 @@ import {
 
 import WorldLayout from "../components/WorldLayout";
 import { API_URL } from "../config/api";
+import { apiFetch } from "../utils/apiFetch";
 
 function EntityTypeEditor() {
   const {
@@ -75,19 +76,10 @@ function EntityTypeEditor() {
 
   async function fetchWorld() {
     try {
-      const response =
-        await fetch(
+      const data =
+        await apiFetch(
           `${API_URL.worlds}/${worldId}`
         );
-
-      if (!response.ok) {
-        throw new Error(
-          "Failed to fetch world"
-        );
-      }
-
-      const data =
-        await response.json();
 
       setWorld(data);
     } catch (error) {
@@ -100,19 +92,10 @@ function EntityTypeEditor() {
 
   async function fetchEntityType() {
     try {
-      const response =
-        await fetch(
+      const data =
+        await apiFetch(
           `${API_URL.entityTypes}/${entityTypeId}`
         );
-
-      if (!response.ok) {
-        throw new Error(
-          "Failed to fetch entity type"
-        );
-      }
-
-      const data =
-        await response.json();
 
       setEntityType(data);
     } catch (error) {
@@ -125,26 +108,23 @@ function EntityTypeEditor() {
 
   async function fetchEntityTypes() {
     try {
-      const response =
-        await fetch(
+      const data =
+        await apiFetch(
           `${API_URL.entityTypes}/world/${worldId}`
         );
 
-      if (!response.ok) {
-        throw new Error(
-          "Failed to fetch entity types"
-        );
-      }
-
-      const data =
-        await response.json();
-
-      setEntityTypes(data);
+      setEntityTypes(
+        Array.isArray(data)
+          ? data
+          : []
+      );
     } catch (error) {
       console.error(
         "Failed to fetch entity types:",
         error
       );
+
+      setEntityTypes([]);
     }
   }
 
@@ -257,11 +237,13 @@ function EntityTypeEditor() {
       return;
     }
 
+
     const body = {
       label:
         fieldLabel.trim(),
 
-      type: fieldType,
+      type:
+        fieldType,
 
       required:
         fieldRequired,
@@ -274,7 +256,8 @@ function EntityTypeEditor() {
           : null,
 
       options:
-        fieldType === "select"
+        fieldType ===
+        "select"
           ? selectOptions
               .map(
                 (option) =>
@@ -284,51 +267,35 @@ function EntityTypeEditor() {
           : [],
     };
 
+
     try {
       const url =
         editingFieldId
           ? `${API_URL.entityTypes}/${entityTypeId}/fields/${editingFieldId}`
           : `${API_URL.entityTypes}/${entityTypeId}/fields`;
 
+
       const method =
         editingFieldId
           ? "PUT"
           : "POST";
 
-      const response =
-        await fetch(
+
+      const updatedEntityType =
+        await apiFetch(
           url,
           {
             method,
 
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify(
-                body
-              ),
+            body,
           }
         );
 
-      if (!response.ok) {
-        const errorData =
-          await response.json();
-
-        throw new Error(
-          errorData.message ||
-            "Failed to save field"
-        );
-      }
-
-      const updatedEntityType =
-        await response.json();
 
       setEntityType(
         updatedEntityType
       );
+
 
       resetFieldForm();
     } catch (error) {
@@ -337,7 +304,11 @@ function EntityTypeEditor() {
         error
       );
 
-      alert(error.message);
+
+      alert(
+        error.message ||
+        "Failed to save field"
+      );
     }
   }
 
@@ -351,13 +322,15 @@ function EntityTypeEditor() {
         )
       );
 
+
     if (!confirmed) {
       return;
     }
 
+
     try {
-      const response =
-        await fetch(
+      const updatedEntityType =
+        await apiFetch(
           `${API_URL.entityTypes}/${entityTypeId}/fields/${fieldId}`,
           {
             method:
@@ -365,22 +338,11 @@ function EntityTypeEditor() {
           }
         );
 
-      if (!response.ok) {
-        const errorData =
-          await response.json();
-
-        throw new Error(
-          errorData.message ||
-            "Failed to delete field"
-        );
-      }
-
-      const updatedEntityType =
-        await response.json();
 
       setEntityType(
         updatedEntityType
       );
+
 
       if (
         editingFieldId ===
@@ -394,7 +356,11 @@ function EntityTypeEditor() {
         error
       );
 
-      alert(error.message);
+
+      alert(
+        error.message ||
+        "Failed to delete field"
+      );
     }
   }
 

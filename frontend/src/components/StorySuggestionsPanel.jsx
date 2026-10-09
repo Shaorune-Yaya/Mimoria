@@ -56,6 +56,30 @@ function normalizeLocale(
     : "en";
 }
 
+function isMachineConceptLabel(
+  value
+) {
+  const normalized =
+    String(
+      value || ""
+    )
+      .trim();
+
+  return (
+    normalized.startsWith(
+      "field."
+    ) ||
+    normalized.startsWith(
+      "relation."
+    ) ||
+    normalized.startsWith(
+      "event."
+    ) ||
+    normalized.startsWith(
+      "entityType."
+    )
+  );
+}
 
 // ======================================================
 // Component
@@ -79,6 +103,12 @@ export default function StorySuggestionsPanel({
     "en",
 
   t,
+
+  title = null,
+
+  description = null,
+
+  emptyText = null,
 
   getConceptLabel,
 
@@ -121,6 +151,34 @@ export default function StorySuggestionsPanel({
       language
     );
 
+
+  const recommendedTypeOptions = [
+    "entityType.character",
+    "entityType.person",
+
+    "entityType.location",
+    "entityType.city",
+    "entityType.town",
+    "entityType.village",
+    "entityType.country",
+    "entityType.region",
+    "entityType.building",
+
+    "entityType.organization",
+    "entityType.faction",
+    "entityType.guild",
+    "entityType.corporation",
+    "entityType.church",
+    "entityType.religion",
+    "entityType.school",
+
+    "entityType.vehicle",
+    "entityType.ship",
+    "entityType.spacecraft",
+
+    "entityType.planet",
+    "entityType.world",
+    ];  
 
   const pendingCount =
     useMemo(
@@ -190,36 +248,98 @@ export default function StorySuggestionsPanel({
 
   function startEditing(
     candidate
-  ) {
-    if (
-      candidate.status !==
-      "pending"
     ) {
-      return;
+    if (
+        candidate.status !==
+        "pending"
+    ) {
+        return;
     }
 
 
     if (
-      onClearError
+        onClearError
     ) {
-      onClearError();
+        onClearError();
     }
 
 
     setEditingCandidateId(
-      getCandidateId(
+        getCandidateId(
         candidate
-      )
+        )
     );
+
+
+    const payload =
+        clonePayload(
+        candidate.payload
+        );
+
+
+    /*
+    * Initialize editable presentation values for a
+    * recommended EntityType.
+    *
+    * These do not replace the semantic concept.
+    */
+    if (
+        candidate.kind ===
+        "create-entity"
+    ) {
+        const recommended =
+        getRecommendedEntityType(
+            candidate
+        );
+
+
+        if (
+        payload
+            .recommendedTypeName ===
+        undefined
+        ) {
+        payload.recommendedTypeName =
+            recommended
+            ?.name ||
+            getConceptLabel(
+            payload
+                .likelyTypeConcept
+            ) ||
+            "";
+        }
+
+
+        if (
+        payload
+            .recommendedTypeIcon ===
+        undefined
+        ) {
+        payload.recommendedTypeIcon =
+            recommended
+            ?.icon ||
+            "✦";
+        }
+
+        payload.recommendedFields =
+          (
+            Array.isArray(
+              payload
+                .recommendedFields
+            )
+              ? payload
+                  .recommendedFields
+              : []
+          )
+            .map(
+              normalizeEditableRecommendedField
+            );
+    }
 
 
     setEditPayload(
-      clonePayload(
-        candidate.payload
-      )
+        payload
     );
-  }
-
+    }
 
   function cancelEditing() {
     setEditingCandidateId(
@@ -246,6 +366,200 @@ export default function StorySuggestionsPanel({
     );
   }
 
+  function normalizeEditableRecommendedField(
+    field = {}
+  ) {
+    const fieldConcept =
+      String(
+        field.fieldConcept ||
+        ""
+      )
+        .trim();
+
+
+    return {
+      fieldConcept:
+        fieldConcept ||
+        null,
+
+      label:
+        String(
+          field.label ||
+          (
+            fieldConcept
+              ? getConceptLabel(
+                  fieldConcept
+                )
+              : ""
+          )
+        )
+          .trim(),
+
+      type:
+        field.type ||
+        "text",
+
+      required:
+        field.required ===
+        true,
+
+      options:
+        Array.isArray(
+          field.options
+        )
+          ? field.options
+          : [],
+
+      referenceEntityTypeId:
+        field
+          .referenceEntityTypeId ||
+        "",
+    };
+  }
+
+
+  function updateRecommendedField(
+    index,
+    key,
+    value
+  ) {
+    setEditPayload(
+      (current) => {
+        const fields =
+          Array.isArray(
+            current
+              .recommendedFields
+          )
+            ? [
+                ...current
+                  .recommendedFields,
+              ]
+            : [];
+
+
+        if (
+          !fields[index]
+        ) {
+          return current;
+        }
+
+
+        fields[index] = {
+          ...fields[index],
+
+          [key]:
+            value,
+        };
+
+
+        return {
+          ...current,
+
+          recommendedFields:
+            fields,
+        };
+      }
+    );
+  }
+
+
+  function removeRecommendedField(
+    index
+  ) {
+    setEditPayload(
+      (current) => ({
+        ...current,
+
+        recommendedFields:
+          (
+            Array.isArray(
+              current
+                .recommendedFields
+            )
+              ? current
+                  .recommendedFields
+              : []
+          )
+            .filter(
+              (
+                _field,
+                fieldIndex
+              ) =>
+                fieldIndex !==
+                index
+            ),
+      })
+    );
+  }
+
+
+  function addRecommendedField() {
+    setEditPayload(
+      (current) => ({
+        ...current,
+
+        recommendedFields: [
+          ...(
+            Array.isArray(
+              current
+                .recommendedFields
+            )
+              ? current
+                  .recommendedFields
+              : []
+          ),
+
+          {
+            fieldConcept:
+              null,
+
+            label:
+              "",
+
+            type:
+              "text",
+
+            required:
+              false,
+
+            options:
+              [],
+
+            referenceEntityTypeId:
+              "",
+          },
+        ],
+      })
+    );
+  }
+
+
+  function updateRecommendedFieldOptions(
+    index,
+    rawValue
+  ) {
+    const options =
+      String(
+        rawValue || ""
+      )
+        .split(
+          /[\n,，]/gu
+        )
+        .map(
+          (item) =>
+            item.trim()
+        )
+        .filter(
+          Boolean
+        );
+
+
+    updateRecommendedField(
+      index,
+      "options",
+      options
+    );
+  }
 
   // ====================================================
   // Entity Type Helpers
@@ -365,163 +679,233 @@ export default function StorySuggestionsPanel({
 
   async function saveEdit(
     candidate
-  ) {
+    ) {
     const patch =
-      {};
+        {};
 
 
     switch (
-      candidate.kind
+        candidate.kind
     ) {
-      // ------------------------------------------------
-      // Field
-      // ------------------------------------------------
+        // ------------------------------------------------
+        // Field
+        // ------------------------------------------------
 
-      case "field-update":
+        case "field-update":
         patch.value =
-          editPayload.value;
+            editPayload.value;
 
         break;
 
 
-      // ------------------------------------------------
-      // Relation
-      //
-      // relationConcept intentionally remains semantic
-      // machine data.
-      //
-      // User edits only the resolved entities.
-      // ------------------------------------------------
+        // ------------------------------------------------
+        // Relation
+        // ------------------------------------------------
 
-      case "relation-update":
+        case "relation-update":
         patch.subjectName =
-          String(
+            String(
             editPayload
-              .subjectName ||
+                .subjectName ||
             ""
-          )
+            )
             .trim();
 
         patch.objectName =
-          String(
+            String(
             editPayload
-              .objectName ||
+                .objectName ||
             ""
-          )
+            )
             .trim();
 
         break;
 
 
-      // ------------------------------------------------
-      // Event
-      //
-      // eventConcept intentionally remains semantic
-      // machine data.
-      //
-      // User edits only subject/object recognition.
-      // ------------------------------------------------
+        // ------------------------------------------------
+        // Event
+        // ------------------------------------------------
 
-      case "event-history":
+        case "event-history":
         patch.subjectName =
-          String(
+            String(
             editPayload
-              .subjectName ||
+                .subjectName ||
             ""
-          )
+            )
             .trim();
 
         patch.objectName =
-          String(
+            String(
             editPayload
-              .objectName ||
+                .objectName ||
             ""
-          )
+            )
             .trim();
 
         break;
 
 
-      // ------------------------------------------------
-      // Entity
-      // ------------------------------------------------
+        // ------------------------------------------------
+        // Entity
+        // ------------------------------------------------
 
-      case "create-entity":
+        case "create-entity":
         patch.name =
-          String(
+            String(
             editPayload
-              .name ||
+                .name ||
             ""
-          )
+            )
             .trim();
 
 
-        if (
-          editPayload
-            .entityTypeId
-        ) {
-          patch.entityTypeId =
+        /*
+        * Existing EntityType selection.
+        *
+        * Empty string means:
+        * keep using the recommended type flow.
+        */
+        patch.entityTypeId =
+            String(
             editPayload
-              .entityTypeId;
-        }
+                .entityTypeId ||
+            ""
+            )
+            .trim();
+
+
+        patch.likelyTypeConcept =
+            String(
+            editPayload
+                .likelyTypeConcept ||
+            ""
+            )
+            .trim();
+
+
+        patch.recommendedTypeName =
+            String(
+            editPayload
+                .recommendedTypeName ||
+            ""
+            )
+            .trim();
+
+
+        patch.recommendedTypeIcon =
+            String(
+            editPayload
+                .recommendedTypeIcon ||
+            ""
+            )
+            .trim();
+        
+        patch.recommendedFields =
+          (
+            Array.isArray(
+              editPayload
+                .recommendedFields
+            )
+              ? editPayload
+                  .recommendedFields
+              : []
+          )
+            .map(
+              (field) => ({
+                fieldConcept:
+                  field.fieldConcept ||
+                  null,
+
+                label:
+                  String(
+                    field.label ||
+                    ""
+                  )
+                    .trim(),
+
+                type:
+                  field.type ||
+                  "text",
+
+                required:
+                  field.required ===
+                  true,
+
+                options:
+                  Array.isArray(
+                    field.options
+                  )
+                    ? field.options
+                    : [],
+
+                referenceEntityTypeId:
+                  field
+                    .type ===
+                    "entity-reference"
+                    ? field
+                        .referenceEntityTypeId ||
+                      null
+                    : null,
+              })
+            );
 
         break;
 
 
-      // ------------------------------------------------
-      // Schema Field
-      // ------------------------------------------------
+        // ------------------------------------------------
+        // Schema Field
+        // ------------------------------------------------
 
-      case "create-schema-field":
+        case "create-schema-field":
         patch.suggestedLabel =
-          String(
+            String(
             editPayload
-              .suggestedLabel ||
+                .suggestedLabel ||
             ""
-          )
+            )
             .trim();
 
         patch.suggestedValueType =
-          editPayload
+            editPayload
             .suggestedValueType;
 
         break;
 
 
-      // ------------------------------------------------
-      // Select Option
-      // ------------------------------------------------
+        // ------------------------------------------------
+        // Select Option
+        // ------------------------------------------------
 
-      case "create-select-option":
+        case "create-select-option":
         patch.value =
-          String(
+            String(
             editPayload.value ??
             ""
-          )
+            )
             .trim();
 
         break;
 
 
-      default:
+        default:
         return;
     }
 
 
     const success =
-      await onEdit(
+        await onEdit(
         candidate,
         patch
-      );
+        );
 
 
     if (
-      success
+        success
     ) {
-      cancelEditing();
+        cancelEditing();
     }
-  }
-
+    }
 
   // ====================================================
   // Apply
@@ -791,9 +1175,27 @@ export default function StorySuggestionsPanel({
       // Create Entity
       // ------------------------------------------------
 
-      case "create-entity":
+      case "create-entity": {
+        const selectedRecommendedConcept =
+          editPayload
+            .likelyTypeConcept ??
+          "";
+
+
+        const recommendedFields =
+          Array.isArray(
+            editPayload
+              .recommendedFields
+          )
+            ? editPayload
+                .recommendedFields
+            : [];
+
+
         return (
           <div className="story-suggestion-edit-grid">
+            {/* Entity Name */}
+
             <label>
               <span className="story-suggestion-label">
                 {t(
@@ -807,9 +1209,7 @@ export default function StorySuggestionsPanel({
                   editPayload.name ??
                   ""
                 }
-                onChange={(
-                  event
-                ) =>
+                onChange={(event) =>
                   updateEditField(
                     "name",
                     event.target.value
@@ -818,6 +1218,430 @@ export default function StorySuggestionsPanel({
               />
             </label>
 
+
+            {/* Recommended Semantic Type */}
+
+            <label>
+              <span className="story-suggestion-label">
+                {t(
+                  "documents.editRecommendedType"
+                )}
+              </span>
+
+              <select
+                value={
+                  selectedRecommendedConcept
+                }
+                onChange={(event) => {
+                  const concept =
+                    event.target.value;
+
+
+                  updateEditField(
+                    "likelyTypeConcept",
+                    concept
+                  );
+
+
+                  if (
+                    concept
+                  ) {
+                    updateEditField(
+                      "recommendedTypeName",
+                      getConceptLabel(
+                        concept
+                      )
+                    );
+                  }
+                }}
+              >
+                <option value="">
+                  {t(
+                    "documents.selectRecommendedType"
+                  )}
+                </option>
+
+                {recommendedTypeOptions.map(
+                  (concept) => (
+                    <option
+                      key={
+                        concept
+                      }
+                      value={
+                        concept
+                      }
+                    >
+                      {getConceptLabel(
+                        concept
+                      )}
+                    </option>
+                  )
+                )}
+              </select>
+            </label>
+
+
+            {/* Recommended Type Name */}
+
+            <label>
+              <span className="story-suggestion-label">
+                {t(
+                  "documents.editRecommendedTypeName"
+                )}
+              </span>
+
+              <input
+                type="text"
+                value={
+                  editPayload
+                    .recommendedTypeName ??
+                  ""
+                }
+                placeholder={t(
+                  "documents.editRecommendedTypeNamePlaceholder"
+                )}
+                onChange={(event) =>
+                  updateEditField(
+                    "recommendedTypeName",
+                    event.target.value
+                  )
+                }
+              />
+            </label>
+
+
+            {/* Recommended Icon */}
+
+            <label>
+              <span className="story-suggestion-label">
+                {t(
+                  "documents.editRecommendedIcon"
+                )}
+              </span>
+
+              <input
+                type="text"
+                value={
+                  editPayload
+                    .recommendedTypeIcon ??
+                  ""
+                }
+                placeholder="👤"
+                onChange={(event) =>
+                  updateEditField(
+                    "recommendedTypeIcon",
+                    event.target.value
+                  )
+                }
+              />
+            </label>
+
+
+            {/* Recommended Fields */}
+
+            <div className="story-recommended-fields-editor">
+              <div className="story-recommended-fields-header">
+                <div>
+                  <span className="story-suggestion-label">
+                    {t(
+                      "documents.recommendedFields"
+                    )}
+                  </span>
+
+                  <p className="story-recommended-fields-help">
+                    {t(
+                      "documents.recommendedFieldsHelp"
+                    )}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className="story-suggestion-secondary-button"
+                  onClick={
+                    addRecommendedField
+                  }
+                >
+                  {t(
+                    "documents.addRecommendedField"
+                  )}
+                </button>
+              </div>
+
+
+              {recommendedFields.length ===
+              0 ? (
+                <div className="story-recommended-fields-empty">
+                  {t(
+                    "documents.noRecommendedFields"
+                  )}
+                </div>
+              ) : (
+                <div className="story-recommended-fields-list">
+                  {recommendedFields.map(
+                    (
+                      field,
+                      index
+                    ) => (
+                      <div
+                        key={
+                          `${field.fieldConcept || "custom"}-${index}`
+                        }
+                        className="story-recommended-field-card"
+                      >
+                        <div className="story-recommended-field-main">
+                          {/* Field Name */}
+
+                          <label>
+                            <span className="story-suggestion-label">
+                              {t(
+                                "documents.recommendedFieldName"
+                              )}
+                            </span>
+
+                            <input
+                              type="text"
+                              value={
+                                field.label ??
+                                ""
+                              }
+                              onChange={(event) =>
+                                updateRecommendedField(
+                                  index,
+                                  "label",
+                                  event.target.value
+                                )
+                              }
+                            />
+                          </label>
+
+
+                          {/* Field Type */}
+
+                          <label>
+                            <span className="story-suggestion-label">
+                              {t(
+                                "documents.recommendedFieldType"
+                              )}
+                            </span>
+
+                            <select
+                              value={
+                                field.type ||
+                                "text"
+                              }
+                              onChange={(event) =>
+                                updateRecommendedField(
+                                  index,
+                                  "type",
+                                  event.target.value
+                                )
+                              }
+                            >
+                              <option value="text">
+                                {t(
+                                  "fieldTypes.text"
+                                )}
+                              </option>
+
+                              <option value="long-text">
+                                {t(
+                                  "fieldTypes.long-text"
+                                )}
+                              </option>
+
+                              <option value="number">
+                                {t(
+                                  "fieldTypes.number"
+                                )}
+                              </option>
+
+                              <option value="boolean">
+                                {t(
+                                  "fieldTypes.boolean"
+                                )}
+                              </option>
+
+                              <option value="date">
+                                {t(
+                                  "fieldTypes.date"
+                                )}
+                              </option>
+
+                              <option value="select">
+                                {t(
+                                  "fieldTypes.select"
+                                )}
+                              </option>
+
+                              <option value="entity-reference">
+                                {t(
+                                  "fieldTypes.entity-reference"
+                                )}
+                              </option>
+                            </select>
+                          </label>
+
+
+                          {/* Required */}
+
+                          <label className="story-recommended-field-required">
+                            <input
+                              type="checkbox"
+                              checked={
+                                field.required ===
+                                true
+                              }
+                              onChange={(event) =>
+                                updateRecommendedField(
+                                  index,
+                                  "required",
+                                  event.target.checked
+                                )
+                              }
+                            />
+
+                            <span>
+                              {t(
+                                "documents.recommendedFieldRequired"
+                              )}
+                            </span>
+                          </label>
+
+
+                          {/* Delete */}
+
+                          <button
+                            type="button"
+                            className="story-suggestion-danger-button"
+                            onClick={() =>
+                              removeRecommendedField(
+                                index
+                              )
+                            }
+                          >
+                            {t(
+                              "documents.removeRecommendedField"
+                            )}
+                          </button>
+                        </div>
+
+
+                        {/* Select Options */}
+
+                        {field.type ===
+                          "select" && (
+                          <label className="story-recommended-field-extra">
+                            <span className="story-suggestion-label">
+                              {t(
+                                "documents.recommendedFieldOptions"
+                              )}
+                            </span>
+
+                            <textarea
+                              rows="3"
+                              value={
+                                (
+                                  Array.isArray(
+                                    field.options
+                                  )
+                                    ? field.options
+                                    : []
+                                )
+                                  .join(
+                                    "\n"
+                                  )
+                              }
+                              placeholder={t(
+                                "documents.recommendedFieldOptionsPlaceholder"
+                              )}
+                              onChange={(event) =>
+                                updateRecommendedFieldOptions(
+                                  index,
+                                  event.target.value
+                                )
+                              }
+                            />
+                          </label>
+                        )}
+
+
+                        {/* Entity Reference Type */}
+
+                        {field.type ===
+                          "entity-reference" && (
+                          <label className="story-recommended-field-extra">
+                            <span className="story-suggestion-label">
+                              {t(
+                                "documents.recommendedFieldReferenceType"
+                              )}
+                            </span>
+
+                            <select
+                              value={
+                                field
+                                  .referenceEntityTypeId ||
+                                ""
+                              }
+                              onChange={(event) =>
+                                updateRecommendedField(
+                                  index,
+                                  "referenceEntityTypeId",
+                                  event.target.value
+                                )
+                              }
+                            >
+                              <option value="">
+                                {t(
+                                  "schema.anyEntityType"
+                                )}
+                              </option>
+
+                              {entityTypes.map(
+                                (entityType) => (
+                                  <option
+                                    key={
+                                      entityType._id
+                                    }
+                                    value={
+                                      entityType._id
+                                    }
+                                  >
+                                    {entityType.icon
+                                      ? `${entityType.icon} `
+                                      : ""}
+
+                                    {entityType.name}
+                                  </option>
+                                )
+                              )}
+                            </select>
+                          </label>
+                        )}
+
+
+                        {field.fieldConcept && (
+                          <div className="story-recommended-field-concept">
+                            {getConceptLabel(
+                              field.fieldConcept
+                            )}
+
+                            <span>
+                              {
+                                field.fieldConcept
+                              }
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
+
+
+            {/* Existing Entity Type */}
 
             <label>
               <span className="story-suggestion-label">
@@ -832,9 +1656,7 @@ export default function StorySuggestionsPanel({
                     .entityTypeId ??
                   ""
                 }
-                onChange={(
-                  event
-                ) =>
+                onChange={(event) =>
                   updateEditField(
                     "entityTypeId",
                     event.target.value
@@ -847,11 +1669,8 @@ export default function StorySuggestionsPanel({
                   )}
                 </option>
 
-
                 {entityTypes.map(
-                  (
-                    entityType
-                  ) => (
+                  (entityType) => (
                     <option
                       key={
                         entityType._id
@@ -860,15 +1679,11 @@ export default function StorySuggestionsPanel({
                         entityType._id
                       }
                     >
-                      {
-                        entityType.icon
-                          ? `${entityType.icon} `
-                          : ""
-                      }
+                      {entityType.icon
+                        ? `${entityType.icon} `
+                        : ""}
 
-                      {
-                        entityType.name
-                      }
+                      {entityType.name}
                     </option>
                   )
                 )}
@@ -876,6 +1691,7 @@ export default function StorySuggestionsPanel({
             </label>
           </div>
         );
+      }
 
 
       // ------------------------------------------------
@@ -1055,12 +1871,17 @@ export default function StorySuggestionsPanel({
             </span>
 
             <span className="story-suggestion-label">
-              {
-                payload.fieldLabel ||
-                getConceptLabel(
-                  payload.fieldConcept
+            {
+                payload.fieldLabel &&
+                !isMachineConceptLabel(
+                payload.fieldLabel
                 )
-              }
+                ? payload.fieldLabel
+                : getConceptLabel(
+                    payload.fieldConcept ||
+                    payload.fieldLabel
+                    )
+            }
             </span>
 
             <span className="story-suggestion-arrow">
@@ -1190,11 +2011,13 @@ export default function StorySuggestionsPanel({
 
 
         const recommendedLabel =
-          recommended
-            ?.name ||
-          getConceptLabel(
-            recommendedConcept
-          );
+            recommended
+                ?.name ||
+            payload
+                .recommendedTypeName ||
+            getConceptLabel(
+                recommendedConcept
+            );
 
 
         const selectedEntityTypeId =
@@ -1235,8 +2058,10 @@ export default function StorySuggestionsPanel({
                 <div className="story-recommended-type-value">
                   <strong>
                     {
-                      recommended?.icon ||
-                      "✦"
+                    recommended?.icon ||
+                    payload
+                        .recommendedTypeIcon ||
+                    "✦"
                     }
 
                     {" "}
@@ -1507,15 +2332,17 @@ export default function StorySuggestionsPanel({
       <div className="story-suggestions-header">
         <div>
           <h3>
-            {t(
-              "documents.storySuggestionsTitle"
-            )}
+            {title ||
+              t(
+                "documents.storySuggestionsTitle"
+              )}
           </h3>
 
           <p>
-            {t(
-              "documents.storySuggestionsDescription"
-            )}
+            {description ||
+              t(
+                "documents.storySuggestionsDescription"
+              )}
           </p>
         </div>
 
@@ -1541,9 +2368,10 @@ export default function StorySuggestionsPanel({
         candidates.length ===
           0 && (
           <div className="story-suggestions-empty">
-            {t(
-              "documents.storySuggestionsEmpty"
-            )}
+            {emptyText ||
+              t(
+                "documents.storySuggestionsEmpty"
+              )}
           </div>
         )}
 

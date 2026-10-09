@@ -47,18 +47,6 @@ function isPlainObject(
 }
 
 
-/*
- * Remove undefined values without destroying special
- * object types such as:
- *
- * - mongoose.Types.ObjectId
- * - Date
- * - Buffer
- * - BSON values
- *
- * Only ordinary JavaScript objects are recursively
- * copied.
- */
 function cleanUndefined(
   value
 ) {
@@ -79,12 +67,6 @@ function cleanUndefined(
   }
 
 
-  /*
-   * IMPORTANT:
-   *
-   * Do not recursively expand ObjectId / Date / Buffer
-   * or other class instances.
-   */
   if (
     !isPlainObject(
       value
@@ -137,15 +119,27 @@ function buildFieldUpdatePayload(
   return {
     targetEntityId:
       suggestion
-        .targetEntityId,
+        .targetEntityId ??
+      null,
+
+    targetDraftEntityKey:
+      suggestion
+        .targetDraftEntityKey ??
+      null,
 
     targetEntityName:
       suggestion
         .targetEntityName,
 
+    targetTypeConcept:
+      suggestion
+        .targetTypeConcept ??
+      null,
+
     fieldKey:
       suggestion
-        .fieldKey,
+        .fieldKey ??
+      null,
 
     fieldLabel:
       suggestion
@@ -157,7 +151,8 @@ function buildFieldUpdatePayload(
 
     fieldType:
       suggestion
-        .fieldType,
+        .fieldType ??
+      null,
 
     value:
       suggestion
@@ -176,7 +171,13 @@ function buildRelationUpdatePayload(
   return {
     subjectEntityId:
       suggestion
-        .subjectEntityId,
+        .subjectEntityId ??
+      null,
+
+    subjectDraftEntityKey:
+      suggestion
+        .subjectDraftEntityKey ??
+      null,
 
     subjectName:
       suggestion
@@ -188,7 +189,13 @@ function buildRelationUpdatePayload(
 
     objectEntityId:
       suggestion
-        .objectEntityId,
+        .objectEntityId ??
+      null,
+
+    objectDraftEntityKey:
+      suggestion
+        .objectDraftEntityKey ??
+      null,
 
     objectName:
       suggestion
@@ -245,8 +252,12 @@ function buildCreateEntityPayload(
 ) {
   return {
     name:
+      suggestion.name,
+
+    draftEntityKey:
       suggestion
-        .name,
+        .draftEntityKey ??
+      null,
 
     likelyTypeConcept:
       suggestion
@@ -255,6 +266,25 @@ function buildCreateEntityPayload(
     expectedTypeConcepts:
       suggestion
         .expectedTypeConcepts,
+
+    recommendedTypeName:
+      suggestion
+        .recommendedTypeName ??
+      null,
+
+    recommendedTypeIcon:
+      suggestion
+        .recommendedTypeIcon ??
+      null,
+
+    recommendedFields:
+      Array.isArray(
+        suggestion
+          .recommendedFields
+      )
+        ? suggestion
+            .recommendedFields
+        : [],
 
     fieldKey:
       suggestion
@@ -271,6 +301,11 @@ function buildCreateEntityPayload(
     role:
       suggestion
         .role,
+
+    roles:
+      suggestion
+        .roles ??
+      [],
   };
 }
 
@@ -417,11 +452,17 @@ function buildCandidateSource({
         .subjectHint ??
       suggestionSource
         .subject ??
+      suggestion
+        .subjectName ??
+      suggestion
+        .targetEntityName ??
       null,
 
     objectHint:
       suggestionSource
         .objectHint ??
+      suggestion
+        .objectName ??
       null,
 
     fieldConcept:
@@ -446,6 +487,22 @@ function buildCandidateSource({
     candidateType:
       suggestionSource
         .candidateType ??
+      null,
+
+    subjectDraftEntityKey:
+      suggestion
+        .subjectDraftEntityKey ??
+      suggestion
+        .targetDraftEntityKey ??
+      suggestionSource
+        .subjectDraftEntityKey ??
+      null,
+
+    objectDraftEntityKey:
+      suggestion
+        .objectDraftEntityKey ??
+      suggestionSource
+        .objectDraftEntityKey ??
       null,
   });
 }
@@ -522,14 +579,6 @@ function mapSuggestionToStorySyncCandidate({
       suggestion
         .kind,
 
-    /*
-     * L3 status describes analysis readiness.
-     *
-     * StorySyncCandidate status describes whether the
-     * user has acted on the suggestion.
-     *
-     * Every newly-persisted suggestion starts pending.
-     */
     status:
       "pending",
 
@@ -551,6 +600,9 @@ function mapSuggestionToStorySyncCandidate({
 
   // ----------------------------------------------------
   // Legacy relation compatibility
+  //
+  // Only populate real IDs here.
+  // Draft references stay exclusively in payload/source.
   // ----------------------------------------------------
 
   if (
@@ -561,22 +613,37 @@ function mapSuggestionToStorySyncCandidate({
       suggestion
         .relationConcept;
 
+
     record.relationType =
       suggestion
         .relationConcept;
 
-    record.subjectEntityId =
-      suggestion
-        .subjectEntityId;
 
-    record.objectEntityId =
+    if (
       suggestion
-        .objectEntityId;
+        .subjectEntityId
+    ) {
+      record.subjectEntityId =
+        suggestion
+          .subjectEntityId;
+    }
+
+
+    if (
+      suggestion
+        .objectEntityId
+    ) {
+      record.objectEntityId =
+        suggestion
+          .objectEntityId;
+    }
+
 
     record.subjectHint =
       suggestion
         .subjectName ??
       null;
+
 
     record.objectHint =
       suggestion
@@ -618,11 +685,6 @@ function mapSuggestionsToStorySyncCandidates({
     const suggestion of
     suggestions
   ) {
-    /*
-     * Informational suggestions are useful analysis
-     * output but do not need to enter the pending user
-     * action queue.
-     */
     if (
       suggestion.status ===
       "informational"

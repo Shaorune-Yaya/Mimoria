@@ -12,154 +12,312 @@ import {
 } from "react-i18next";
 
 import AppHeader from "../components/AppHeader";
-import { API_URL } from "../config/api";
+
+import {
+  API_URL,
+} from "../config/api";
+
+import {
+  apiFetch,
+} from "../utils/apiFetch";
+
 
 function WorldsPage() {
-  const { t, i18n } =
+  const {
+    t,
+    i18n,
+  } =
     useTranslation();
+
 
   const navigate =
     useNavigate();
 
+
   const [
     worlds,
     setWorlds,
-  ] = useState([]);
+  ] =
+    useState([]);
+
 
   const [
     showCreateForm,
     setShowCreateForm,
-  ] = useState(false);
+  ] =
+    useState(false);
+
 
   const [
     name,
     setName,
-  ] = useState("");
+  ] =
+    useState("");
+
 
   const [
     description,
     setDescription,
-  ] = useState("");
+  ] =
+    useState("");
+
+
+  const [
+    loading,
+    setLoading,
+  ] =
+    useState(true);
+
+
+  const [
+    creating,
+    setCreating,
+  ] =
+    useState(false);
+
+
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] =
+    useState("");
+
+
+  // ====================================================
+  // Load Worlds
+  // ====================================================
 
   async function fetchWorlds() {
     try {
-      const response =
-        await fetch(
+      setLoading(
+        true
+      );
+
+
+      setErrorMessage(
+        ""
+      );
+
+
+      const data =
+        await apiFetch(
           API_URL.worlds
         );
 
-      if (!response.ok) {
-        throw new Error(
-          "Failed to fetch worlds"
-        );
-      }
 
-      const data =
-        await response.json();
-
-      setWorlds(data);
-    } catch (error) {
+      setWorlds(
+        Array.isArray(
+          data
+        )
+          ? data
+          : []
+      );
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to fetch worlds:",
         error
       );
+
+
+      setErrorMessage(
+        error.message ||
+        "Failed to fetch worlds"
+      );
+    } finally {
+      setLoading(
+        false
+      );
     }
   }
+
+
+  // ====================================================
+  // Create World
+  // ====================================================
 
   async function createWorld(
     event
   ) {
     event.preventDefault();
 
-    if (!name.trim()) {
+
+    const normalizedName =
+      name.trim();
+
+
+    if (
+      !normalizedName ||
+      creating
+    ) {
       return;
     }
 
+
     try {
-      const response =
-        await fetch(
+      setCreating(
+        true
+      );
+
+
+      setErrorMessage(
+        ""
+      );
+
+
+      const newWorld =
+        await apiFetch(
           API_URL.worlds,
           {
-            method: "POST",
+            method:
+              "POST",
 
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
+            body: {
+              name:
+                normalizedName,
 
-            body: JSON.stringify({
-              name: name.trim(),
               description:
                 description.trim(),
-              icon: "🌍",
-            }),
+
+              icon:
+                "🌍",
+            },
           }
         );
 
-      if (!response.ok) {
-        throw new Error(
-          "Failed to create world"
-        );
-      }
-
-      const newWorld =
-        await response.json();
 
       setWorlds(
-        (currentWorlds) => [
+        (
+          currentWorlds
+        ) => [
           newWorld,
           ...currentWorlds,
         ]
       );
 
-      setName("");
-      setDescription("");
-      setShowCreateForm(false);
-    } catch (error) {
+
+      setName(
+        ""
+      );
+
+
+      setDescription(
+        ""
+      );
+
+
+      setShowCreateForm(
+        false
+      );
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to create world:",
         error
       );
+
+
+      setErrorMessage(
+        error.message ||
+        "Failed to create world"
+      );
+    } finally {
+      setCreating(
+        false
+      );
     }
   }
 
-  function openWorld(worldId) {
+
+  // ====================================================
+  // Navigation
+  // ====================================================
+
+  function openWorld(
+    worldId
+  ) {
     navigate(
       `/world/${worldId}`
     );
   }
 
-  useEffect(() => {
-    fetchWorlds();
-  }, []);
+
+  // ====================================================
+  // Initial Load
+  // ====================================================
+
+  useEffect(
+    () => {
+      fetchWorlds();
+    },
+    []
+  );
+
+
+  // ====================================================
+  // Render
+  // ====================================================
 
   return (
     <div className="app">
       <AppHeader />
 
+
       <main className="main-content">
         <div className="page-header">
           <div>
             <h1>
-              {t("worlds.title")}
+              {t(
+                "worlds.title"
+              )}
             </h1>
 
+
             <p>
-              {t("worlds.subtitle")}
+              {t(
+                "worlds.subtitle"
+              )}
             </p>
           </div>
 
+
           <button
+            type="button"
             className="create-button"
-            onClick={() =>
+            onClick={() => {
+              setErrorMessage(
+                ""
+              );
+
+
               setShowCreateForm(
                 true
-              )
-            }
+              );
+            }}
           >
-            {t("worlds.newWorld")}
+            {t(
+              "worlds.newWorld"
+            )}
           </button>
         </div>
+
+
+        {errorMessage && (
+          <div
+            className="error-message"
+            style={{
+              marginBottom:
+                "16px",
+            }}
+          >
+            {
+              errorMessage
+            }
+          </div>
+        )}
+
 
         {showCreateForm && (
           <div className="create-panel">
@@ -169,31 +327,46 @@ function WorldsPage() {
               )}
             </h2>
 
+
             <form
-              onSubmit={createWorld}
+              onSubmit={
+                createWorld
+              }
             >
               <label>
-                {t("worlds.name")}
+                {t(
+                  "worlds.name"
+                )}
               </label>
+
 
               <input
                 type="text"
                 placeholder={t(
                   "worlds.namePlaceholder"
                 )}
-                value={name}
-                onChange={(event) =>
+                value={
+                  name
+                }
+                disabled={
+                  creating
+                }
+                onChange={(
+                  event
+                ) =>
                   setName(
                     event.target.value
                   )
                 }
               />
 
+
               <label>
                 {t(
                   "worlds.description"
                 )}
               </label>
+
 
               <textarea
                 placeholder={t(
@@ -202,104 +375,154 @@ function WorldsPage() {
                 value={
                   description
                 }
-                onChange={(event) =>
+                disabled={
+                  creating
+                }
+                onChange={(
+                  event
+                ) =>
                   setDescription(
                     event.target.value
                   )
                 }
               />
 
+
               <div className="form-buttons">
                 <button
                   type="button"
                   className="cancel-button"
-                  onClick={() =>
+                  disabled={
+                    creating
+                  }
+                  onClick={() => {
                     setShowCreateForm(
                       false
-                    )
-                  }
+                    );
+
+
+                    setErrorMessage(
+                      ""
+                    );
+                  }}
                 >
-                  {t("worlds.cancel")}
+                  {t(
+                    "worlds.cancel"
+                  )}
                 </button>
+
 
                 <button
                   type="submit"
                   className="save-button"
+                  disabled={
+                    creating ||
+                    !name.trim()
+                  }
                 >
-                  {t("worlds.create")}
+                  {creating
+                    ? "..."
+                    : t(
+                        "worlds.create"
+                      )}
                 </button>
               </div>
             </form>
           </div>
         )}
 
-        <div className="world-grid">
-          {worlds.map(
-            (world) => (
-              <div
-                className="world-card"
-                key={world._id}
-                onClick={() =>
-                  openWorld(
-                    world._id
-                  )
-                }
-              >
-                <div className="world-icon">
-                  {world.icon ||
-                    "🌍"}
-                </div>
 
-                <div className="world-info">
-                  <h2>
-                    {world.name}
-                  </h2>
-
-                  <p>
-                    {world.description ||
-                      t(
-                        "worlds.noDescription"
-                      )}
-                  </p>
-
-                  <span className="updated-time">
-                    {t(
-                      "worlds.updated"
-                    )}{" "}
-                    {new Date(
-                      world.updatedAt
-                    ).toLocaleDateString(
-                      i18n.language ===
-                        "zh-CN"
-                        ? "zh-CN"
-                        : "en-US"
-                    )}
-                  </span>
-                </div>
-              </div>
-            )
-          )}
-        </div>
-
-        {worlds.length ===
-          0 && (
+        {loading ? (
           <div className="empty-state">
-            <h2>
-              {t(
-                "worlds.emptyTitle"
-              )}
-            </h2>
-
             <p>
-              {t(
-                "worlds.emptyDescription"
-              )}
+              Loading...
             </p>
           </div>
+        ) : (
+          <>
+            <div className="world-grid">
+              {worlds.map(
+                (
+                  world
+                ) => (
+                  <div
+                    className="world-card"
+                    key={
+                      world._id
+                    }
+                    onClick={() =>
+                      openWorld(
+                        world._id
+                      )
+                    }
+                  >
+                    <div className="world-icon">
+                      {world.icon ||
+                        "🌍"}
+                    </div>
+
+
+                    <div className="world-info">
+                      <h2>
+                        {
+                          world.name
+                        }
+                      </h2>
+
+
+                      <p>
+                        {world.description ||
+                          t(
+                            "worlds.noDescription"
+                          )}
+                      </p>
+
+
+                      <span className="updated-time">
+                        {t(
+                          "worlds.updated"
+                        )}{" "}
+
+                        {new Date(
+                          world.updatedAt
+                        )
+                          .toLocaleDateString(
+                            i18n.language ===
+                              "zh-CN"
+                              ? "zh-CN"
+                              : "en-US"
+                          )}
+                      </span>
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+
+
+            {worlds.length ===
+              0 && (
+              <div className="empty-state">
+                <h2>
+                  {t(
+                    "worlds.emptyTitle"
+                  )}
+                </h2>
+
+
+                <p>
+                  {t(
+                    "worlds.emptyDescription"
+                  )}
+                </p>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>
   );
 }
+
 
 export default WorldsPage;

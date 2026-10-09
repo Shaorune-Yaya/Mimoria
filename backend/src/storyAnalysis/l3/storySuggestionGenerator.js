@@ -53,6 +53,246 @@ function getCandidateConfidence(
   );
 }
 
+// ======================================================
+// Recommended EntityType Fields
+//
+// These fields describe the schema that could be created
+// together with a NEW recommended EntityType.
+//
+// They do NOT replace field-update suggestions.
+// ======================================================
+
+function normalizeDraftKey(
+  value
+) {
+  return String(
+    value || ""
+  )
+    .normalize("NFKC")
+    .trim()
+    .toLowerCase();
+}
+
+
+function inferRecommendedFieldType(
+  candidate
+) {
+  if (
+    candidate?.resolvedFieldType
+  ) {
+    return candidate.resolvedFieldType;
+  }
+
+
+  if (
+    candidate?.schemaResolution?.fieldType
+  ) {
+    return candidate
+      .schemaResolution
+      .fieldType;
+  }
+
+
+  const concept =
+    candidate?.fieldConcept ||
+    "";
+
+
+  const value =
+    candidate?.normalizedValue ??
+    candidate?.value;
+
+
+  // Canonical semantic hints.
+  if (
+    concept === "field.age" ||
+    concept === "field.height" ||
+    concept === "field.weight"
+  ) {
+    return "number";
+  }
+
+
+  if (
+    concept === "field.alive"
+  ) {
+    return "boolean";
+  }
+
+
+  if (
+    concept === "field.birthdate" ||
+    concept === "field.deathdate"
+  ) {
+    return "date";
+  }
+
+
+  // Value-based fallback.
+  if (
+    typeof value === "number"
+  ) {
+    return "number";
+  }
+
+
+  if (
+    typeof value === "boolean"
+  ) {
+    return "boolean";
+  }
+
+
+  return "text";
+}
+
+
+function createRecommendedFieldFromCandidate(
+  candidate
+) {
+  const fieldConcept =
+    candidate?.fieldConcept ||
+    null;
+
+
+  if (
+    !fieldConcept
+  ) {
+    return null;
+  }
+
+
+  let label =
+    candidate?.resolvedFieldLabel ||
+    candidate?.schemaResolution?.fieldLabel ||
+    null;
+
+
+  /*
+   * Do not persist machine labels such as "field.age"
+   * as visible schema labels.
+   *
+   * The frontend can localize them while editing, and the
+   * recommended EntityType service also has a semantic
+   * fallback when the user applies without editing.
+   */
+  if (
+    label === fieldConcept ||
+    String(label || "").startsWith("field.")
+  ) {
+    label = null;
+  }
+
+
+  return {
+    fieldConcept,
+
+    label,
+
+    type:
+      inferRecommendedFieldType(
+        candidate
+      ),
+
+    required:
+      false,
+
+    options:
+      [],
+
+    referenceEntityTypeId:
+      null,
+  };
+}
+
+
+function buildRecommendedFieldsForEntity({
+  entitySuggestion,
+
+  fieldCandidates = [],
+}) {
+  const entityDraftKey =
+    normalizeDraftKey(
+      entitySuggestion?.draftEntityKey ||
+      entitySuggestion?.normalizedName ||
+      entitySuggestion?.name
+    );
+
+
+  if (
+    !entityDraftKey
+  ) {
+    return [];
+  }
+
+
+  const result =
+    [];
+
+
+  const seen =
+    new Set();
+
+
+  for (
+    const candidate of
+    fieldCandidates
+  ) {
+    const candidateDraftKey =
+      normalizeDraftKey(
+        candidate?.subjectDraftEntityKey ||
+        candidate?.subjectResolution?.draftEntityKey ||
+        candidate?.subjectHint
+      );
+
+
+    if (
+      !candidateDraftKey ||
+      candidateDraftKey !==
+        entityDraftKey
+    ) {
+      continue;
+    }
+
+
+    const recommendedField =
+      createRecommendedFieldFromCandidate(
+        candidate
+      );
+
+
+    if (
+      !recommendedField
+    ) {
+      continue;
+    }
+
+
+    const identity =
+      recommendedField
+        .fieldConcept ||
+      normalizeDraftKey(
+        recommendedField.label
+      );
+
+
+    if (
+      seen.has(identity)
+    ) {
+      continue;
+    }
+
+
+    seen.add(identity);
+
+    result.push(
+      recommendedField
+    );
+  }
+
+
+  return result;
+}
 
 // ======================================================
 // Field Update Suggestions
@@ -61,25 +301,97 @@ function getCandidateConfidence(
 function createFieldUpdateSuggestion(
   candidate
 ) {
-  if (
+  const targetEntityId =
     candidate
-      ?.schemaResolution
-      ?.status !==
-      "resolved"
+      ?.subjectEntityId ??
+    candidate
+      ?.subjectResolution
+      ?.entityId ??
+    null;
+
+
+  const targetDraftEntityKey =
+    candidate
+      ?.subjectDraftEntityKey ??
+    candidate
+      ?.subjectResolution
+      ?.draftEntityKey ??
+    null;
+
+
+  /*
+   * Existing Entity or Draft Entity is required.
+   */
+  if (
+    !targetEntityId &&
+    !targetDraftEntityKey
+  ) {
+    return null;
+  }
+
+
+  const fieldConcept =
+    candidate
+      ?.fieldConcept ??
+    null;
+
+
+  const fieldKey =
+    candidate
+      ?.resolvedFieldKey ??
+    null;
+
+
+  /*
+   * For a materialized schema we use fieldKey.
+   *
+   * For a Draft Entity whose EntityType/schema does not
+   * exist yet, fieldConcept is enough to preserve the fact.
+   */
+  if (
+    !fieldKey &&
+    !fieldConcept
   ) {
     return null;
   }
 
 
   /*
-   * A missing or ambiguous Entity-Reference is not yet
-   * safe to write.
+   * If schema resolution actually succeeded, respect
+   * explicit incompatibility.
+   */
+  if (
+    candidate
+      ?.typeCompatibility
+      ?.compatible ===
+      false
+  ) {
+    return null;
+  }
+
+
+  /*
+   * Missing Select option still requires the option to be
+   * created before the field value can be applied.
    */
   if (
     candidate
       ?.valueResolution
       ?.status ===
-      "missing-reference" ||
+      "missing-option"
+  ) {
+    return null;
+  }
+
+
+  /*
+   * Existing Entity Reference fields remain unresolved
+   * until their referenced Entity exists.
+   *
+   * A future pass can convert these into Draft-reference
+   * values. Relation candidates are handled separately.
+   */
+  if (
     candidate
       ?.valueResolution
       ?.status ===
@@ -93,59 +405,45 @@ function createFieldUpdateSuggestion(
   }
 
 
-  /*
-   * Missing Select option is also not directly writable.
-   */
-  if (
+  let value =
     candidate
-      ?.valueResolution
-      ?.status ===
-      "missing-option"
-  ) {
-    return null;
-  }
+      ?.storageValuePreview;
 
 
   /*
-   * Explicitly incompatible schema types must not
-   * generate ready-to-apply field updates.
+   * Draft schema analysis often has no storage preview yet.
+   * Preserve the normalized semantic value instead.
    */
   if (
-    candidate
-      ?.typeCompatibility
-      ?.compatible ===
-      false
-  ) {
-    return null;
-  }
-
-
-  if (
-    !candidate
-      ?.subjectEntityId
-  ) {
-    return null;
-  }
-
-
-  if (
-    !candidate
-      ?.resolvedFieldKey
-  ) {
-    return null;
-  }
-
-
-  if (
-    candidate
-      .storageValuePreview ===
+    value ===
       undefined ||
-    candidate
-      .storageValuePreview ===
+    value ===
       null
   ) {
+    value =
+      candidate
+        ?.normalizedValue ??
+      candidate
+        ?.value;
+  }
+
+
+  if (
+    value ===
+    undefined
+  ) {
     return null;
   }
+
+
+  const targetIdentity =
+    targetEntityId ||
+    `draft:${targetDraftEntityKey}`;
+
+
+  const hasUnresolvedDependency =
+    !targetEntityId ||
+    !fieldKey;
 
 
   return {
@@ -153,15 +451,13 @@ function createFieldUpdateSuggestion(
       makeSuggestionId([
         "field-update",
 
-        candidate
-          .subjectEntityId,
+        targetIdentity,
 
-        candidate
-          .resolvedFieldKey,
+        fieldKey ||
+        fieldConcept,
 
         JSON.stringify(
-          candidate
-            .storageValuePreview
+          value
         ),
       ]),
 
@@ -169,81 +465,105 @@ function createFieldUpdateSuggestion(
       "field-update",
 
     status:
-      "ready",
+      hasUnresolvedDependency
+        ? "needs-user-confirmation"
+        : "ready",
 
-    targetEntityId:
-      candidate
-        .subjectEntityId,
+    targetEntityId,
+
+    targetDraftEntityKey,
 
     targetEntityName:
       candidate
-        .subjectHint,
-
-    fieldKey:
+        ?.subjectHint ??
       candidate
-        .resolvedFieldKey,
+        ?.subjectDraftEntity
+        ?.name ??
+      null,
+
+    targetTypeConcept:
+      candidate
+        ?.subjectTypeConcept ??
+      candidate
+        ?.subjectDraftEntity
+        ?.likelyTypeConcept ??
+      null,
+
+    fieldKey,
 
     fieldLabel:
       candidate
-        .resolvedFieldLabel,
+        ?.resolvedFieldLabel ??
+      fieldConcept,
 
-    fieldConcept:
-      candidate
-        .fieldConcept,
+    fieldConcept,
 
     fieldType:
       candidate
-        .resolvedFieldType,
+        ?.resolvedFieldType ??
+      null,
 
-    value:
-      candidate
-        .storageValuePreview,
+    value,
 
     originalValue:
       candidate
-        .normalizedValue ??
+        ?.normalizedValue ??
       candidate
-        .value,
+        ?.value,
 
     confidence:
       getCandidateConfidence(
         candidate
       ),
 
-    warnings:
-      [
+    warnings: [
+      candidate
+        ?.typeCompatibility
+        ?.warning,
+
+      !targetEntityId
+        ? "TARGET_ENTITY_IS_DRAFT"
+        : null,
+
+      !fieldKey
+        ? "FIELD_SCHEMA_NOT_MATERIALIZED"
+        : null,
+    ].filter(
+      Boolean
+    ),
+
+    source: {
+      candidateType:
+        candidate
+          ?.candidateType,
+
+      subjectHint:
+        candidate
+          ?.subjectHint,
+
+      subjectDraftEntityKey:
+        targetDraftEntityKey,
+
+      schemaMatchType:
+        candidate
+          ?.schemaResolution
+          ?.matchType,
+
+      schemaResolution:
+        candidate
+          ?.schemaResolution
+          ?.status,
+
+      typeCompatibility:
         candidate
           ?.typeCompatibility
-          ?.warning,
-      ].filter(
-        Boolean
-      ),
+          ?.status,
 
-    source:
-      {
-        candidateType:
-          candidate
-            .candidateType,
-
-        subjectHint:
-          candidate
-            .subjectHint,
-
-        schemaMatchType:
-          candidate
-            ?.schemaResolution
-            ?.matchType,
-
-        typeCompatibility:
-          candidate
-            ?.typeCompatibility
-            ?.status,
-
-        valueResolution:
-          candidate
-            ?.valueResolution
-            ?.status,
-      },
+      valueResolution:
+        candidate
+          ?.valueResolution
+          ?.status,
+    },
   };
 }
 
@@ -465,7 +785,10 @@ function isObviouslyNonEntitySuggestion(
 
 
 function createEntitySuggestion(
-  suggestion
+  suggestion,
+  {
+    recommendedFields = [],
+  } = {}
 ) {
   if (
     isObviouslyNonEntitySuggestion(
@@ -476,16 +799,29 @@ function createEntitySuggestion(
   }
 
 
+  const name =
+    normalizeEntitySuggestionName(
+      suggestion.name
+    );
+
+
+  const draftEntityKey =
+    normalizeDraftKey(
+      suggestion?.draftEntityKey ||
+      suggestion?.normalizedName ||
+      name
+    );
+
+
   return {
     suggestionId:
       makeSuggestionId([
         "create-entity",
 
-        suggestion
-          .name,
+        draftEntityKey,
 
         suggestion
-          .fieldConcept ??
+          .likelyTypeConcept ??
         suggestion
           .likelyType ??
         "",
@@ -497,9 +833,9 @@ function createEntitySuggestion(
     status:
       "needs-user-confirmation",
 
-    name:
-      suggestion
-        .name,
+    name,
+
+    draftEntityKey,
 
     likelyTypeConcept:
       suggestion
@@ -512,6 +848,13 @@ function createEntitySuggestion(
       suggestion
         .expectedTypeConcepts ??
       [],
+
+    recommendedFields:
+      Array.isArray(
+        recommendedFields
+      )
+        ? recommendedFields
+        : [],
 
     fieldKey:
       suggestion
@@ -533,28 +876,37 @@ function createEntitySuggestion(
         .role ??
       null,
 
+    roles:
+      suggestion
+        .roles ??
+      [],
+
     confidence:
       suggestion
         .confidence ??
       0.7,
 
-    source:
-      {
-        subject:
-          suggestion
-            .sourceSubject ??
-          null,
+    source: {
+      subject:
+        suggestion
+          .sourceSubject ??
+      null,
 
-        sourceEntityId:
-          suggestion
-            .sourceEntityId ??
-          null,
+      sourceEntityId:
+        suggestion
+          .sourceEntityId ??
+      null,
 
-        sourceConcept:
-          suggestion
-            .sourceConcept ??
-          null,
-      },
+      sourceConcept:
+        suggestion
+          .sourceConcept ??
+      null,
+
+      sourceConcepts:
+        suggestion
+          .sourceConcepts ??
+      [],
+    },
   };
 }
 
@@ -575,6 +927,15 @@ function createRelationSuggestion(
     null;
 
 
+  const subjectDraftEntityKey =
+    candidate
+      ?.subjectDraftEntityKey ??
+    candidate
+      ?.subjectResolution
+      ?.draftEntityKey ??
+    null;
+
+
   const objectEntityId =
     candidate
       ?.objectResolution
@@ -584,9 +945,27 @@ function createRelationSuggestion(
     null;
 
 
+  const objectDraftEntityKey =
+    candidate
+      ?.objectDraftEntityKey ??
+    candidate
+      ?.objectResolution
+      ?.draftEntityKey ??
+    null;
+
+
+  /*
+   * Each side must exist either canonically or as a draft.
+   */
   if (
-    !subjectEntityId ||
-    !objectEntityId
+    (
+      !subjectEntityId &&
+      !subjectDraftEntityKey
+    ) ||
+    (
+      !objectEntityId &&
+      !objectDraftEntityKey
+    )
   ) {
     return null;
   }
@@ -607,56 +986,98 @@ function createRelationSuggestion(
   }
 
 
+  const subjectIdentity =
+    subjectEntityId ||
+    `draft:${subjectDraftEntityKey}`;
+
+
+  const objectIdentity =
+    objectEntityId ||
+    `draft:${objectDraftEntityKey}`;
+
+
+  const hasDraftDependency =
+    !subjectEntityId ||
+    !objectEntityId;
+
+
   return {
     suggestionId:
       makeSuggestionId([
         "relation-update",
 
-        subjectEntityId,
+        subjectIdentity,
 
         relationConcept,
 
-        objectEntityId,
+        objectIdentity,
       ]),
 
     kind:
       "relation-update",
 
     status:
-      "ready",
+      hasDraftDependency
+        ? "needs-user-confirmation"
+        : "ready",
 
     subjectEntityId,
 
+    subjectDraftEntityKey,
+
     subjectName:
       candidate
-        .subjectHint ??
+        ?.subjectHint ??
+      candidate
+        ?.subjectDraftEntity
+        ?.name ??
       null,
 
     relationConcept,
 
     objectEntityId,
 
+    objectDraftEntityKey,
+
     objectName:
       candidate
-        .objectHint ??
+        ?.objectHint ??
+      candidate
+        ?.objectDraftEntity
+        ?.name ??
       null,
 
     confidence:
       candidate
-        .confidence ??
+        ?.confidence ??
       0.7,
 
-    source:
-      {
-        candidateType:
-          candidate
-            .candidateType,
+    warnings: [
+      !subjectEntityId
+        ? "SUBJECT_ENTITY_IS_DRAFT"
+        : null,
 
-        state:
-          candidate
-            .state ??
-          null,
-      },
+      !objectEntityId
+        ? "OBJECT_ENTITY_IS_DRAFT"
+        : null,
+    ].filter(
+      Boolean
+    ),
+
+    source: {
+      candidateType:
+        candidate
+          ?.candidateType,
+
+      state:
+        candidate
+          ?.state ??
+      null,
+
+      subjectDraftEntityKey,
+
+      objectDraftEntityKey,
+    },
   };
 }
 
@@ -1149,15 +1570,30 @@ function generateStorySuggestions({
 
   // ----------------------------------------------------
   // L3-A missing entities
+  //
+  // A missing entity may also carry recommended schema
+  // fields for a NEW recommended EntityType.
   // ----------------------------------------------------
 
   for (
     const entity of
     entitySuggestions
   ) {
+    const recommendedFields =
+      buildRecommendedFieldsForEntity({
+        entitySuggestion:
+          entity,
+
+        fieldCandidates,
+      });
+
+
     const suggestion =
       createEntitySuggestion(
-        entity
+        entity,
+        {
+          recommendedFields,
+        }
       );
 
 
@@ -1254,4 +1690,9 @@ module.exports = {
 
   generateStorySuggestions,
   isRedundantEventSuggestion,
+
+  normalizeDraftKey,
+  inferRecommendedFieldType,
+  createRecommendedFieldFromCandidate,
+  buildRecommendedFieldsForEntity,
 };

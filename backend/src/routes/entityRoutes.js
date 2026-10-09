@@ -1,25 +1,34 @@
-const express = require(
-  "express"
-);
+const express =
+  require(
+    "express"
+  );
 
-const Entity = require(
-  "../models/Entity"
-);
 
-const EntityType = require(
-  "../models/EntityType"
-);
+const World =
+  require(
+    "../models/World"
+  );
 
-const TreeNode = require(
-  "../models/TreeNode"
-);
+const Entity =
+  require(
+    "../models/Entity"
+  );
+
+const EntityType =
+  require(
+    "../models/EntityType"
+  );
+
+const TreeNode =
+  require(
+    "../models/TreeNode"
+  );
 
 
 const {
-  getDevUser,
-  getOwnedWorld,
+  requireAuth,
 } = require(
-  "../utils/devUser"
+  "../middleware/requireAuth"
 );
 
 
@@ -35,179 +44,80 @@ const router =
 
 
 // ======================================================
-// Get every Entity belonging to a World
+// Authentication
 // ======================================================
 
-router.get(
-  "/world/:worldId",
-
-  async (
-    req,
-    res
-  ) => {
-    try {
-      const user =
-        await getDevUser();
-
-
-      const world =
-        await getOwnedWorld(
-          req.params.worldId,
-          user._id
-        );
-
-
-      if (
-        !world
-      ) {
-        return res
-          .status(404)
-          .json({
-            message:
-              "World not found",
-          });
-      }
-
-
-      const entities =
-        await Entity.find({
-          worldId:
-            world._id,
-        })
-          .populate(
-            "entityTypeId",
-            "name icon description canonicalConcept"
-          )
-          .sort({
-            updatedAt:
-              -1,
-          });
-
-
-      res.json(
-        entities
-      );
-    } catch (error) {
-      console.error(
-        "Failed to get entities:",
-        error
-      );
-
-
-      res
-        .status(500)
-        .json({
-          message:
-            "Failed to get entities",
-
-          error:
-            error.message,
-        });
-    }
-  }
+router.use(
+  requireAuth
 );
 
 
 // ======================================================
-// Get Entities belonging to a specific Entity Type
+// Ownership Helpers
 // ======================================================
 
-router.get(
-  "/world/:worldId/type/:entityTypeId",
-
-  async (
-    req,
-    res
-  ) => {
-    try {
-      const user =
-        await getDevUser();
-
-
-      const world =
-        await getOwnedWorld(
-          req.params.worldId,
-          user._id
-        );
-
-
-      if (
-        !world
-      ) {
-        return res
-          .status(404)
-          .json({
-            message:
-              "World not found",
-          });
-      }
-
-
-      const entityType =
-        await EntityType.findOne({
-          _id:
-            req.params.entityTypeId,
-
-          worldId:
-            world._id,
-        });
-
-
-      if (
-        !entityType
-      ) {
-        return res
-          .status(404)
-          .json({
-            message:
-              "Entity type not found",
-          });
-      }
-
-
-      const entities =
-        await Entity.find({
-          worldId:
-            world._id,
-
-          entityTypeId:
-            entityType._id,
-        })
-          .select(
-            "name entityTypeId"
-          )
-          .sort({
-            name:
-              1,
-          });
-
-
-      res.json(
-        entities
-      );
-    } catch (error) {
-      console.error(
-        "Failed to get entities:",
-        error
-      );
-
-
-      res
-        .status(500)
-        .json({
-          message:
-            "Failed to get entities",
-
-          error:
-            error.message,
-        });
-    }
+async function findOwnedWorld(
+  worldId,
+  userId
+) {
+  if (
+    !worldId ||
+    !userId
+  ) {
+    return null;
   }
-);
+
+
+  return World.findOne({
+    _id:
+      worldId,
+
+    ownerId:
+      userId,
+  });
+}
+
+
+async function findOwnedEntity({
+  entityId,
+  userId,
+}) {
+  const entity =
+    await Entity.findById(
+      entityId
+    );
+
+
+  if (
+    !entity
+  ) {
+    return null;
+  }
+
+
+  const world =
+    await findOwnedWorld(
+      entity.worldId,
+      userId
+    );
+
+
+  if (
+    !world
+  ) {
+    return null;
+  }
+
+
+  return {
+    entity,
+    world,
+  };
+}
 
 
 // ======================================================
-// Validation Helper
+// Entity Value Validation
 // ======================================================
 
 function cleanEntityValues({
@@ -263,6 +173,10 @@ function cleanEntityValues({
     }
 
 
+    // --------------------------------------------------
+    // Number
+    // --------------------------------------------------
+
     if (
       field.type ===
       "number"
@@ -295,10 +209,56 @@ function cleanEntityValues({
     }
 
 
+    // --------------------------------------------------
+    // Boolean
+    // --------------------------------------------------
+
     if (
       field.type ===
       "boolean"
     ) {
+      /*
+       * Avoid Boolean("false") === true.
+       */
+      if (
+        typeof value ===
+        "string"
+      ) {
+        const normalized =
+          value
+            .trim()
+            .toLowerCase();
+
+
+        if (
+          normalized ===
+          "true"
+        ) {
+          cleanedValues[
+            field.key
+          ] =
+            true;
+
+
+          continue;
+        }
+
+
+        if (
+          normalized ===
+          "false"
+        ) {
+          cleanedValues[
+            field.key
+          ] =
+            false;
+
+
+          continue;
+        }
+      }
+
+
       cleanedValues[
         field.key
       ] =
@@ -311,12 +271,24 @@ function cleanEntityValues({
     }
 
 
+    // --------------------------------------------------
+    // Select
+    // --------------------------------------------------
+
     if (
       field.type ===
       "select"
     ) {
+      const options =
+        Array.isArray(
+          field.options
+        )
+          ? field.options
+          : [];
+
+
       if (
-        !field.options.includes(
+        !options.includes(
           value
         )
       ) {
@@ -337,6 +309,10 @@ function cleanEntityValues({
     }
 
 
+    // --------------------------------------------------
+    // Default
+    // --------------------------------------------------
+
     cleanedValues[
       field.key
     ] =
@@ -352,7 +328,296 @@ function cleanEntityValues({
 
 
 // ======================================================
-// Create an Entity
+// Entity Reference Validation
+//
+// Prevent values such as:
+//
+// User A World:
+// Character.home = <Entity from User B World>
+//
+// from being stored manually through the API.
+// ======================================================
+
+async function validateEntityReferenceValues({
+  world,
+  entityType,
+  values,
+}) {
+  for (
+    const field of
+    entityType.fields
+  ) {
+    if (
+      field.type !==
+      "entity-reference"
+    ) {
+      continue;
+    }
+
+
+    const value =
+      values[
+        field.key
+      ];
+
+
+    if (
+      value ===
+        undefined ||
+      value ===
+        null ||
+      value ===
+        ""
+    ) {
+      continue;
+    }
+
+
+    let referencedEntity;
+
+
+    try {
+      referencedEntity =
+        await Entity.findOne({
+          _id:
+            value,
+
+          worldId:
+            world._id,
+        });
+    } catch {
+      return {
+        error:
+          `Invalid entity reference for ${field.label}`,
+      };
+    }
+
+
+    if (
+      !referencedEntity
+    ) {
+      return {
+        error:
+          `Referenced entity for ${field.label} was not found`,
+      };
+    }
+
+
+    if (
+      field.referenceEntityTypeId &&
+      String(
+        referencedEntity
+          .entityTypeId
+      ) !==
+        String(
+          field
+            .referenceEntityTypeId
+        )
+    ) {
+      return {
+        error:
+          `Referenced entity has an invalid type for ${field.label}`,
+      };
+    }
+  }
+
+
+  return {
+    valid:
+      true,
+  };
+}
+
+
+// ======================================================
+// Get Every Entity in World
+//
+// GET /api/entities/world/:worldId
+// ======================================================
+
+router.get(
+  "/world/:worldId",
+
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const world =
+        await findOwnedWorld(
+          req.params.worldId,
+          req.user._id
+        );
+
+
+      if (
+        !world
+      ) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "World not found",
+
+            code:
+              "WORLD_NOT_FOUND",
+          });
+      }
+
+
+      const entities =
+        await Entity
+          .find({
+            worldId:
+              world._id,
+          })
+          .populate(
+            "entityTypeId",
+            "name icon description canonicalConcept"
+          )
+          .sort({
+            updatedAt:
+              -1,
+          });
+
+
+      return res.json(
+        entities
+      );
+    } catch (
+      error
+    ) {
+      console.error(
+        "Failed to get entities:",
+        error
+      );
+
+
+      return res
+        .status(500)
+        .json({
+          message:
+            "Failed to get entities",
+
+          error:
+            error.message,
+        });
+    }
+  }
+);
+
+
+// ======================================================
+// Get Entities by Entity Type
+//
+// GET
+// /api/entities/world/:worldId/type/:entityTypeId
+// ======================================================
+
+router.get(
+  "/world/:worldId/type/:entityTypeId",
+
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const world =
+        await findOwnedWorld(
+          req.params.worldId,
+          req.user._id
+        );
+
+
+      if (
+        !world
+      ) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "World not found",
+
+            code:
+              "WORLD_NOT_FOUND",
+          });
+      }
+
+
+      const entityType =
+        await EntityType.findOne({
+          _id:
+            req.params
+              .entityTypeId,
+
+          worldId:
+            world._id,
+        });
+
+
+      if (
+        !entityType
+      ) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "Entity type not found",
+
+            code:
+              "ENTITY_TYPE_NOT_FOUND",
+          });
+      }
+
+
+      const entities =
+        await Entity
+          .find({
+            worldId:
+              world._id,
+
+            entityTypeId:
+              entityType._id,
+          })
+          .select(
+            "name entityTypeId"
+          )
+          .sort({
+            name:
+              1,
+          });
+
+
+      return res.json(
+        entities
+      );
+    } catch (
+      error
+    ) {
+      console.error(
+        "Failed to get entities:",
+        error
+      );
+
+
+      return res
+        .status(500)
+        .json({
+          message:
+            "Failed to get entities",
+
+          error:
+            error.message,
+        });
+    }
+  }
+);
+
+
+// ======================================================
+// Create Entity
+//
+// POST /api/entities
 // ======================================================
 
 router.post(
@@ -363,17 +628,14 @@ router.post(
     res
   ) => {
     try {
-      const user =
-        await getDevUser();
-
-
       const {
         worldId,
         entityTypeId,
         name,
         values,
       } =
-        req.body;
+        req.body ||
+        {};
 
 
       if (
@@ -384,6 +646,9 @@ router.post(
           .json({
             message:
               "worldId is required",
+
+            code:
+              "WORLD_ID_REQUIRED",
           });
       }
 
@@ -396,27 +661,40 @@ router.post(
           .json({
             message:
               "entityTypeId is required",
+
+            code:
+              "ENTITY_TYPE_ID_REQUIRED",
           });
       }
 
 
+      const normalizedName =
+        String(
+          name ||
+          ""
+        )
+          .trim();
+
+
       if (
-        !name ||
-        !name.trim()
+        !normalizedName
       ) {
         return res
           .status(400)
           .json({
             message:
               "Entity name is required",
+
+            code:
+              "ENTITY_NAME_REQUIRED",
           });
       }
 
 
       const world =
-        await getOwnedWorld(
+        await findOwnedWorld(
           worldId,
-          user._id
+          req.user._id
         );
 
 
@@ -428,14 +706,27 @@ router.post(
           .json({
             message:
               "World not found",
+
+            code:
+              "WORLD_NOT_FOUND",
           });
       }
 
 
+      /*
+       * Query by both ID and worldId instead of loading
+       * globally and comparing afterward.
+       *
+       * This avoids exposing cross-world records.
+       */
       const entityType =
-        await EntityType.findById(
-          entityTypeId
-        );
+        await EntityType.findOne({
+          _id:
+            entityTypeId,
+
+          worldId:
+            world._id,
+        });
 
 
       if (
@@ -446,23 +737,9 @@ router.post(
           .json({
             message:
               "Entity type not found",
-          });
-      }
 
-
-      if (
-        entityType
-          .worldId
-          .toString() !==
-        world
-          ._id
-          .toString()
-      ) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Entity type does not belong to this world",
+            code:
+              "ENTITY_TYPE_NOT_FOUND",
           });
       }
 
@@ -485,6 +762,35 @@ router.post(
           .json({
             message:
               validation.error,
+
+            code:
+              "ENTITY_VALUES_INVALID",
+          });
+      }
+
+
+      const referenceValidation =
+        await validateEntityReferenceValues({
+          world,
+
+          entityType,
+
+          values:
+            validation.values,
+        });
+
+
+      if (
+        referenceValidation.error
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              referenceValidation.error,
+
+            code:
+              "ENTITY_REFERENCE_INVALID",
           });
       }
 
@@ -494,10 +800,11 @@ router.post(
           worldId:
             world._id,
 
-          entityTypeId,
+          entityTypeId:
+            entityType._id,
 
           name:
-            name.trim(),
+            normalizedName,
 
           values:
             validation.values,
@@ -507,6 +814,10 @@ router.post(
       const savedEntity =
         await entity.save();
 
+
+      // --------------------------------------------------
+      // Create root TreeNode
+      // --------------------------------------------------
 
       const rootCount =
         await TreeNode
@@ -558,11 +869,6 @@ router.post(
           );
 
 
-      /*
-       * Keep Entity response compatible.
-       *
-       * The version is included as a transient JSON field.
-       */
       const dto =
         populatedEntity.toObject();
 
@@ -571,19 +877,21 @@ router.post(
         canonVersion;
 
 
-      res
+      return res
         .status(201)
         .json(
           dto
         );
-    } catch (error) {
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to create entity:",
         error
       );
 
 
-      res
+      return res
         .status(500)
         .json({
           message:
@@ -598,7 +906,9 @@ router.post(
 
 
 // ======================================================
-// Update an Entity
+// Update Entity
+//
+// PUT /api/entities/:id
 // ======================================================
 
 router.put(
@@ -609,71 +919,83 @@ router.put(
     res
   ) => {
     try {
-      const user =
-        await getDevUser();
+      const owned =
+        await findOwnedEntity({
+          entityId:
+            req.params.id,
+
+          userId:
+            req.user._id,
+        });
+
+
+      /*
+       * Deliberately return the same 404 for:
+       *
+       * nonexistent entity
+       * another user's entity
+       */
+      if (
+        !owned
+      ) {
+        return res
+          .status(404)
+          .json({
+            message:
+              "Entity not found",
+
+            code:
+              "ENTITY_NOT_FOUND",
+          });
+      }
+
+
+      const {
+        entity,
+        world,
+      } =
+        owned;
 
 
       const {
         name,
         values,
       } =
-        req.body;
+        req.body ||
+        {};
 
 
-      const entity =
-        await Entity.findById(
-          req.params.id
-        );
-
-
-      if (
-        !entity
-      ) {
-        return res
-          .status(404)
-          .json({
-            message:
-              "Entity not found",
-          });
-      }
-
-
-      const world =
-        await getOwnedWorld(
-          entity.worldId,
-          user._id
-        );
+      const normalizedName =
+        String(
+          name ||
+          ""
+        )
+          .trim();
 
 
       if (
-        !world
-      ) {
-        return res
-          .status(404)
-          .json({
-            message:
-              "Entity not found",
-          });
-      }
-
-
-      if (
-        !name ||
-        !name.trim()
+        !normalizedName
       ) {
         return res
           .status(400)
           .json({
             message:
               "Entity name is required",
+
+            code:
+              "ENTITY_NAME_REQUIRED",
           });
       }
 
 
       const entityType =
-        await EntityType.findById(
-          entity.entityTypeId
-        );
+        await EntityType.findOne({
+          _id:
+            entity.entityTypeId,
+
+          worldId:
+            world._id,
+        });
 
 
       if (
@@ -684,6 +1006,9 @@ router.put(
           .json({
             message:
               "Entity type not found",
+
+            code:
+              "ENTITY_TYPE_NOT_FOUND",
           });
       }
 
@@ -706,12 +1031,41 @@ router.put(
           .json({
             message:
               validation.error,
+
+            code:
+              "ENTITY_VALUES_INVALID",
+          });
+      }
+
+
+      const referenceValidation =
+        await validateEntityReferenceValues({
+          world,
+
+          entityType,
+
+          values:
+            validation.values,
+        });
+
+
+      if (
+        referenceValidation.error
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              referenceValidation.error,
+
+            code:
+              "ENTITY_REFERENCE_INVALID",
           });
       }
 
 
       entity.name =
-        name.trim();
+        normalizedName;
 
 
       entity.values =
@@ -746,17 +1100,19 @@ router.put(
         canonVersion;
 
 
-      res.json(
+      return res.json(
         dto
       );
-    } catch (error) {
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to update entity:",
         error
       );
 
 
-      res
+      return res
         .status(500)
         .json({
           message:
@@ -771,10 +1127,12 @@ router.put(
 
 
 // ======================================================
-// Delete an Entity
+// Delete Entity
 //
-// Any child TreeNodes are promoted to the deleted
-// Entity node's parent.
+// DELETE /api/entities/:id
+//
+// Child TreeNodes are promoted to the deleted Entity
+// node's parent.
 // ======================================================
 
 router.delete(
@@ -785,45 +1143,36 @@ router.delete(
     res
   ) => {
     try {
-      const user =
-        await getDevUser();
+      const owned =
+        await findOwnedEntity({
+          entityId:
+            req.params.id,
 
-
-      const entity =
-        await Entity.findById(
-          req.params.id
-        );
+          userId:
+            req.user._id,
+        });
 
 
       if (
-        !entity
+        !owned
       ) {
         return res
           .status(404)
           .json({
             message:
               "Entity not found",
+
+            code:
+              "ENTITY_NOT_FOUND",
           });
       }
 
 
-      const world =
-        await getOwnedWorld(
-          entity.worldId,
-          user._id
-        );
-
-
-      if (
-        !world
-      ) {
-        return res
-          .status(404)
-          .json({
-            message:
-              "Entity not found",
-          });
-      }
+      const {
+        entity,
+        world,
+      } =
+        owned;
 
 
       const treeNode =
@@ -915,33 +1264,32 @@ router.delete(
           finalNodes.length >
           0
         ) {
-          await TreeNode
-            .bulkWrite(
-              finalNodes.map(
-                (
-                  node,
-                  index
-                ) => ({
-                  updateOne: {
-                    filter: {
-                      _id:
-                        node._id,
-                    },
+          await TreeNode.bulkWrite(
+            finalNodes.map(
+              (
+                node,
+                index
+              ) => ({
+                updateOne: {
+                  filter: {
+                    _id:
+                      node._id,
+                  },
 
-                    update: {
-                      $set: {
-                        parentId:
-                          treeNode.parentId ||
-                          null,
+                  update: {
+                    $set: {
+                      parentId:
+                        treeNode.parentId ||
+                        null,
 
-                        order:
-                          index,
-                      },
+                      order:
+                        index,
                     },
                   },
-                })
-              )
-            );
+                },
+              })
+            )
+          );
         }
 
 
@@ -958,20 +1306,22 @@ router.delete(
         );
 
 
-      res.json({
+      return res.json({
         message:
           "Entity deleted",
 
         canonVersion,
       });
-    } catch (error) {
+    } catch (
+      error
+    ) {
       console.error(
         "Failed to delete entity:",
         error
       );
 
 
-      res
+      return res
         .status(500)
         .json({
           message:

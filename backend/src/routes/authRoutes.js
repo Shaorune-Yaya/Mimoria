@@ -16,6 +16,9 @@ const {
   validateEmail,
   validateUsername,
 
+  normalizeEmail,
+  normalizeUsername,
+
   normalizeDisplayName,
 } = require(
   "../utils/accountValidation"
@@ -26,6 +29,7 @@ const {
   PasswordValidationError,
 
   hashPassword,
+  verifyPassword,
 } = require(
   "../services/passwordService"
 );
@@ -64,8 +68,17 @@ const {
   createAuthToken,
 
   setAuthCookie,
+
+  clearAuthCookie,
 } = require(
   "../utils/authToken"
+);
+
+
+const {
+  getSessionUser,
+} = require(
+  "../middleware/requireAuth"
 );
 
 
@@ -87,7 +100,7 @@ const RESEND_COOLDOWN_MS =
 
 
 // ======================================================
-// DTO
+// User DTO
 // ======================================================
 
 function userToDto(
@@ -121,6 +134,10 @@ function userToDto(
 
     createdAt:
       user.createdAt,
+
+    lastLoginAt:
+      user.lastLoginAt ??
+      null,
   };
 }
 
@@ -148,7 +165,71 @@ async function findDuplicateAccount({
 
 
 // ======================================================
-// Register
+// Normalize Login Identifier
+//
+// Login accepts:
+//
+// email@example.com
+//
+// or:
+//
+// username
+// ======================================================
+
+function normalizeLoginIdentifier(
+  value
+) {
+  const identifier =
+    String(
+      value || ""
+    )
+      .trim();
+
+
+  if (
+    !identifier
+  ) {
+    return {
+      type:
+        null,
+
+      value:
+        "",
+    };
+  }
+
+
+  if (
+    identifier.includes(
+      "@"
+    )
+  ) {
+    return {
+      type:
+        "email",
+
+      value:
+        normalizeEmail(
+          identifier
+        ),
+    };
+  }
+
+
+  return {
+    type:
+      "username",
+
+    value:
+      normalizeUsername(
+        identifier
+      ),
+  };
+}
+
+
+// ======================================================
+// REGISTER
 //
 // POST /api/auth/register
 //
@@ -304,10 +385,6 @@ router.post(
       await user.save();
 
 
-      // --------------------------------------------------
-      // Send verification code
-      // --------------------------------------------------
-
       try {
         await sendVerificationEmail({
           to:
@@ -324,11 +401,6 @@ router.post(
       } catch (
         emailError
       ) {
-        /*
-         * Keep the newly-created account.
-         *
-         * The user can request another code later.
-         */
         console.error(
           "Verification email failed:",
           emailError
@@ -406,9 +478,6 @@ router.post(
       }
 
 
-      /*
-       * MongoDB unique index race protection.
-       */
       if (
         error?.code ===
         11000
@@ -453,7 +522,7 @@ router.post(
 
 
 // ======================================================
-// Verify Email
+// VERIFY EMAIL
 //
 // POST /api/auth/verify-email
 //
@@ -523,30 +592,39 @@ router.post(
       }
 
 
+      /*
+       * IMPORTANT:
+       *
+       * Never issue a login session merely because the
+       * email was already verified.
+       *
+       * Otherwise anyone who knows a registered email
+       * address could use this endpoint to log in.
+       */
       if (
         user.emailVerified
-        ) {
+      ) {
         return res
-            .status(409)
-            .json({
+          .status(409)
+          .json({
             message:
-                "This email address has already been verified.",
+              "This email address has already been verified.",
 
             code:
-                "EMAIL_ALREADY_VERIFIED",
+              "EMAIL_ALREADY_VERIFIED",
 
             user:
-                userToDto(
+              userToDto(
                 user
-                ),
+              ),
 
             alreadyVerified:
-                true,
+              true,
 
             authenticated:
-                false,
-            });
-        }
+              false,
+          });
+      }
 
 
       const verification =
@@ -659,10 +737,6 @@ router.post(
       }
 
 
-      // --------------------------------------------------
-      // Verification successful
-      // --------------------------------------------------
-
       user.emailVerified =
         true;
 
@@ -745,7 +819,7 @@ router.post(
 
 
 // ======================================================
-// Resend Verification Code
+// RESEND EMAIL VERIFICATION
 //
 // POST /api/auth/resend-verification
 //
@@ -776,7 +850,7 @@ router.post(
 
 
       /*
-       * Do not reveal whether an email address exists.
+       * Do not disclose whether an email exists here.
        */
       if (
         !user
@@ -936,6 +1010,399 @@ router.post(
 
 
 // ======================================================
+// LOGIN
+//
+// POST /api/auth/login
+//
+// {
+//   identifier: "email@example.com"
+//   password: "..."
+// }
+//
+// or:
+//
+// {
+//   identifier: "username"
+//   password: "..."
+// }
+// ======================================================
+
+router.post(
+  "/login",
+
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const identifier =
+        normalizeLoginIdentifier(
+          req.body
+            ?.identifier
+        );
+
+
+      const password =
+        String(
+          req.body
+            ?.password ||
+          ""
+        );
+
+
+      if (
+        !identifier.value ||
+        !password
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              "Email or username and password are required.",
+
+            code:
+              "LOGIN_FIELDS_REQUIRED",
+          });
+      }
+
+
+      // --------------------------------------------------
+      // Query account
+      //
+      // passwordHash has select:false in User schema,
+      // therefore it must be explicitly selected.
+      // --------------------------------------------------
+
+      const query =
+        identifier.type ===
+          "email"
+          ? {
+              email:
+                identifier.value,
+            }
+          : {
+              username:
+                identifier.value,
+            };
+
+
+      const user =
+        await User
+          .findOne(
+            query
+          )
+          .select(
+            "+passwordHash"
+          );
+
+
+      /*
+       * Use the same public message for:
+       *
+       * unknown account
+       * incorrect password
+       *
+       * This reduces account enumeration through login.
+       */
+      if (
+        !user
+      ) {
+        return res
+          .status(401)
+          .json({
+            message:
+              "Email, username, or password is incorrect.",
+
+            code:
+              "INVALID_CREDENTIALS",
+          });
+      }
+
+
+      const passwordValid =
+        await verifyPassword(
+          password,
+          user.passwordHash
+        );
+
+
+      if (
+        !passwordValid
+      ) {
+        return res
+          .status(401)
+          .json({
+            message:
+              "Email, username, or password is incorrect.",
+
+            code:
+              "INVALID_CREDENTIALS",
+          });
+      }
+
+
+      // --------------------------------------------------
+      // Account State
+      // --------------------------------------------------
+
+      if (
+        user.status !==
+        "active"
+      ) {
+        return res
+          .status(403)
+          .json({
+            message:
+              "This account is not active.",
+
+            code:
+              "ACCOUNT_NOT_ACTIVE",
+          });
+      }
+
+
+      if (
+        !user.emailVerified
+      ) {
+        return res
+          .status(403)
+          .json({
+            message:
+              "Verify your email address before signing in.",
+
+            code:
+              "EMAIL_NOT_VERIFIED",
+
+            requiresEmailVerification:
+              true,
+
+            email:
+              user.email,
+          });
+      }
+
+
+      // --------------------------------------------------
+      // Login Success
+      // --------------------------------------------------
+
+      user.lastLoginAt =
+        new Date();
+
+
+      await user.save();
+
+
+      const token =
+        createAuthToken(
+          user
+        );
+
+
+      setAuthCookie(
+        res,
+        token
+      );
+
+
+      return res.json({
+        authenticated:
+          true,
+
+        user:
+          userToDto(
+            user
+          ),
+      });
+    } catch (
+      error
+    ) {
+      console.error(
+        "Login failed:",
+        error
+      );
+
+
+      return res
+        .status(500)
+        .json({
+          message:
+            "Login failed.",
+
+          error:
+            error.message,
+        });
+    }
+  }
+);
+
+
+// ======================================================
+// CURRENT USER
+//
+// GET /api/auth/me
+// ======================================================
+
+router.get(
+  "/me",
+
+  async (
+    req,
+    res
+  ) => {
+    try {
+      const user =
+        await getSessionUser(
+          req
+        );
+
+
+      if (
+        !user
+      ) {
+        return res
+          .status(401)
+          .json({
+            authenticated:
+              false,
+
+            user:
+              null,
+
+            message:
+              "Authentication is required.",
+
+            code:
+              "AUTHENTICATION_REQUIRED",
+          });
+      }
+
+
+      if (
+        user.status !==
+        "active"
+      ) {
+        clearAuthCookie(
+          res
+        );
+
+
+        return res
+          .status(403)
+          .json({
+            authenticated:
+              false,
+
+            user:
+              null,
+
+            message:
+              "This account is not active.",
+
+            code:
+              "ACCOUNT_NOT_ACTIVE",
+          });
+      }
+
+
+      if (
+        !user.emailVerified &&
+        !user.isDevelopmentUser
+      ) {
+        clearAuthCookie(
+          res
+        );
+
+
+        return res
+          .status(403)
+          .json({
+            authenticated:
+              false,
+
+            user:
+              null,
+
+            message:
+              "Email verification is required.",
+
+            code:
+              "EMAIL_NOT_VERIFIED",
+          });
+      }
+
+
+      return res.json({
+        authenticated:
+          true,
+
+        user:
+          userToDto(
+            user
+          ),
+      });
+    } catch (
+      error
+    ) {
+      console.error(
+        "Current-user lookup failed:",
+        error
+      );
+
+
+      return res
+        .status(500)
+        .json({
+          authenticated:
+            false,
+
+          user:
+            null,
+
+          message:
+            "Unable to load the current account.",
+
+          error:
+            error.message,
+        });
+    }
+  }
+);
+
+
+// ======================================================
+// LOGOUT
+//
+// POST /api/auth/logout
+// ======================================================
+
+router.post(
+  "/logout",
+
+  (
+    req,
+    res
+  ) => {
+    clearAuthCookie(
+      res
+    );
+
+
+    return res.json({
+      authenticated:
+        false,
+
+      user:
+        null,
+
+      loggedOut:
+        true,
+    });
+  }
+);
+
+
+// ======================================================
 // Exports
 // ======================================================
 
@@ -943,4 +1410,6 @@ module.exports = {
   router,
 
   userToDto,
+
+  normalizeLoginIdentifier,
 };

@@ -4,6 +4,9 @@ const API_BASE_URL =
 
 
 export const API_URL = {
+  auth:
+    `${API_BASE_URL}/api/auth`,
+
   worlds:
     `${API_BASE_URL}/api/worlds`,
 
@@ -30,6 +33,9 @@ export const API_URL = {
 
   storySuggestions:
     `${API_BASE_URL}/api/story-suggestions`,
+
+  smartImport:
+    `${API_BASE_URL}/api/smart-import`,
 
   health:
     `${API_BASE_URL}/api/health`,

@@ -142,6 +142,30 @@ function WorldSidebar({
         )}
       </button>
 
+      <button
+        type="button"
+        className={
+          isSection(
+            `${basePath}/smart-import`
+          )
+            ? "sidebar-item active"
+            : "sidebar-item"
+        }
+        onClick={() =>
+          goTo(
+            `${basePath}/smart-import`
+          )
+        }
+      >
+        {t(
+          "workspace.smartImport",
+          {
+            defaultValue:
+              "Smart Import",
+          }
+        )}
+      </button>
+
       <div className="sidebar-divider" />
 
       <button

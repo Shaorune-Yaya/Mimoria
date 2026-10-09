@@ -21,6 +21,12 @@ const {
   "./schemaFieldResolver"
 );
 
+const {
+  findBestEntityTypeForDraft,
+} = require(
+  "./draftEntityResolver"
+);
+
 
 // ======================================================
 // Entity Type Lookup
@@ -66,8 +72,11 @@ function makeSchemaFieldSuggestion({
 }) {
   const metadata =
     getSuggestedFieldMetadata(
-      candidate.fieldConcept,
+      candidate
+        .fieldConcept,
+
       locale,
+
       {
         enabledPacks,
         nsfwEnabled,
@@ -93,7 +102,8 @@ function makeSchemaFieldSuggestion({
       ),
 
     canonicalConcept:
-      candidate.fieldConcept,
+      candidate
+        .fieldConcept,
 
     suggestedLabel:
       metadata
@@ -106,7 +116,8 @@ function makeSchemaFieldSuggestion({
     exampleValue:
       candidate
         .normalizedValue ??
-      candidate.value,
+      candidate
+        .value,
 
     sourceSubject:
       candidate
@@ -116,6 +127,25 @@ function makeSchemaFieldSuggestion({
       candidate
         .subjectEntityId ||
       null,
+
+    sourceDraftEntityKey:
+      candidate
+        .subjectDraftEntityKey ||
+      null,
+
+    sourceDraftEntityName:
+      candidate
+        .subjectDraftEntity
+        ?.name ||
+      null,
+
+    subjectIsDraft:
+      Boolean(
+        candidate
+          .subjectDraftEntityKey &&
+        !candidate
+          .subjectEntityId
+      ),
 
     confidence:
       candidate
@@ -141,6 +171,8 @@ function makeSelectOptionSuggestion({
 
     targetEntityTypeId:
       candidate
+        .subjectSchemaEntityTypeId ||
+      candidate
         .subjectResolution
         ?.entityTypeId ||
       null,
@@ -163,7 +195,8 @@ function makeSelectOptionSuggestion({
         ?.requestedValue ??
       candidate
         .normalizedValue ??
-      candidate.value,
+      candidate
+        .value,
 
     sourceSubject:
       candidate
@@ -173,6 +206,25 @@ function makeSelectOptionSuggestion({
       candidate
         .subjectEntityId ||
       null,
+
+    sourceDraftEntityKey:
+      candidate
+        .subjectDraftEntityKey ||
+      null,
+
+    sourceDraftEntityName:
+      candidate
+        .subjectDraftEntity
+        ?.name ||
+      null,
+
+    subjectIsDraft:
+      Boolean(
+        candidate
+          .subjectDraftEntityKey &&
+        !candidate
+          .subjectEntityId
+      ),
 
     confidence:
       candidate
@@ -213,16 +265,9 @@ function makeReferenceEntitySuggestion({
       candidate
         .fieldConcept,
 
-    /*
-     * This is the EntityType that owns the field.
-     *
-     * Example:
-     * 夜岚 -> Character
-     *
-     * The reference target constraints are stored
-     * separately below.
-     */
     sourceEntityTypeId:
+      candidate
+        .subjectSchemaEntityTypeId ||
       candidate
         .subjectResolution
         ?.entityTypeId ||
@@ -232,6 +277,25 @@ function makeReferenceEntitySuggestion({
       candidate
         .subjectEntityId ||
       null,
+
+    sourceDraftEntityKey:
+      candidate
+        .subjectDraftEntityKey ||
+      null,
+
+    sourceDraftEntityName:
+      candidate
+        .subjectDraftEntity
+        ?.name ||
+      null,
+
+    subjectIsDraft:
+      Boolean(
+        candidate
+          .subjectDraftEntityKey &&
+        !candidate
+          .subjectEntityId
+      ),
 
     sourceSubject:
       candidate
@@ -314,23 +378,100 @@ function resolveFieldCandidateSchemas({
     };
 
 
-    // --------------------------------------------------
-    // L3-A must resolve subject entity type first
-    // --------------------------------------------------
+    // ==================================================
+    // Resolve Subject EntityType
+    //
+    // Existing entity:
+    //
+    // subjectResolution.entityTypeId
+    //
+    // Draft entity:
+    //
+    // subjectDraftEntity
+    // -> inferred semantic type
+    // -> find compatible existing EntityType schema
+    // ==================================================
 
-    const subjectTypeId =
+    const canonicalSubjectTypeId =
       candidate
         .subjectResolution
         ?.entityTypeId ||
       null;
 
 
+    let subjectTypeId =
+      canonicalSubjectTypeId;
+
+
+    let subjectTypeSource =
+      canonicalSubjectTypeId
+        ? "canonical-entity"
+        : null;
+
+
+    let draftTypeMatch =
+      null;
+
+
+    if (
+      !subjectTypeId &&
+      candidate
+        .subjectDraftEntity
+    ) {
+      draftTypeMatch =
+        findBestEntityTypeForDraft({
+          draftEntity:
+            candidate
+              .subjectDraftEntity,
+
+          entityTypes,
+
+          entityTypeConceptMap,
+        });
+
+
+      subjectTypeId =
+        draftTypeMatch
+          .entityTypeId ||
+        null;
+
+
+      if (
+        subjectTypeId
+      ) {
+        subjectTypeSource =
+          "draft-inferred-type";
+      }
+    }
+
+
+    result.subjectSchemaEntityTypeId =
+      subjectTypeId;
+
+
+    result.subjectSchemaTypeSource =
+      subjectTypeSource;
+
+
+    result.subjectSchemaTypeMatch =
+      draftTypeMatch
+        ?.matchType ||
+      null;
+
+
+    // ==================================================
+    // No usable EntityType schema yet
+    // ==================================================
+
     if (
       !subjectTypeId
     ) {
       result.schemaResolution = {
         status:
-          "missing-subject-type",
+          candidate
+            .subjectDraftEntity
+            ? "draft-subject-type-unmaterialized"
+            : "missing-subject-type",
 
         fieldConcept:
           candidate
@@ -339,7 +480,23 @@ function resolveFieldCandidateSchemas({
         fieldKey:
           null,
 
+        likelyTypeConcept:
+          candidate
+            .subjectDraftEntity
+            ?.likelyTypeConcept ||
+          candidate
+            .subjectTypeConcept ||
+          null,
+
+        draftEntityKey:
+          candidate
+            .subjectDraftEntityKey ||
+          null,
+
         confidence:
+          candidate
+            .subjectDraftEntity
+            ?.confidence ||
           0,
       };
 
@@ -365,9 +522,9 @@ function resolveFieldCandidateSchemas({
     }
 
 
-    // --------------------------------------------------
-    // Find user's real EntityType schema
-    // --------------------------------------------------
+    // ==================================================
+    // Find Real User EntityType
+    // ==================================================
 
     const entityType =
       findEntityTypeById(
@@ -386,6 +543,13 @@ function resolveFieldCandidateSchemas({
         entityTypeId:
           subjectTypeId,
 
+        subjectTypeSource,
+
+        draftEntityKey:
+          candidate
+            .subjectDraftEntityKey ||
+          null,
+
         fieldConcept:
           candidate
             .fieldConcept,
@@ -419,15 +583,16 @@ function resolveFieldCandidateSchemas({
     }
 
 
-    // --------------------------------------------------
+    // ==================================================
     // L3-B1
-    // Resolve canonical field -> user's real field
-    // --------------------------------------------------
+    // Canonical field -> user's schema field
+    // ==================================================
 
     const schemaResolution =
       resolveSchemaField({
         fieldConcept:
-          candidate.fieldConcept,
+          candidate
+            .fieldConcept,
 
         entityType,
 
@@ -439,8 +604,16 @@ function resolveFieldCandidateSchemas({
       });
 
 
-    result.schemaResolution =
-      schemaResolution;
+    result.schemaResolution = {
+      ...schemaResolution,
+
+      subjectTypeSource,
+
+      draftEntityKey:
+        candidate
+          .subjectDraftEntityKey ||
+        null,
+    };
 
 
     result.resolvedFieldKey =
@@ -470,30 +643,35 @@ function resolveFieldCandidateSchemas({
         : null;
 
 
-    // --------------------------------------------------
-    // L3-B2 + L3-B3
-    // --------------------------------------------------
+    // ==================================================
+    // L3-B2 / L3-B3
+    // ==================================================
 
     if (
-      schemaResolution.status ===
+      schemaResolution
+        .status ===
       "resolved"
     ) {
       const candidateValue =
-        candidate.normalizedValue ??
-        candidate.value;
+        candidate
+          .normalizedValue ??
+        candidate
+          .value;
 
 
-      // ------------------------------------------------
-      // L3-B2 Field Type Compatibility
-      // ------------------------------------------------
+      // -----------------------------------------------
+      // Field Type Compatibility
+      // -----------------------------------------------
 
       const typeCompatibility =
         evaluateFieldTypeCompatibility({
           fieldConcept:
-            candidate.fieldConcept,
+            candidate
+              .fieldConcept,
 
           schemaFieldType:
-            schemaResolution.fieldType,
+            schemaResolution
+              .fieldType,
 
           value:
             candidateValue,
@@ -504,17 +682,9 @@ function resolveFieldCandidateSchemas({
         typeCompatibility;
 
 
-      // ------------------------------------------------
-      // L3-B3 Field Value Resolution
-      //
-      // Select:
-      // "蓝色"
-      // -> existing option
-      //
-      // Entity-Reference:
-      // "美利坚合众国"
-      // -> entity-us
-      // ------------------------------------------------
+      // -----------------------------------------------
+      // Field Value Resolution
+      // -----------------------------------------------
 
       const valueResolution =
         resolveFieldValue({
@@ -522,7 +692,8 @@ function resolveFieldCandidateSchemas({
             candidateValue,
 
           field:
-            schemaResolution.field,
+            schemaResolution
+              .field,
 
           entities,
 
@@ -534,12 +705,13 @@ function resolveFieldCandidateSchemas({
         valueResolution;
 
 
-      // ------------------------------------------------
+      // -----------------------------------------------
       // Missing Select Option
-      // ------------------------------------------------
+      // -----------------------------------------------
 
       if (
-        valueResolution.status ===
+        valueResolution
+          .status ===
         "missing-option"
       ) {
         selectOptionSuggestions.push(
@@ -551,12 +723,19 @@ function resolveFieldCandidateSchemas({
       }
 
 
-      // ------------------------------------------------
+      // -----------------------------------------------
       // Missing Entity Reference
-      // ------------------------------------------------
+      //
+      // Example:
+      //
+      // Alice birthplace = Silverport
+      //
+      // Silverport does not exist yet.
+      // -----------------------------------------------
 
       if (
-        valueResolution.status ===
+        valueResolution
+          .status ===
         "missing-reference"
       ) {
         referenceEntitySuggestions.push(
@@ -568,36 +747,33 @@ function resolveFieldCandidateSchemas({
       }
 
 
-      // ------------------------------------------------
-      // Storage Value Preview
-      //
-      // Important:
-      //
-      // Resolved reference:
-      // entity-us
-      //
-      // Missing reference:
-      // null
-      //
-      // Never put unresolved plain text into an actual
-      // Entity-Reference field.
-      // ------------------------------------------------
+      // -----------------------------------------------
+      // Storage Preview
+      // -----------------------------------------------
 
       if (
-        valueResolution.status ===
+        valueResolution
+          .status ===
         "resolved"
       ) {
         result.storageValuePreview =
           valueResolution
             .resolvedValue;
       } else if (
-        valueResolution.status ===
+        valueResolution
+          .status ===
           "missing-reference" ||
-        valueResolution.status ===
+        valueResolution
+          .status ===
           "ambiguous-reference" ||
-        valueResolution.status ===
+        valueResolution
+          .status ===
           "missing-reference-hint"
       ) {
+        /*
+         * Never pretend an unresolved string is already
+         * a real Entity Reference ObjectId.
+         */
         result.storageValuePreview =
           null;
       } else {
@@ -624,12 +800,24 @@ function resolveFieldCandidateSchemas({
     }
 
 
-    // --------------------------------------------------
+    // ==================================================
     // Missing Schema Field
-    // --------------------------------------------------
+    //
+    // This now also works for a Draft Entity when its
+    // inferred EntityType maps to an existing user type.
+    //
+    // Example:
+    //
+    // Alice -> Character draft
+    // Character EntityType exists
+    // field.age does not
+    //
+    // -> suggest Create Age field on Character
+    // ==================================================
 
     if (
-      schemaResolution.status ===
+      schemaResolution
+        .status ===
       "missing"
     ) {
       schemaSuggestions.push(
@@ -731,7 +919,8 @@ function deduplicateSchemaSuggestions(
 
     const serialized =
       JSON.stringify(
-        suggestion.exampleValue
+        suggestion
+          .exampleValue
       );
 
 
@@ -761,8 +950,13 @@ function deduplicateSchemaSuggestions(
 
     existing.confidence =
       Math.max(
-        existing.confidence,
-        suggestion.confidence
+        existing
+          .confidence ||
+        0,
+
+        suggestion
+          .confidence ||
+        0
       );
   }
 
@@ -832,8 +1026,13 @@ function deduplicateSelectOptionSuggestions(
 
     existing.confidence =
       Math.max(
-        existing.confidence,
-        suggestion.confidence
+        existing
+          .confidence ||
+        0,
+
+        suggestion
+          .confidence ||
+        0
       );
   }
 
@@ -861,7 +1060,8 @@ function deduplicateReferenceEntitySuggestions(
   ) {
     const normalizedName =
       String(
-        suggestion.name ||
+        suggestion
+          .name ||
         ""
       )
         .normalize(
@@ -879,11 +1079,11 @@ function deduplicateReferenceEntitySuggestions(
 
 
     /*
-     * Include field concept in the key.
+     * The same reference entity may appear in several
+     * different fields.
      *
-     * This prevents two unrelated reference fields from
-     * being merged only because they mention the same
-     * missing entity name.
+     * Include fieldConcept so unrelated references do not
+     * merge incorrectly.
      */
     const key = [
       normalizedName,
@@ -917,8 +1117,13 @@ function deduplicateReferenceEntitySuggestions(
 
     existing.confidence =
       Math.max(
-        existing.confidence,
-        suggestion.confidence
+        existing
+          .confidence ||
+        0,
+
+        suggestion
+          .confidence ||
+        0
       );
 
 

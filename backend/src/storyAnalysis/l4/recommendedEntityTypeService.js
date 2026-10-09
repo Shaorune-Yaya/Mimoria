@@ -1,7 +1,10 @@
+const crypto = require(
+  "crypto"
+);
+
 const EntityType = require(
   "../../models/EntityType"
 );
-
 
 const {
   bumpWorldCanonVersion,
@@ -9,11 +12,16 @@ const {
   "../../services/worldCanonVersionService"
 );
 
-
 const {
   getEntityTypePresentation,
 } = require(
   "../concepts/entityTypePresentation"
+);
+
+const {
+  getSuggestedFieldMetadata,
+} = require(
+  "../l3/schemaFieldResolver"
 );
 
 
@@ -57,7 +65,7 @@ class RecommendedEntityTypeError
 
 
 // ======================================================
-// Normalize Locale
+// Locale
 // ======================================================
 
 function normalizeLocale(
@@ -85,7 +93,7 @@ function normalizeLocale(
 
 
 // ======================================================
-// Find Existing Recommended Type
+// Existing Type
 // ======================================================
 
 async function findRecommendedEntityType({
@@ -110,31 +118,256 @@ async function findRecommendedEntityType({
 
 
 // ======================================================
+// Recommended Field Helpers
+// ======================================================
+
+const ALLOWED_FIELD_TYPES =
+  new Set([
+    "text",
+    "long-text",
+    "number",
+    "boolean",
+    "date",
+    "entity-reference",
+    "select",
+  ]);
+
+
+function normalizeFieldType(
+  value
+) {
+  const normalized =
+    String(
+      value || ""
+    )
+      .trim();
+
+
+  if (
+    ALLOWED_FIELD_TYPES.has(
+      normalized
+    )
+  ) {
+    return normalized;
+  }
+
+
+  return "text";
+}
+
+
+function createFieldKey() {
+  return `field_${crypto
+    .randomUUID()
+    .replace(
+      /-/gu,
+      ""
+    )}`;
+}
+
+
+function buildRecommendedSchemaFields({
+  payload,
+
+  locale,
+}) {
+  const recommendedFields =
+    Array.isArray(
+      payload
+        ?.recommendedFields
+    )
+      ? payload
+          .recommendedFields
+      : [];
+
+
+  const result =
+    [];
+
+
+  const seenConcepts =
+    new Set();
+
+
+  const seenLabels =
+    new Set();
+
+
+  for (
+    const field of
+    recommendedFields
+  ) {
+    if (
+      !field ||
+      typeof field !==
+        "object"
+    ) {
+      continue;
+    }
+
+
+    const fieldConcept =
+      String(
+        field
+          .fieldConcept ||
+        ""
+      )
+        .trim();
+
+
+    let metadata =
+      null;
+
+
+    if (
+      fieldConcept
+    ) {
+      metadata =
+        getSuggestedFieldMetadata(
+          fieldConcept,
+
+          locale,
+
+          {
+            enabledPacks: [
+              "furry",
+              "sciFi",
+            ],
+
+            nsfwEnabled:
+              false,
+          }
+        );
+    }
+
+
+    const label =
+      String(
+        field.label ||
+        metadata
+          ?.suggestedLabel ||
+        fieldConcept ||
+        "Field"
+      )
+        .trim();
+
+
+    if (
+      !label
+    ) {
+      continue;
+    }
+
+
+    const normalizedLabel =
+      label
+        .toLowerCase();
+
+
+    if (
+      fieldConcept &&
+      seenConcepts.has(
+        fieldConcept
+      )
+    ) {
+      continue;
+    }
+
+
+    if (
+      seenLabels.has(
+        normalizedLabel
+      )
+    ) {
+      continue;
+    }
+
+
+    if (
+      fieldConcept
+    ) {
+      seenConcepts.add(
+        fieldConcept
+      );
+    }
+
+
+    seenLabels.add(
+      normalizedLabel
+    );
+
+
+    const type =
+      normalizeFieldType(
+        field.type ||
+        metadata
+          ?.suggestedValueType ||
+        "text"
+      );
+
+
+    const options =
+      type ===
+        "select" &&
+      Array.isArray(
+        field.options
+      )
+        ? [
+            ...new Set(
+              field.options
+                .map(
+                  (option) =>
+                    String(
+                      option || ""
+                    )
+                      .trim()
+                )
+                .filter(
+                  Boolean
+                )
+            ),
+          ]
+        : [];
+
+
+    result.push({
+      key:
+        createFieldKey(),
+
+      label,
+
+      type,
+
+      required:
+        field.required ===
+        true,
+
+      canonicalConcept:
+        fieldConcept ||
+        null,
+
+      referenceEntityTypeId:
+        type ===
+          "entity-reference"
+          ? field
+              .referenceEntityTypeId ||
+            null
+          : null,
+
+      options,
+
+      order:
+        result.length,
+    });
+  }
+
+
+  return result;
+}
+
+
+// ======================================================
 // Ensure Recommended Entity Type
-//
-// This is called ONLY after explicit user confirmation.
-//
-// Example:
-//
-// Candidate:
-// {
-//   kind: "create-entity",
-//   payload: {
-//     name: "Black Rose Church",
-//     likelyTypeConcept: "entityType.church"
-//   }
-// }
-//
-// If the World already has:
-//
-// 教会
-// canonicalConcept = entityType.church
-//
-// -> reuse it.
-//
-// Otherwise:
-//
-// -> create the recommended EntityType.
 // ======================================================
 
 async function ensureRecommendedEntityType({
@@ -263,7 +496,11 @@ async function ensureRecommendedEntityType({
 
 
   // ----------------------------------------------------
-  // Reuse an existing semantic EntityType
+  // Reuse Existing Semantic EntityType
+  //
+  // Important:
+  // Do NOT automatically add recommendedFields to an
+  // already-existing EntityType.
   // ----------------------------------------------------
 
   const existing =
@@ -313,26 +550,44 @@ async function ensureRecommendedEntityType({
 
 
   // ----------------------------------------------------
-  // Create Recommended EntityType
+  // Presentation
   // ----------------------------------------------------
+
+  const normalizedLocale =
+    normalizeLocale(
+      locale
+    );
+
 
   const presentation =
     getEntityTypePresentation(
       canonicalConcept,
 
-      normalizeLocale(
-        locale
-      )
+      normalizedLocale
     );
 
 
-  const name =
+  const defaultName =
     String(
       presentation
         ?.label ||
       ""
     )
       .trim();
+
+
+  const customName =
+    String(
+      payload
+        .recommendedTypeName ||
+      ""
+    )
+      .trim();
+
+
+  const name =
+    customName ||
+    defaultName;
 
 
   if (
@@ -352,14 +607,26 @@ async function ensureRecommendedEntityType({
   }
 
 
-  /*
-   * Defensive fallback:
-   *
-   * If the World already contains a type with exactly the
-   * same localized name but without canonicalConcept,
-   * reuse it and attach the concept instead of creating a
-   * duplicate visible type.
-   */
+  const customIcon =
+    String(
+      payload
+        .recommendedTypeIcon ||
+      ""
+    )
+      .trim();
+
+
+  const icon =
+    customIcon ||
+    presentation
+      ?.icon ||
+    "📄";
+
+
+  // ----------------------------------------------------
+  // Same visible name
+  // ----------------------------------------------------
+
   const sameName =
     await EntityType.findOne({
       worldId:
@@ -433,11 +700,6 @@ async function ensureRecommendedEntityType({
     }
 
 
-    /*
-     * Same visible name but different semantic concept.
-     *
-     * Do not silently merge them.
-     */
     throw new RecommendedEntityTypeError(
       `An Entity Type named "${name}" already exists but represents a different canonical concept.`,
       {
@@ -467,6 +729,23 @@ async function ensureRecommendedEntityType({
   }
 
 
+  // ----------------------------------------------------
+  // Build recommended schema fields
+  // ----------------------------------------------------
+
+  const fields =
+    buildRecommendedSchemaFields({
+      payload,
+
+      locale:
+        normalizedLocale,
+    });
+
+
+  // ----------------------------------------------------
+  // Create New EntityType
+  // ----------------------------------------------------
+
   const entityType =
     await EntityType.create({
       worldId:
@@ -477,21 +756,14 @@ async function ensureRecommendedEntityType({
       description:
         "",
 
-      icon:
-        presentation
-          ?.icon ||
-        "📄",
+      icon,
 
       canonicalConcept,
 
-      fields:
-        [],
+      fields,
     });
 
 
-  /*
-   * Creating an EntityType changes World Canon.
-   */
   const canonVersion =
     await bumpWorldCanonVersion(
       candidate.worldId
@@ -532,6 +804,9 @@ async function ensureRecommendedEntityType({
     canonicalConceptAttached:
       false,
 
+    createdFieldCount:
+      fields.length,
+
     canonVersion,
   };
 }
@@ -564,6 +839,8 @@ module.exports = {
   normalizeLocale,
 
   findRecommendedEntityType,
+
+  buildRecommendedSchemaFields,
 
   ensureRecommendedEntityType,
 };

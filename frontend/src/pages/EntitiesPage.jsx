@@ -26,6 +26,7 @@ import {
 
 import WorldLayout from "../components/WorldLayout";
 import { API_URL } from "../config/api";
+import { apiFetch } from "../utils/apiFetch";
 
 
 // ======================================================
@@ -779,19 +780,10 @@ function EntitiesPage() {
 
   async function fetchWorld() {
     try {
-      const response =
-        await fetch(
+      const data =
+        await apiFetch(
           `${API_URL.worlds}/${worldId}`
         );
-
-      if (!response.ok) {
-        throw new Error(
-          "Failed to fetch world"
-        );
-      }
-
-      const data =
-        await response.json();
 
       setWorld(data);
     } catch (error) {
@@ -805,19 +797,10 @@ function EntitiesPage() {
 
   async function fetchEntityTypes() {
     try {
-      const response =
-        await fetch(
+      const data =
+        await apiFetch(
           `${API_URL.entityTypes}/world/${worldId}`
         );
-
-      if (!response.ok) {
-        throw new Error(
-          "Failed to fetch entity types"
-        );
-      }
-
-      const data =
-        await response.json();
 
       setEntityTypes(data);
     } catch (error) {
@@ -831,19 +814,10 @@ function EntitiesPage() {
 
   async function fetchEntities() {
     try {
-      const response =
-        await fetch(
+      const data =
+        await apiFetch(
           `${API_URL.entities}/world/${worldId}`
         );
-
-      if (!response.ok) {
-        throw new Error(
-          "Failed to fetch entities"
-        );
-      }
-
-      const data =
-        await response.json();
 
       setEntities(data);
     } catch (error) {
@@ -857,19 +831,10 @@ function EntitiesPage() {
 
   async function fetchTree() {
     try {
-      const response =
-        await fetch(
+      const data =
+        await apiFetch(
           `${API_URL.tree}/world/${worldId}`
         );
-
-      if (!response.ok) {
-        throw new Error(
-          "Failed to fetch tree"
-        );
-      }
-
-      const data =
-        await response.json();
 
       setTreeNodes(data);
     } catch (error) {
@@ -1166,45 +1131,24 @@ function EntitiesPage() {
 
 
     try {
-      const response =
-        await fetch(
+      const createdFolder =
+        await apiFetch(
           `${API_URL.tree}/folders`,
           {
             method:
               "POST",
 
-            headers: {
-              "Content-Type":
-                "application/json",
+            body: {
+              worldId,
+
+              name:
+                folderName.trim(),
+
+              parentId:
+                folderParentId,
             },
-
-            body:
-              JSON.stringify({
-                worldId,
-
-                name:
-                  folderName.trim(),
-
-                parentId:
-                  folderParentId,
-              }),
           }
         );
-
-
-      if (!response.ok) {
-        const data =
-          await response.json();
-
-        throw new Error(
-          data.message ||
-            "Failed to create folder"
-        );
-      }
-
-
-      const createdFolder =
-        await response.json();
 
 
       if (
@@ -1366,36 +1310,18 @@ function EntitiesPage() {
 
 
     try {
-      const response =
-        await fetch(
-          `${API_URL.tree}/${nodeId}`,
-          {
-            method:
-              "PUT",
+      await apiFetch(
+        `${API_URL.tree}/${nodeId}`,
+        {
+          method:
+            "PUT",
 
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify({
-                name:
-                  cleanedName,
-              }),
-          }
-        );
-
-
-      if (!response.ok) {
-        const data =
-          await response.json();
-
-        throw new Error(
-          data.message ||
-            "Failed to rename folder"
-        );
-      }
+          body: {
+            name:
+              cleanedName,
+          },
+        }
+      );
 
 
       cancelRenameFolder();
@@ -1449,25 +1375,13 @@ function EntitiesPage() {
 
 
     try {
-      const response =
-        await fetch(
-          `${API_URL.tree}/${node._id}`,
-          {
-            method:
-              "DELETE",
-          }
-        );
-
-
-      if (!response.ok) {
-        const data =
-          await response.json();
-
-        throw new Error(
-          data.message ||
-            "Failed to delete folder"
-        );
-      }
+      await apiFetch(
+        `${API_URL.tree}/${node._id}`,
+        {
+          method:
+            "DELETE",
+        }
+      );
 
 
       setExpandedNodes(
@@ -1534,25 +1448,13 @@ function EntitiesPage() {
 
 
     try {
-      const response =
-        await fetch(
-          `${API_URL.entities}/${entity._id}`,
-          {
-            method:
-              "DELETE",
-          }
-        );
-
-
-      if (!response.ok) {
-        const data =
-          await response.json();
-
-        throw new Error(
-          data.message ||
-            "Failed to delete entity"
-        );
-      }
+      await apiFetch(
+        `${API_URL.entities}/${entity._id}`,
+        {
+          method:
+            "DELETE",
+        }
+      );
 
 
       setEntities(
@@ -1679,36 +1581,18 @@ function EntitiesPage() {
     index = null
   ) {
     try {
-      const response =
-        await fetch(
-          `${API_URL.tree}/${nodeId}/move`,
-          {
-            method:
-              "PUT",
+      await apiFetch(
+        `${API_URL.tree}/${nodeId}/move`,
+        {
+          method:
+            "PUT",
 
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify({
-                parentId,
-                index,
-              }),
-          }
-        );
-
-
-      if (!response.ok) {
-        const data =
-          await response.json();
-
-        throw new Error(
-          data.message ||
-            "Failed to move node"
-        );
-      }
+          body: {
+            parentId,
+            index,
+          },
+        }
+      );
 
 
       if (parentId) {
@@ -2074,21 +1958,10 @@ function EntitiesPage() {
       }
 
 
-      const response =
-        await fetch(
+      const data =
+        await apiFetch(
           url
         );
-
-
-      if (!response.ok) {
-        throw new Error(
-          "Failed to load reference options"
-        );
-      }
-
-
-      const data =
-        await response.json();
 
 
       setReferenceOptions(
@@ -2207,47 +2080,26 @@ function EntitiesPage() {
 
 
     try {
-      const response =
-        await fetch(
+      const newEntity =
+        await apiFetch(
           API_URL.entities,
           {
             method:
               "POST",
 
-            headers: {
-              "Content-Type":
-                "application/json",
+            body: {
+              worldId,
+
+              entityTypeId:
+                selectedEntityTypeId,
+
+              name:
+                name.trim(),
+
+              values,
             },
-
-            body:
-              JSON.stringify({
-                worldId,
-
-                entityTypeId:
-                  selectedEntityTypeId,
-
-                name:
-                  name.trim(),
-
-                values,
-              }),
           }
         );
-
-
-      if (!response.ok) {
-        const data =
-          await response.json();
-
-        throw new Error(
-          data.message ||
-            "Failed to create entity"
-        );
-      }
-
-
-      const newEntity =
-        await response.json();
 
 
       setEntities(
@@ -2580,43 +2432,22 @@ function EntitiesPage() {
 
 
     try {
-      const response =
-        await fetch(
+      const updatedEntity =
+        await apiFetch(
           `${API_URL.entities}/${selectedDetailEntity._id}`,
           {
             method:
               "PUT",
 
-            headers: {
-              "Content-Type":
-                "application/json",
+            body: {
+              name:
+                editName.trim(),
+
+              values:
+                editValues,
             },
-
-            body:
-              JSON.stringify({
-                name:
-                  editName.trim(),
-
-                values:
-                  editValues,
-              }),
           }
         );
-
-
-      if (!response.ok) {
-        const data =
-          await response.json();
-
-        throw new Error(
-          data.message ||
-            "Failed to update entity"
-        );
-      }
-
-
-      const updatedEntity =
-        await response.json();
 
 
       setSelectedDetailEntity(
