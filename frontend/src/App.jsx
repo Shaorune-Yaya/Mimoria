@@ -11,7 +11,13 @@ import EntityTypeEditor from "./pages/EntityTypeEditor";
 import EntitiesPage from "./pages/EntitiesPage";
 import DocumentsPage from "./pages/DocumentsPage";
 import SmartImportPage from "./pages/SmartImportPage";
+
 import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
+import AccountPage from "./pages/AccountPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 import {
   AuthProvider,
@@ -38,6 +44,8 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          {/* Public Auth Routes */}
+
           <Route
             path="/login"
             element={
@@ -45,6 +53,45 @@ function App() {
             }
           />
 
+          <Route
+            path="/register"
+            element={
+              <RegisterPage />
+            }
+          />
+
+          <Route
+            path="/verify-email"
+            element={
+              <VerifyEmailPage />
+            }
+          />
+
+          <Route
+            path="/account"
+            element={
+              <Protected>
+                <AccountPage />
+              </Protected>
+            }
+          />
+          
+          <Route
+            path="/forgot-password"
+            element={
+              <ForgotPasswordPage />
+            }
+          />
+
+          <Route
+            path="/reset-password"
+            element={
+              <ResetPasswordPage />
+            }
+          />
+
+
+          {/* Protected Routes */}
 
           <Route
             path="/"

@@ -8,12 +8,27 @@ import AppHeader from "./AppHeader";
 import WorldSidebar from "./WorldSidebar";
 import SecondaryWorkspacePane from "./SecondaryWorkspacePane";
 
-const MIN_SPLIT_PERCENT = 25;
-const MAX_SPLIT_PERCENT = 75;
+import {
+  isDockableWorkspaceView,
+} from "../config/workspaceViews";
 
-const DEFAULT_MOBILE_SHEET_HEIGHT = 36;
-const MIN_MOBILE_SHEET_HEIGHT = 28;
-const MAX_MOBILE_SHEET_HEIGHT = 92;
+
+const MIN_SPLIT_PERCENT =
+  25;
+
+const MAX_SPLIT_PERCENT =
+  75;
+
+
+const DEFAULT_MOBILE_SHEET_HEIGHT =
+  36;
+
+const MIN_MOBILE_SHEET_HEIGHT =
+  28;
+
+const MAX_MOBILE_SHEET_HEIGHT =
+  92;
+
 
 function WorldLayout({
   worldId,
@@ -26,6 +41,7 @@ function WorldLayout({
   const workspaceSplitRef =
     useRef(null);
 
+
   // ======================================================
   // Mobile Navigation Drawer
   // ======================================================
@@ -33,40 +49,56 @@ function WorldLayout({
   const [
     mobileMenuOpen,
     setMobileMenuOpen,
-  ] = useState(false);
+  ] =
+    useState(
+      false
+    );
+
 
   // ======================================================
-  // Desktop / Ultrawide Splitter
+  // Desktop Splitter
   // ======================================================
 
   const [
     splitPercent,
     setSplitPercent,
-  ] = useState(() => {
-    const saved =
-      Number(
-        localStorage.getItem(
-          "mimoria-workspace-split"
-        )
-      );
+  ] =
+    useState(
+      () => {
+        const saved =
+          Number(
+            localStorage.getItem(
+              "mimoria-workspace-split"
+            )
+          );
 
-    if (
-      Number.isFinite(saved) &&
-      saved >=
-        MIN_SPLIT_PERCENT &&
-      saved <=
-        MAX_SPLIT_PERCENT
-    ) {
-      return saved;
-    }
 
-    return 50;
-  });
+        if (
+          Number.isFinite(
+            saved
+          ) &&
+          saved >=
+            MIN_SPLIT_PERCENT &&
+          saved <=
+            MAX_SPLIT_PERCENT
+        ) {
+          return saved;
+        }
+
+
+        return 50;
+      }
+    );
+
 
   const [
     isResizing,
     setIsResizing,
-  ] = useState(false);
+  ] =
+    useState(
+      false
+    );
+
 
   // ======================================================
   // Mobile Bottom Sheet
@@ -75,14 +107,20 @@ function WorldLayout({
   const [
     mobileSheetHeight,
     setMobileSheetHeight,
-  ] = useState(
-    DEFAULT_MOBILE_SHEET_HEIGHT
-  );
+  ] =
+    useState(
+      DEFAULT_MOBILE_SHEET_HEIGHT
+    );
+
 
   const [
     isMobileSheetResizing,
     setIsMobileSheetResizing,
-  ] = useState(false);
+  ] =
+    useState(
+      false
+    );
+
 
   // ======================================================
   // Secondary Workspace
@@ -91,24 +129,47 @@ function WorldLayout({
   const [
     dockTargetActive,
     setDockTargetActive,
-  ] = useState(false);
+  ] =
+    useState(
+      false
+    );
+
 
   const [
     secondaryView,
     setSecondaryView,
-  ] = useState(() => {
-    return (
-      localStorage.getItem(
-        "mimoria-secondary-pane-view"
-      ) ||
-      "entity-types"
+  ] =
+    useState(
+      () => {
+        const saved =
+          localStorage.getItem(
+            "mimoria-secondary-pane-view"
+          );
+
+
+        if (
+          saved &&
+          isDockableWorkspaceView(
+            saved
+          )
+        ) {
+          return saved;
+        }
+
+
+        return "entity-types";
+      }
     );
-  });
+
 
   const [
     secondaryPaneOpen,
     setSecondaryPaneOpen,
-  ] = useState(true);
+  ] =
+    useState(
+      true
+    );
+
 
   // ======================================================
   // Layout Classes
@@ -125,8 +186,13 @@ function WorldLayout({
       ? "has-ultrawide-pane"
       : "",
   ]
-    .filter(Boolean)
-    .join(" ");
+    .filter(
+      Boolean
+    )
+    .join(
+      " "
+    );
+
 
   // ======================================================
   // Mobile Drawer
@@ -138,6 +204,7 @@ function WorldLayout({
     );
   }
 
+
   // ======================================================
   // Secondary Workspace View
   // ======================================================
@@ -145,11 +212,24 @@ function WorldLayout({
   function setWorkspaceView(
     view
   ) {
+    if (
+      view &&
+      !isDockableWorkspaceView(
+        view
+      )
+    ) {
+      return;
+    }
+
+
     setSecondaryView(
       view
     );
 
-    if (view) {
+
+    if (
+      view
+    ) {
       localStorage.setItem(
         "mimoria-secondary-pane-view",
         view
@@ -161,6 +241,7 @@ function WorldLayout({
     }
   }
 
+
   // ======================================================
   // Desktop Split Resize
   // ======================================================
@@ -170,96 +251,131 @@ function WorldLayout({
   ) {
     event.preventDefault();
 
+
     setIsResizing(
       true
     );
   }
 
-  useEffect(() => {
-    if (!isResizing) {
-      return;
-    }
 
-    function handlePointerMove(
-      event
-    ) {
-      const container =
-        workspaceSplitRef
-          .current;
-
-      if (!container) {
+  useEffect(
+    () => {
+      if (
+        !isResizing
+      ) {
         return;
       }
 
-      const rect =
-        container.getBoundingClientRect();
 
-      const rawPercent =
-        ((event.clientX -
-          rect.left) /
-          rect.width) *
-        100;
+      function handlePointerMove(
+        event
+      ) {
+        const container =
+          workspaceSplitRef.current;
 
-      const nextPercent =
-        Math.min(
-          MAX_SPLIT_PERCENT,
-          Math.max(
-            MIN_SPLIT_PERCENT,
-            rawPercent
-          )
+
+        if (
+          !container
+        ) {
+          return;
+        }
+
+
+        const rect =
+          container
+            .getBoundingClientRect();
+
+
+        const rawPercent =
+          (
+            (
+              event.clientX -
+              rect.left
+            ) /
+            rect.width
+          ) *
+          100;
+
+
+        const nextPercent =
+          Math.min(
+            MAX_SPLIT_PERCENT,
+
+            Math.max(
+              MIN_SPLIT_PERCENT,
+              rawPercent
+            )
+          );
+
+
+        setSplitPercent(
+          nextPercent
+        );
+      }
+
+
+      function handlePointerUp() {
+        setIsResizing(
+          false
+        );
+      }
+
+
+      window.addEventListener(
+        "pointermove",
+        handlePointerMove
+      );
+
+
+      window.addEventListener(
+        "pointerup",
+        handlePointerUp
+      );
+
+
+      document.body.classList.add(
+        "workspace-is-resizing"
+      );
+
+
+      return () => {
+        window.removeEventListener(
+          "pointermove",
+          handlePointerMove
         );
 
-      setSplitPercent(
-        nextPercent
-      );
-    }
 
-    function handlePointerUp() {
-      setIsResizing(
-        false
-      );
+        window.removeEventListener(
+          "pointerup",
+          handlePointerUp
+        );
 
+
+        document.body.classList.remove(
+          "workspace-is-resizing"
+        );
+      };
+    },
+    [
+      isResizing,
+    ]
+  );
+
+
+  useEffect(
+    () => {
       localStorage.setItem(
         "mimoria-workspace-split",
         String(
           splitPercent
         )
       );
-    }
+    },
+    [
+      splitPercent,
+    ]
+  );
 
-    window.addEventListener(
-      "pointermove",
-      handlePointerMove
-    );
-
-    window.addEventListener(
-      "pointerup",
-      handlePointerUp
-    );
-
-    document.body.classList.add(
-      "workspace-is-resizing"
-    );
-
-    return () => {
-      window.removeEventListener(
-        "pointermove",
-        handlePointerMove
-      );
-
-      window.removeEventListener(
-        "pointerup",
-        handlePointerUp
-      );
-
-      document.body.classList.remove(
-        "workspace-is-resizing"
-      );
-    };
-  }, [
-    isResizing,
-    splitPercent,
-  ]);
 
   // ======================================================
   // Mobile Bottom Sheet Resize
@@ -275,104 +391,133 @@ function WorldLayout({
       return;
     }
 
+
     event.preventDefault();
+
     event.stopPropagation();
+
 
     setIsMobileSheetResizing(
       true
     );
   }
 
-  useEffect(() => {
-    if (
-      !isMobileSheetResizing
-    ) {
-      return;
-    }
 
-    function handlePointerMove(
-      event
-    ) {
-      const viewportHeight =
-        window.innerHeight;
-
+  useEffect(
+    () => {
       if (
-        viewportHeight <= 0
+        !isMobileSheetResizing
       ) {
         return;
       }
 
-      const rawHeight =
-        ((viewportHeight -
-          event.clientY) /
-          viewportHeight) *
-        100;
 
-      const nextHeight =
-        Math.min(
-          MAX_MOBILE_SHEET_HEIGHT,
-          Math.max(
-            MIN_MOBILE_SHEET_HEIGHT,
-            rawHeight
-          )
+      function handlePointerMove(
+        event
+      ) {
+        const viewportHeight =
+          window.innerHeight;
+
+
+        if (
+          viewportHeight <=
+          0
+        ) {
+          return;
+        }
+
+
+        const rawHeight =
+          (
+            (
+              viewportHeight -
+              event.clientY
+            ) /
+            viewportHeight
+          ) *
+          100;
+
+
+        const nextHeight =
+          Math.min(
+            MAX_MOBILE_SHEET_HEIGHT,
+
+            Math.max(
+              MIN_MOBILE_SHEET_HEIGHT,
+              rawHeight
+            )
+          );
+
+
+        setMobileSheetHeight(
+          nextHeight
         );
-
-      setMobileSheetHeight(
-        nextHeight
-      );
-    }
-
-    function handlePointerUp() {
-      setIsMobileSheetResizing(
-        false
-      );
-    }
-
-    window.addEventListener(
-      "pointermove",
-      handlePointerMove,
-      {
-        passive: false,
       }
-    );
 
-    window.addEventListener(
-      "pointerup",
-      handlePointerUp
-    );
 
-    window.addEventListener(
-      "pointercancel",
-      handlePointerUp
-    );
+      function handlePointerUp() {
+        setIsMobileSheetResizing(
+          false
+        );
+      }
 
-    document.body.classList.add(
-      "mobile-sheet-is-resizing"
-    );
 
-    return () => {
-      window.removeEventListener(
+      window.addEventListener(
         "pointermove",
-        handlePointerMove
+        handlePointerMove,
+        {
+          passive:
+            false,
+        }
       );
 
-      window.removeEventListener(
+
+      window.addEventListener(
         "pointerup",
         handlePointerUp
       );
 
-      window.removeEventListener(
+
+      window.addEventListener(
         "pointercancel",
         handlePointerUp
       );
 
-      document.body.classList.remove(
+
+      document.body.classList.add(
         "mobile-sheet-is-resizing"
       );
-    };
-  }, [
-    isMobileSheetResizing,
-  ]);
+
+
+      return () => {
+        window.removeEventListener(
+          "pointermove",
+          handlePointerMove
+        );
+
+
+        window.removeEventListener(
+          "pointerup",
+          handlePointerUp
+        );
+
+
+        window.removeEventListener(
+          "pointercancel",
+          handlePointerUp
+        );
+
+
+        document.body.classList.remove(
+          "mobile-sheet-is-resizing"
+        );
+      };
+    },
+    [
+      isMobileSheetResizing,
+    ]
+  );
+
 
   // ======================================================
   // Docking
@@ -389,15 +534,19 @@ function WorldLayout({
       return;
     }
 
+
     event.preventDefault();
+
 
     event.dataTransfer.dropEffect =
       "move";
+
 
     setDockTargetActive(
       true
     );
   }
+
 
   function handleDockDragLeave(
     event
@@ -410,15 +559,18 @@ function WorldLayout({
       return;
     }
 
+
     setDockTargetActive(
       false
     );
   }
 
+
   function handleDockDrop(
     event
   ) {
     event.preventDefault();
+
 
     const view =
       event.dataTransfer.getData(
@@ -428,34 +580,50 @@ function WorldLayout({
         "text/plain"
       );
 
+
     setDockTargetActive(
       false
     );
 
-    if (!view) {
+
+    if (
+      !isDockableWorkspaceView(
+        view
+      )
+    ) {
       return;
     }
+
 
     setWorkspaceView(
       view
     );
+
 
     setSecondaryPaneOpen(
       true
     );
   }
 
+
   function closeSecondaryPane() {
+    setDockTargetActive(
+      false
+    );
+
+
     setSecondaryPaneOpen(
       false
     );
   }
+
 
   function reopenSecondaryPane() {
     setSecondaryPaneOpen(
       true
     );
   }
+
 
   // ======================================================
   // Render
@@ -466,7 +634,9 @@ function WorldLayout({
       <AppHeader
         showBackButton
         showMenuButton
-        backTo={backTo}
+        backTo={
+          backTo
+        }
         worldName={
           worldName
         }
@@ -477,6 +647,7 @@ function WorldLayout({
         }
       />
 
+
       {mobileMenuOpen && (
         <div
           className="mobile-drawer-backdrop"
@@ -486,9 +657,7 @@ function WorldLayout({
         >
           <div
             className="mobile-drawer"
-            onClick={(
-              event
-            ) =>
+            onClick={(event) =>
               event.stopPropagation()
             }
           >
@@ -505,6 +674,7 @@ function WorldLayout({
         </div>
       )}
 
+
       <div
         className={
           bodyClassName
@@ -516,7 +686,9 @@ function WorldLayout({
           }
         />
 
+
         {secondarySidebar}
+
 
         <div
           className={
@@ -551,9 +723,11 @@ function WorldLayout({
             <div className="mobile-sheet-resize-pill" />
           </div>
 
+
           <main className="workspace-main workspace-primary-pane">
             {children}
           </main>
+
 
           {enableUltrawidePane && (
             <>
@@ -574,6 +748,7 @@ function WorldLayout({
                   <div className="workspace-splitter-handle" />
                 </div>
               )}
+
 
               {secondaryPaneOpen ? (
                 <div
@@ -606,6 +781,7 @@ function WorldLayout({
                       closeSecondaryPane
                     }
                   />
+
 
                   {dockTargetActive && (
                     <div className="workspace-dock-overlay">
@@ -640,5 +816,6 @@ function WorldLayout({
     </div>
   );
 }
+
 
 export default WorldLayout;

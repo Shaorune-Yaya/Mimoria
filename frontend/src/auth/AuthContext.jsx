@@ -65,16 +65,17 @@ export function AuthProvider({
             );
 
 
+          const nextUser =
+            data?.user ||
+            null;
+
+
           setUser(
-            data?.user ||
-            null
+            nextUser
           );
 
 
-          return (
-            data?.user ||
-            null
-          );
+          return nextUser;
         } catch (
           error
         ) {
@@ -104,6 +105,191 @@ export function AuthProvider({
 
           return null;
         }
+      },
+      []
+    );
+
+
+  // ====================================================
+  // Register
+  // ====================================================
+
+  const register =
+    useCallback(
+      async ({
+        email,
+        username,
+        password,
+        inviteCode,
+        displayName,
+      }) => {
+        return apiFetch(
+          `${API_URL.auth}/register`,
+          {
+            method:
+              "POST",
+
+            body: {
+              email,
+              username,
+              password,
+              inviteCode,
+
+              ...(displayName
+                ? {
+                    displayName,
+                  }
+                : {}),
+            },
+          }
+        );
+      },
+      []
+    );
+
+
+  // ====================================================
+  // Verify Email
+  // ====================================================
+
+  const verifyEmail =
+    useCallback(
+      async ({
+        email,
+        code,
+      }) => {
+        const data =
+          await apiFetch(
+            `${API_URL.auth}/verify-email`,
+            {
+              method:
+                "POST",
+
+              body: {
+                email,
+                code,
+              },
+            }
+          );
+
+
+        if (
+          data?.authenticated &&
+          data?.user
+        ) {
+          setUser(
+            data.user
+          );
+        }
+
+
+        return data;
+      },
+      []
+    );
+
+
+  // ====================================================
+  // Resend Verification
+  // ====================================================
+
+  const resendVerification =
+    useCallback(
+      async ({
+        email,
+      }) => {
+        return apiFetch(
+          `${API_URL.auth}/resend-verification`,
+          {
+            method:
+              "POST",
+
+            body: {
+              email,
+            },
+          }
+        );
+      },
+      []
+    );
+
+
+  // ====================================================
+// Forgot Password
+// ====================================================
+
+const requestPasswordReset =
+  useCallback(
+    async ({
+      email,
+    }) => {
+      return apiFetch(
+        `${API_URL.auth}/forgot-password`,
+        {
+          method:
+            "POST",
+
+          body: {
+            email,
+          },
+        }
+      );
+    },
+    []
+  );
+
+
+// ====================================================
+// Reset Password
+// ====================================================
+
+const resetPassword =
+  useCallback(
+    async ({
+      email,
+      code,
+      newPassword,
+    }) => {
+      return apiFetch(
+        `${API_URL.auth}/reset-password`,
+        {
+          method:
+            "POST",
+
+          body: {
+            email,
+            code,
+            newPassword,
+          },
+        }
+      );
+    },
+    []
+  );
+
+
+  // ====================================================
+  // Change Password
+  // ====================================================
+
+  const changePassword =
+    useCallback(
+      async ({
+        currentPassword,
+        newPassword,
+      }) => {
+        return apiFetch(
+          `${API_URL.auth}/change-password`,
+          {
+            method:
+              "POST",
+
+            body: {
+              currentPassword,
+              newPassword,
+            },
+          }
+        );
       },
       []
     );
@@ -269,17 +455,35 @@ export function AuthProvider({
             user
           ),
 
+        register,
+
+        verifyEmail,
+
+        resendVerification,
+
         login,
 
         logout,
 
         refreshSession,
+
+        requestPasswordReset,
+
+        resetPassword,
+
+        changePassword,
       }),
       [
         user,
         loading,
+        register,
+        verifyEmail,
+        resendVerification,
         login,
         logout,
+        requestPasswordReset,
+        resetPassword,
+        changePassword,
         refreshSession,
       ]
     );

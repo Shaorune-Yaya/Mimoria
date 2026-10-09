@@ -26,6 +26,7 @@ import {
 } from "@dnd-kit/modifiers";
 
 import WorldLayout from "../components/WorldLayout";
+import EmbeddedWorkspaceLayout from "../components/EmbeddedWorkspaceLayout";
 import DocumentEditor from "../components/DocumentEditor";
 
 import {
@@ -514,7 +515,9 @@ function DocumentRootDropZone({
 // Documents Page
 // ======================================================
 
-function DocumentsPage() {
+function DocumentsPage({
+  embedded = false,
+}) {
   const {
     worldId,
   } =
@@ -2649,9 +2652,14 @@ function DocumentsPage() {
   // Render
   // ====================================================
 
+  const LayoutComponent =
+  embedded
+    ? EmbeddedWorkspaceLayout
+    : WorldLayout;
+
   return (
     <>
-      <WorldLayout
+      <LayoutComponent
         worldId={
           worldId
         }
@@ -2664,7 +2672,9 @@ function DocumentsPage() {
         secondarySidebar={
           explorerSidebar
         }
-        enableUltrawidePane
+        enableUltrawidePane={
+          !embedded
+        }
       >
         <div className="documents-page-header">
           <div>
@@ -2843,7 +2853,7 @@ function DocumentsPage() {
               </p>
             </div>
           )}
-      </WorldLayout>
+      </LayoutComponent>
 
 
       {contextMenu && (

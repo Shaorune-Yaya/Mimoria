@@ -20,10 +20,10 @@ const USER_STATUSES = [
 
 
 // ======================================================
-// Email Verification
+// Verification Challenge Schema
 // ======================================================
 
-const emailVerificationSchema =
+const verificationChallengeSchema =
   new mongoose.Schema(
     {
       codeHash: {
@@ -66,6 +66,27 @@ const emailVerificationSchema =
         false,
     }
   );
+
+
+// ======================================================
+// Empty Challenge
+// ======================================================
+
+function createEmptyChallenge() {
+  return {
+    codeHash:
+      null,
+
+    expiresAt:
+      null,
+
+    lastSentAt:
+      null,
+
+    failedAttempts:
+      0,
+  };
+}
 
 
 // ======================================================
@@ -129,12 +150,6 @@ const userSchema =
 
       // ------------------------------------------------
       // Public Profile
-      //
-      // username:
-      // unique account/login name
-      //
-      // displayName:
-      // visible name shown inside Mimoria
       // ------------------------------------------------
 
       displayName: {
@@ -167,22 +182,23 @@ const userSchema =
 
       emailVerification: {
         type:
-          emailVerificationSchema,
+          verificationChallengeSchema,
 
         default:
-          () => ({
-            codeHash:
-              null,
+          createEmptyChallenge,
+      },
 
-            expiresAt:
-              null,
 
-            lastSentAt:
-              null,
+      // ------------------------------------------------
+      // Password Reset
+      // ------------------------------------------------
 
-            failedAttempts:
-              0,
-          }),
+      passwordReset: {
+        type:
+          verificationChallengeSchema,
+
+        default:
+          createEmptyChallenge,
       },
 
 
@@ -254,21 +270,9 @@ const userSchema =
       },
 
 
-      // =================================================
+      // ------------------------------------------------
       // Development Compatibility
-      //
-      // Keep this while Mimoria is migrating away from
-      // getDevUser().
-      //
-      // The temporary development user does not need:
-      //
-      // email
-      // username
-      // password
-      //
-      // and therefore those fields intentionally are NOT
-      // globally required in this model.
-      // =================================================
+      // ------------------------------------------------
 
       isDevelopmentUser: {
         type:
@@ -295,12 +299,6 @@ const userSchema =
 // Indexes
 // ======================================================
 
-/*
- * Real registered users must have unique emails.
- *
- * The development user has no email, so a partial index
- * lets it continue existing safely.
- */
 userSchema.index(
   {
     email:
@@ -320,11 +318,6 @@ userSchema.index(
 );
 
 
-/*
- * Usernames are also unique.
- *
- * Case normalization will be handled before registration.
- */
 userSchema.index(
   {
     username:
@@ -361,19 +354,18 @@ userSchema.methods.isRealAccount =
 
 userSchema.methods.clearEmailVerification =
   function clearEmailVerification() {
-    this.emailVerification = {
-      codeHash:
-        null,
+    this.emailVerification =
+      createEmptyChallenge();
 
-      expiresAt:
-        null,
 
-      lastSentAt:
-        null,
+    return this;
+  };
 
-      failedAttempts:
-        0,
-    };
+
+userSchema.methods.clearPasswordReset =
+  function clearPasswordReset() {
+    this.passwordReset =
+      createEmptyChallenge();
 
 
     return this;

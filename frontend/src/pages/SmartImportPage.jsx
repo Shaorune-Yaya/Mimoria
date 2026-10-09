@@ -13,6 +13,7 @@ import {
 } from "react-router-dom";
 
 import WorldLayout from "../components/WorldLayout";
+import EmbeddedWorkspaceLayout from "../components/EmbeddedWorkspaceLayout";
 import StorySuggestionsPanel from "../components/StorySuggestionsPanel";
 
 import {
@@ -55,7 +56,9 @@ function normalizeLocale(
 // Component
 // ======================================================
 
-export default function SmartImportPage() {
+export default function SmartImportPage({
+  embedded = false,
+}) {
   const {
     worldId,
   } =
@@ -164,6 +167,11 @@ export default function SmartImportPage() {
       i18n.language
     );
 
+  
+  const LayoutComponent =
+    embedded
+      ? EmbeddedWorkspaceLayout
+      : WorldLayout;
 
   const pendingCount =
     useMemo(
@@ -1002,7 +1010,7 @@ export default function SmartImportPage() {
     loading
   ) {
     return (
-      <WorldLayout
+      <LayoutComponent
         worldId={
           worldId
         }
@@ -1026,13 +1034,13 @@ export default function SmartImportPage() {
             }
           )}
         </div>
-      </WorldLayout>
+      </LayoutComponent>
     );
   }
 
 
   return (
-    <WorldLayout
+    <LayoutComponent
       worldId={
         worldId
       }
@@ -1435,6 +1443,6 @@ export default function SmartImportPage() {
           }
         />
       </div>
-    </WorldLayout>
+    </LayoutComponent>
   );
 }

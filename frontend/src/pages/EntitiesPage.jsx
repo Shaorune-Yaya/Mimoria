@@ -25,6 +25,7 @@ import {
 } from "react-i18next";
 
 import WorldLayout from "../components/WorldLayout";
+import EmbeddedWorkspaceLayout from "../components/EmbeddedWorkspaceLayout";
 import { API_URL } from "../config/api";
 import { apiFetch } from "../utils/apiFetch";
 
@@ -574,7 +575,9 @@ function RootDropZone() {
 // Entities Page
 // ======================================================
 
-function EntitiesPage() {
+function EntitiesPage({
+  embedded = false,
+})  {
   const {
     worldId,
   } = useParams();
@@ -3297,18 +3300,21 @@ function EntitiesPage() {
   // Render
   // ====================================================
 
+  const LayoutComponent =
+  embedded
+    ? EmbeddedWorkspaceLayout
+    : WorldLayout;
+
   return (
-    <WorldLayout
-      worldId={
-        worldId
-      }
-      worldName={
-        world.name
-      }
+    <LayoutComponent
+      worldId={worldId}
+      worldName={world.name}
       secondarySidebar={
         explorerSidebar
       }
-      enableUltrawidePane
+      enableUltrawidePane={
+        !embedded
+      }
     >
       {/* ==================================================
           Page Header
@@ -3792,7 +3798,7 @@ function EntitiesPage() {
             </p>
           </div>
         )}
-    </WorldLayout>
+    </LayoutComponent>
   );
 }
 

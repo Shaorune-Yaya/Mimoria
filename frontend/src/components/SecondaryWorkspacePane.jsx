@@ -1,6 +1,6 @@
 import {
-  useEffect,
-  useState,
+  lazy,
+  Suspense,
 } from "react";
 
 import {
@@ -8,80 +8,355 @@ import {
 } from "react-i18next";
 
 import {
-  API_URL,
-} from "../config/api";
+  DOCKABLE_WORKSPACE_VIEWS,
+  getWorkspaceView,
+} from "../config/workspaceViews";
+
+
+const EntityTypesPage =
+  lazy(
+    () =>
+      import(
+        "../pages/EntityTypesPage"
+      )
+  );
+
+
+const EntitiesPage =
+  lazy(
+    () =>
+      import(
+        "../pages/EntitiesPage"
+      )
+  );
+
+
+const DocumentsPage =
+  lazy(
+    () =>
+      import(
+        "../pages/DocumentsPage"
+      )
+  );
+
+
+const SmartImportPage =
+  lazy(
+    () =>
+      import(
+        "../pages/SmartImportPage"
+      )
+  );
+
 
 function SecondaryWorkspacePane({
   worldId,
+  activeView,
+  onChangeView,
   onClose,
 }) {
   const { t } =
     useTranslation();
 
-  const [
-    entityTypes,
-    setEntityTypes,
-  ] = useState([]);
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
+  const viewDefinition =
+    getWorkspaceView(
+      activeView
+    );
 
-  async function fetchEntityTypes() {
-    try {
-      setLoading(true);
 
-      const response =
-        await fetch(
-          `${API_URL.entityTypes}/world/${worldId}`
+  // ======================================================
+  // Loading
+  // ======================================================
+
+  function renderLoading() {
+    return (
+      <div className="secondary-pane-empty">
+        {t(
+          "workspace.loading"
+        )}
+      </div>
+    );
+  }
+
+
+  // ======================================================
+  // Placeholder
+  // ======================================================
+
+  function renderPlaceholder({
+    icon,
+    title,
+    description,
+  }) {
+    return (
+      <div className="secondary-pane-placeholder">
+        <div className="secondary-pane-placeholder-icon">
+          {icon}
+        </div>
+
+        <h3>
+          {title}
+        </h3>
+
+        <p>
+          {description}
+        </p>
+      </div>
+    );
+  }
+
+
+  // ======================================================
+  // Content
+  // ======================================================
+
+  function renderContent() {
+    if (
+      !activeView
+    ) {
+      return renderPlaceholder({
+        icon:
+          "◧",
+
+        title:
+          t(
+            "workspace.secondaryWorkspace"
+          ),
+
+        description:
+          t(
+            "workspace.secondaryEmpty",
+            {
+              defaultValue:
+                "Drag a workspace from the left navigation or choose one above.",
+            }
+          ),
+      });
+    }
+
+
+    switch (
+      activeView
+    ) {
+      case "entity-types":
+        return (
+          <Suspense
+            fallback={
+              renderLoading()
+            }
+          >
+            <EntityTypesPage
+              embedded
+            />
+          </Suspense>
         );
 
-      if (!response.ok) {
-        throw new Error(
-          "Failed to fetch entity types"
+
+      case "entities":
+        return (
+          <Suspense
+            fallback={
+              renderLoading()
+            }
+          >
+            <EntitiesPage
+              embedded
+            />
+          </Suspense>
         );
-      }
 
-      const data =
-        await response.json();
 
-      setEntityTypes(
-        Array.isArray(data)
-          ? data
-          : []
-      );
-    } catch (error) {
-      console.error(
-        "Failed to load entity types:",
-        error
-      );
+      case "documents":
+        return (
+          <Suspense
+            fallback={
+              renderLoading()
+            }
+          >
+            <DocumentsPage
+              embedded
+            />
+          </Suspense>
+        );
 
-      setEntityTypes([]);
-    } finally {
-      setLoading(false);
+
+      case "smart-import":
+        return (
+          <Suspense
+            fallback={
+              renderLoading()
+            }
+          >
+            <SmartImportPage
+              embedded
+            />
+          </Suspense>
+        );
+
+
+      case "timeline":
+        return renderPlaceholder({
+          icon:
+            "◷",
+
+          title:
+            t(
+              "workspace.timeline"
+            ),
+
+          description:
+            t(
+              "workspace.timelineComingSoon",
+              {
+                defaultValue:
+                  "Timeline workspace is not implemented yet.",
+              }
+            ),
+        });
+
+
+      case "graph":
+        return renderPlaceholder({
+          icon:
+            "◉",
+
+          title:
+            t(
+              "workspace.graph"
+            ),
+
+          description:
+            t(
+              "workspace.graphComingSoon",
+              {
+                defaultValue:
+                  "Relationship graph workspace is not implemented yet.",
+              }
+            ),
+        });
+
+
+      case "settings":
+        return renderPlaceholder({
+          icon:
+            "⚙",
+
+          title:
+            t(
+              "workspace.settings"
+            ),
+
+          description:
+            t(
+              "workspace.settingsComingSoon",
+              {
+                defaultValue:
+                  "World settings workspace is not implemented yet.",
+              }
+            ),
+        });
+
+
+      default:
+        return renderPlaceholder({
+          icon:
+            "◧",
+
+          title:
+            t(
+              "workspace.secondaryWorkspace"
+            ),
+
+          description:
+            t(
+              "workspace.secondaryUnknown",
+              {
+                defaultValue:
+                  "This workspace cannot be displayed here.",
+              }
+            ),
+        });
     }
   }
 
-  useEffect(() => {
-    fetchEntityTypes();
-  }, [worldId]);
+
+  // ======================================================
+  // Render
+  // ======================================================
 
   return (
     <section className="workspace-secondary-pane">
       <div className="secondary-pane-header">
         <div className="secondary-pane-title">
-          {t(
-            "workspace.entityTypes"
-          )}
+          <span className="secondary-pane-title-icon">
+            {viewDefinition?.icon ||
+              "◧"}
+          </span>
+
+          <span>
+            {viewDefinition
+              ? t(
+                  viewDefinition.labelKey
+                )
+              : t(
+                  "workspace.secondaryWorkspace"
+                )}
+          </span>
         </div>
 
+
         <div className="secondary-pane-header-actions">
-          <div className="secondary-pane-fixed-view">
-            {t(
-              "workspace.secondaryWorkspace"
+          <select
+            className="secondary-pane-view-select"
+            value={
+              activeView ||
+              ""
+            }
+            aria-label={t(
+              "workspace.selectSecondaryView",
+              {
+                defaultValue:
+                  "Secondary workspace view",
+              }
             )}
-          </div>
+            onChange={(event) =>
+              onChangeView(
+                event.target.value ||
+                null
+              )
+            }
+          >
+            <option value="">
+              {t(
+                "workspace.secondaryEmptyOption",
+                {
+                  defaultValue:
+                    "Empty",
+                }
+              )}
+            </option>
+
+
+            {DOCKABLE_WORKSPACE_VIEWS.map(
+              (view) => (
+                <option
+                  key={
+                    view.id
+                  }
+                  value={
+                    view.id
+                  }
+                >
+                  {view.icon}{" "}
+                  {t(
+                    view.labelKey
+                  )}
+                </option>
+              )
+            )}
+          </select>
+
 
           <button
             type="button"
@@ -101,58 +376,13 @@ function SecondaryWorkspacePane({
         </div>
       </div>
 
-      <div className="secondary-pane-content">
-        {loading ? (
-          <div className="secondary-pane-empty">
-            {t(
-              "workspace.loading"
-            )}
-          </div>
-        ) : entityTypes.length ===
-          0 ? (
-          <div className="secondary-pane-empty">
-            {t(
-              "entityTypes.emptyTitle"
-            )}
-          </div>
-        ) : (
-          <div className="secondary-entity-type-list">
-            {entityTypes.map(
-              (type) => (
-                <div
-                  className="secondary-entity-type-item"
-                  key={
-                    type._id
-                  }
-                >
-                  <span>
-                    {type.icon ||
-                      "📄"}
-                  </span>
 
-                  <div>
-                    <strong>
-                      {
-                        type.name
-                      }
-                    </strong>
-
-                    {type.description && (
-                      <p>
-                        {
-                          type.description
-                        }
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )
-            )}
-          </div>
-        )}
+      <div className="secondary-pane-content secondary-pane-content-workspace">
+        {renderContent()}
       </div>
     </section>
   );
 }
+
 
 export default SecondaryWorkspacePane;

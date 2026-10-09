@@ -197,11 +197,160 @@ function WorldWorkspace() {
         </p>
 
 
-        <div className="workspace-placeholder">
+        <div className="workspace-home-content">
+  <div className="workspace-beta-notice">
+    <div className="workspace-beta-notice-header">
+      <span className="workspace-beta-badge">
+        BETA
+      </span>
+
+      <div>
+        <h2>
           {t(
-            "workspace.startMessage"
+            "workspace.betaTitle"
           )}
+        </h2>
+
+        <p>
+          {t(
+            "workspace.betaDescription"
+          )}
+        </p>
+      </div>
+    </div>
+  </div>
+
+
+    <div className="workspace-progress-grid">
+      <section className="workspace-progress-card">
+        <div className="workspace-progress-card-header">
+          <span className="workspace-progress-icon ready">
+            ✓
+          </span>
+
+          <h3>
+            {t(
+              "workspace.availableNow"
+            )}
+          </h3>
         </div>
+
+        <ul className="workspace-progress-list">
+          <li>
+            {t(
+              "workspace.progressEntityTypes"
+            )}
+          </li>
+
+          <li>
+            {t(
+              "workspace.progressEntities"
+            )}
+          </li>
+
+          <li>
+            {t(
+              "workspace.progressDocuments"
+            )}
+          </li>
+
+          <li>
+            {t(
+              "workspace.progressSmartImport"
+            )}
+          </li>
+
+          <li>
+            {t(
+              "workspace.progressDocking"
+            )}
+          </li>
+
+          <li>
+            {t(
+              "workspace.progressAccounts"
+            )}
+          </li>
+        </ul>
+      </section>
+
+
+      <section className="workspace-progress-card">
+        <div className="workspace-progress-card-header">
+          <span className="workspace-progress-icon development">
+            ◷
+          </span>
+
+          <h3>
+            {t(
+              "workspace.inDevelopment"
+            )}
+          </h3>
+        </div>
+
+        <ul className="workspace-progress-list">
+          <li>
+            {t(
+              "workspace.progressTimeline"
+            )}
+          </li>
+
+          <li>
+            {t(
+              "workspace.progressGraph"
+            )}
+          </li>
+
+          <li>
+            {t(
+              "workspace.progressProfileEditing"
+            )}
+          </li>
+
+          <li>
+            {t(
+              "workspace.progressAiFeatures"
+            )}
+          </li>
+        </ul>
+      </section>
+
+
+      <section className="workspace-progress-card">
+        <div className="workspace-progress-card-header">
+          <span className="workspace-progress-icon planned">
+            →
+          </span>
+
+          <h3>
+            {t(
+              "workspace.upNext"
+            )}
+          </h3>
+        </div>
+
+        <ul className="workspace-progress-list">
+          <li>
+            {t(
+              "workspace.progressOnboarding"
+            )}
+          </li>
+
+          <li>
+            {t(
+              "workspace.progressWorkflow"
+            )}
+          </li>
+
+          <li>
+            {t(
+              "workspace.progressCloudBeta"
+            )}
+          </li>
+        </ul>
+      </section>
+    </div>
+  </div>
       </div>
     </WorldLayout>
   );

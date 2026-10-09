@@ -4,6 +4,7 @@ import {
 } from "react";
 
 import {
+  Link,
   useLocation,
   useNavigate,
 } from "react-router-dom";
@@ -80,6 +81,12 @@ export default function LoginPage() {
     location.state
       ?.from ||
     "/";
+
+
+  const notice =
+    location.state
+      ?.notice ||
+    "";
 
 
   // ====================================================
@@ -181,10 +188,25 @@ export default function LoginPage() {
         error.code ===
         "EMAIL_NOT_VERIFIED"
       ) {
-        setErrorMessage(
-          t(
-            "auth.emailNotVerified"
-          )
+        /*
+         * If the user logged in with an email address we
+         * already know where to send them.
+         *
+         * Username login can still open the verification
+         * page and enter the email manually.
+         */
+        navigate(
+          "/verify-email",
+          {
+            state: {
+              email:
+                normalizedIdentifier.includes(
+                  "@"
+                )
+                  ? normalizedIdentifier
+                  : "",
+            },
+          }
         );
       } else if (
         error.status ===
@@ -217,34 +239,14 @@ export default function LoginPage() {
   // ====================================================
 
   return (
-    <div className="app">
-      <main
-        className="main-content"
-        style={{
-          maxWidth:
-            "520px",
-
-          margin:
-            "0 auto",
-
-          paddingTop:
-            "80px",
-        }}
-      >
-        <div
-          className="page-header"
-          style={{
-            display:
-              "block",
-
-            textAlign:
-              "center",
-          }}
-        >
+    <div className="auth-page">
+      <main className="auth-container">
+        <div className="auth-brand">
           <h1>
-            Mimoria
+            {t(
+              "app.name"
+            )}
           </h1>
-
 
           <p>
             {t(
@@ -254,15 +256,18 @@ export default function LoginPage() {
         </div>
 
 
-        <div className="create-panel">
-          <h2>
-            {t(
-              "auth.login"
-            )}
-          </h2>
+        <section className="auth-card">
+          <div className="auth-card-header">
+            <h2>
+              {t(
+                "auth.login"
+              )}
+            </h2>
+          </div>
 
 
           <form
+            className="auth-form"
             onSubmit={
               handleSubmit
             }
@@ -274,7 +279,6 @@ export default function LoginPage() {
                 "auth.identifier"
               )}
             </label>
-
 
             <input
               id="login-identifier"
@@ -290,9 +294,7 @@ export default function LoginPage() {
               placeholder={t(
                 "auth.identifierPlaceholder"
               )}
-              onChange={(
-                event
-              ) =>
+              onChange={(event) =>
                 setIdentifier(
                   event.target.value
                 )
@@ -308,7 +310,6 @@ export default function LoginPage() {
               )}
             </label>
 
-
             <input
               id="login-password"
               type="password"
@@ -322,24 +323,34 @@ export default function LoginPage() {
               placeholder={t(
                 "auth.passwordPlaceholder"
               )}
-              onChange={(
-                event
-              ) =>
+              onChange={(event) =>
                 setPassword(
                   event.target.value
                 )
               }
             />
+            <div className="auth-password-actions">
+              <Link
+                to="/forgot-password"
+                className="auth-link"
+              >
+                {t(
+                  "auth.forgotPassword"
+                )}
+              </Link>
+            </div>
+
+            {notice && (
+              <div className="auth-success">
+                {
+                  notice
+                }
+              </div>
+            )}
 
 
             {errorMessage && (
-              <div
-                className="error-message"
-                style={{
-                  marginTop:
-                    "14px",
-                }}
-              >
+              <div className="auth-error">
                 {
                   errorMessage
                 }
@@ -347,33 +358,43 @@ export default function LoginPage() {
             )}
 
 
-            <div
-              className="form-buttons"
-              style={{
-                marginTop:
-                  "20px",
-              }}
+            <button
+              type="submit"
+              className="auth-primary-button"
+              disabled={
+                submitting ||
+                !identifier.trim() ||
+                !password
+              }
             >
-              <button
-                type="submit"
-                className="save-button"
-                disabled={
-                  submitting ||
-                  !identifier.trim() ||
-                  !password
-                }
-              >
-                {submitting
-                  ? t(
-                      "auth.loggingIn"
-                    )
-                  : t(
-                      "auth.login"
-                    )}
-              </button>
-            </div>
+              {submitting
+                ? t(
+                    "auth.loggingIn"
+                  )
+                : t(
+                    "auth.login"
+                  )}
+            </button>
           </form>
-        </div>
+
+
+          <div className="auth-footer">
+            <span>
+              {t(
+                "auth.noAccount"
+              )}
+            </span>
+
+            <Link
+              to="/register"
+              className="auth-link"
+            >
+              {t(
+                "auth.register"
+              )}
+            </Link>
+          </div>
+        </section>
       </main>
     </div>
   );

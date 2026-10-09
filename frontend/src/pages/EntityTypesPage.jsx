@@ -13,6 +13,7 @@ import {
 } from "react-i18next";
 
 import WorldLayout from "../components/WorldLayout";
+import EmbeddedWorkspaceLayout from "../components/EmbeddedWorkspaceLayout";
 
 import {
   API_URL,
@@ -23,7 +24,10 @@ import {
 } from "../utils/apiFetch";
 
 
-function EntityTypesPage() {
+function EntityTypesPage({
+  embedded = false,
+}) {
+
   const {
     worldId,
   } =
@@ -362,8 +366,13 @@ function EntityTypesPage() {
   // Render
   // ====================================================
 
+  const LayoutComponent =
+    embedded
+      ? EmbeddedWorkspaceLayout
+      : WorldLayout;
+
   return (
-    <WorldLayout
+    <LayoutComponent
       worldId={
         worldId
       }
@@ -630,7 +639,7 @@ function EntityTypesPage() {
           </p>
         </div>
       )}
-    </WorldLayout>
+    </LayoutComponent>
   );
 }
 
