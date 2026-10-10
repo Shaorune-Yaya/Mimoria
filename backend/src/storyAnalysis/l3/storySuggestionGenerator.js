@@ -52,6 +52,117 @@ function getCandidateConfidence(
     0.7
   );
 }
+// ======================================================
+// Suggestion Confidence Policy
+//
+// Confidence tiers are derived from the numeric score.
+//
+// IMPORTANT:
+//
+// The numeric confidence is the source of truth.
+// We deliberately do NOT persist the tier in MongoDB.
+//
+// This lets thresholds evolve without requiring data
+// migrations.
+// ======================================================
+
+const SUGGESTION_CONFIDENCE_THRESHOLDS = {
+  normal:
+    0.72,
+
+  lowConfidence:
+    0.55,
+
+  veryLowConfidence:
+    0.38,
+};
+
+
+function clampConfidence(
+  value
+) {
+  return Math.max(
+    0,
+
+    Math.min(
+      1,
+
+      Number(
+        value
+      ) || 0
+    )
+  );
+}
+
+
+function getSuggestionConfidenceTier(
+  confidence
+) {
+  const value =
+    clampConfidence(
+      confidence
+    );
+
+
+  if (
+    value >=
+    SUGGESTION_CONFIDENCE_THRESHOLDS
+      .normal
+  ) {
+    return "normal";
+  }
+
+
+  if (
+    value >=
+    SUGGESTION_CONFIDENCE_THRESHOLDS
+      .lowConfidence
+  ) {
+    return "low-confidence";
+  }
+
+
+  if (
+    value >=
+    SUGGESTION_CONFIDENCE_THRESHOLDS
+      .veryLowConfidence
+  ) {
+    return "very-low-confidence";
+  }
+
+
+  return "suppressed";
+}
+
+
+function decorateSuggestionConfidence(
+  suggestion
+) {
+  if (
+    !suggestion
+  ) {
+    return null;
+  }
+
+
+  const confidence =
+    clampConfidence(
+      suggestion.confidence ??
+      0.7
+    );
+
+
+  return {
+    ...suggestion,
+
+    confidence,
+
+    confidenceTier:
+      getSuggestionConfidenceTier(
+        confidence
+      ),
+  };
+}
 
 // ======================================================
 // Recommended EntityType Fields
@@ -1455,6 +1566,119 @@ function deduplicateStorySuggestions(
   );
 }
 
+// ======================================================
+// Relation Representation Planning
+//
+// Some relations have already been converted into a
+// preferred field representation by PatternExtractor.
+//
+// When such a field candidate exists, do not also show the
+// user a duplicate relation suggestion.
+//
+// Example:
+//
+// 诺拉隶属于银月协会
+//
+// Preferred UI:
+//
+// 角色缺少：所属组织
+// 所属组织 = 银月协会
+//
+// Instead of simultaneously showing:
+//
+// 诺拉 -> 隶属于 -> 银月协会
+// ======================================================
+
+function relationIsRepresentedByPreferredField({
+  relationCandidate,
+  fieldCandidates = [],
+}) {
+  const relationConcept =
+    relationCandidate
+      ?.relationConcept ||
+    relationCandidate
+      ?.relationType ||
+    null;
+
+
+  if (
+    !relationConcept
+  ) {
+    return false;
+  }
+
+
+  const subjectKey =
+    normalizeDraftKey(
+      relationCandidate
+        ?.subjectHint
+    );
+
+
+  const objectKey =
+    normalizeDraftKey(
+      relationCandidate
+        ?.objectHint
+    );
+
+
+  if (
+    !subjectKey ||
+    !objectKey
+  ) {
+    return false;
+  }
+
+
+  return fieldCandidates.some(
+    (
+      fieldCandidate
+    ) => {
+      if (
+        fieldCandidate
+          ?.metadata
+          ?.representationPreference !==
+          "field-first"
+      ) {
+        return false;
+      }
+
+
+      if (
+        fieldCandidate
+          ?.metadata
+          ?.relationConcept !==
+          relationConcept
+      ) {
+        return false;
+      }
+
+
+      const fieldSubjectKey =
+        normalizeDraftKey(
+          fieldCandidate
+            ?.subjectHint
+        );
+
+
+      const fieldObjectKey =
+        normalizeDraftKey(
+          fieldCandidate
+            ?.normalizedValue ??
+          fieldCandidate
+            ?.value
+        );
+
+
+      return (
+        fieldSubjectKey ===
+          subjectKey &&
+        fieldObjectKey ===
+          objectKey
+      );
+    }
+  );
+}
 
 // ======================================================
 // Main Generator
@@ -1479,101 +1703,64 @@ function generateStorySuggestions({
     [];
 
 
-  // ----------------------------------------------------
-  // Ready field updates
-  // ----------------------------------------------------
-
-  for (
-    const candidate of
-    fieldCandidates
-  ) {
-    const suggestion =
-      createFieldUpdateSuggestion(
-        candidate
-      );
-
-
-    if (
-      suggestion
-    ) {
-      suggestions.push(
-        suggestion
-      );
-    }
-  }
-
-
-  // ----------------------------------------------------
-  // Relations
-  // ----------------------------------------------------
-
-  for (
-    const candidate of
-    relationCandidates
-  ) {
-    const suggestion =
-      createRelationSuggestion(
-        candidate
-      );
-
-
-    if (
-      suggestion
-    ) {
-      suggestions.push(
-        suggestion
-      );
-    }
-  }
-
-
-  // ----------------------------------------------------
-  // Event history
-  // ----------------------------------------------------
-
-  for (
-    const candidate of
-    eventCandidates
-  ) {
-    /*
-     * Do not expose internal event evidence when a more
-     * precise canonical field suggestion already represents
-     * the same information.
-     */
-    if (
-      isRedundantEventSuggestion({
-        eventCandidate:
-          candidate,
-
-        fieldCandidates,
-      })
-    ) {
-      continue;
-    }
-
-
-    const suggestion =
-      createEventSuggestion(
-        candidate
-      );
-
-
-    if (
-      suggestion
-    ) {
-      suggestions.push(
-        suggestion
-      );
-    }
-  }
-
-
-  // ----------------------------------------------------
-  // L3-A missing entities
+  // ====================================================
+  // 1. Schema First
   //
-  // A missing entity may also carry recommended schema
-  // fields for a NEW recommended EntityType.
+  // Prefer teaching Mimoria how the user's existing
+  // EntityTypes should represent the information before
+  // suggesting graph relations or duplicate types.
+  // ====================================================
+
+  for (
+    const schema of
+    schemaSuggestions
+  ) {
+    const suggestion =
+      createSchemaFieldSuggestion(
+        schema
+      );
+
+
+    if (
+      suggestion
+    ) {
+      suggestions.push(
+        suggestion
+      );
+    }
+  }
+
+
   // ----------------------------------------------------
+  // Missing Select options belong to schema preparation.
+  // ----------------------------------------------------
+
+  for (
+    const option of
+    selectOptionSuggestions
+  ) {
+    const suggestion =
+      createSelectOptionSuggestion(
+        option
+      );
+
+
+    if (
+      suggestion
+    ) {
+      suggestions.push(
+        suggestion
+      );
+    }
+  }
+
+
+  // ====================================================
+  // 2. Missing Entities
+  //
+  // Reuse of an existing EntityType should already have
+  // been resolved by DraftEntityResolver before this stage.
+  // ====================================================
 
   for (
     const entity of
@@ -1608,7 +1795,7 @@ function generateStorySuggestions({
 
 
   // ----------------------------------------------------
-  // L3-B missing reference entities
+  // Missing reference entities
   // ----------------------------------------------------
 
   for (
@@ -1631,40 +1818,155 @@ function generateStorySuggestions({
   }
 
 
-  // ----------------------------------------------------
-  // Missing schema fields
-  // ----------------------------------------------------
+  // ====================================================
+  // 3. Field Updates
+  //
+  // Once schema/entity structure is understood, expose the
+  // concrete canonical values.
+  // ====================================================
 
   for (
-    const schema of
-    schemaSuggestions
+    const candidate of
+    fieldCandidates
   ) {
-    suggestions.push(
-      createSchemaFieldSuggestion(
-        schema
-      )
-    );
+    const suggestion =
+      createFieldUpdateSuggestion(
+        candidate
+      );
+
+
+    if (
+      suggestion
+    ) {
+      suggestions.push(
+        suggestion
+      );
+    }
   }
 
 
-  // ----------------------------------------------------
-  // Missing Select options
-  // ----------------------------------------------------
+  // ====================================================
+  // 4. Relations
+  //
+  // A relation stays visible only when a preferred field
+  // representation did not already express the same fact.
+  // ====================================================
 
   for (
-    const option of
-    selectOptionSuggestions
+    const candidate of
+    relationCandidates
   ) {
-    suggestions.push(
-      createSelectOptionSuggestion(
-        option
-      )
-    );
+    if (
+      relationIsRepresentedByPreferredField({
+        relationCandidate:
+          candidate,
+
+        fieldCandidates,
+      })
+    ) {
+      continue;
+    }
+
+
+    const suggestion =
+      createRelationSuggestion(
+        candidate
+      );
+
+
+    if (
+      suggestion
+    ) {
+      suggestions.push(
+        suggestion
+      );
+    }
   }
 
 
-  return deduplicateStorySuggestions(
+  // ====================================================
+  // 5. Event History
+  // ====================================================
+
+  for (
+    const candidate of
+    eventCandidates
+  ) {
+    if (
+      isRedundantEventSuggestion({
+        eventCandidate:
+          candidate,
+
+        fieldCandidates,
+      })
+    ) {
+      continue;
+    }
+
+
+    const suggestion =
+      createEventSuggestion(
+        candidate
+      );
+
+
+    if (
+      suggestion
+    ) {
+      suggestions.push(
+        suggestion
+      );
+    }
+  }
+
+
+  const deduplicatedSuggestions =
+  deduplicateStorySuggestions(
     suggestions
+  );
+
+
+  const confidenceDecoratedSuggestions =
+    deduplicatedSuggestions
+      .map(
+        (
+          suggestion
+        ) =>
+          decorateSuggestionConfidence(
+            suggestion
+          )
+      )
+      .filter(
+        Boolean
+      );
+
+
+  /*
+  * Extremely weak suggestions remain useful internally
+  * during analysis/debugging, but should not become
+  * user-facing Smart Import candidates.
+  *
+  * < 38%
+  * -> do not persist
+  * -> do not display
+  *
+  * 38%–55%
+  * -> preserve
+  * -> frontend hides them by default
+  *
+  * 55%–72%
+  * -> preserve
+  * -> frontend visibly marks them as low confidence
+  *
+  * >= 72%
+  * -> normal suggestion
+  */
+  return confidenceDecoratedSuggestions.filter(
+    (
+      suggestion
+    ) =>
+      suggestion.confidenceTier !==
+      "suppressed"
   );
 }
 
@@ -1695,4 +1997,10 @@ module.exports = {
   inferRecommendedFieldType,
   createRecommendedFieldFromCandidate,
   buildRecommendedFieldsForEntity,
+  relationIsRepresentedByPreferredField,
+  
+  SUGGESTION_CONFIDENCE_THRESHOLDS,
+  clampConfidence,
+  getSuggestionConfidenceTier,
+  decorateSuggestionConfidence,
 };

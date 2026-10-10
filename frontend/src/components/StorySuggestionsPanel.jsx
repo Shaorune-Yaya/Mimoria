@@ -4,6 +4,10 @@ import {
   useState,
 } from "react";
 
+import {
+  useOnboarding,
+} from "../onboarding/OnboardingContext";
+
 
 // ======================================================
 // Helpers
@@ -82,6 +86,200 @@ function isMachineConceptLabel(
 }
 
 // ======================================================
+// Confidence Presentation
+//
+// Keep these thresholds synchronized with:
+//
+// backend/src/storyAnalysis/l3/storySuggestionGenerator.js
+//
+// Numeric confidence remains the source of truth.
+// ======================================================
+
+const CONFIDENCE_THRESHOLDS = {
+  normal:
+    0.72,
+
+  lowConfidence:
+    0.55,
+
+  veryLowConfidence:
+    0.38,
+};
+
+
+function getConfidenceValue(
+  candidate
+) {
+  return Math.max(
+    0,
+
+    Math.min(
+      1,
+
+      Number(
+        candidate
+          ?.confidence ??
+        0
+      ) || 0
+    )
+  );
+}
+
+
+function getConfidenceTier(
+  candidate
+) {
+  /*
+   * New backend candidates already expose confidenceTier.
+   *
+   * Fallback to numeric confidence so:
+   *
+   * - old persisted candidates
+   * - edited candidates
+   * - development data
+   *
+   * still render correctly.
+   */
+  const explicitTier =
+    candidate
+      ?.confidenceTier;
+
+
+  if (
+    [
+      "normal",
+      "low-confidence",
+      "very-low-confidence",
+      "suppressed",
+    ].includes(
+      explicitTier
+    )
+  ) {
+    return explicitTier;
+  }
+
+
+  const confidence =
+    getConfidenceValue(
+      candidate
+    );
+
+
+  if (
+    confidence >=
+    CONFIDENCE_THRESHOLDS
+      .normal
+  ) {
+    return "normal";
+  }
+
+
+  if (
+    confidence >=
+    CONFIDENCE_THRESHOLDS
+      .lowConfidence
+  ) {
+    return "low-confidence";
+  }
+
+
+  if (
+    confidence >=
+    CONFIDENCE_THRESHOLDS
+      .veryLowConfidence
+  ) {
+    return "very-low-confidence";
+  }
+
+
+  return "suppressed";
+}
+
+
+function getConfidencePriority(
+  candidate
+) {
+  switch (
+    getConfidenceTier(
+      candidate
+    )
+  ) {
+    case "normal":
+      return 10;
+
+    case "low-confidence":
+      return 20;
+
+    case "very-low-confidence":
+      return 30;
+
+    default:
+      return 40;
+  }
+}
+
+function getDisplayValue(
+  fieldConcept,
+  value,
+  t
+) {
+  if (
+    value ===
+      null ||
+    value ===
+      undefined
+  ) {
+    return "";
+  }
+
+
+  if (
+    fieldConcept ===
+      "field.gender"
+  ) {
+    const normalizedValue =
+      String(
+        value
+      )
+        .trim()
+        .toLowerCase();
+
+
+    if (
+      normalizedValue ===
+      "female"
+    ) {
+      return t(
+        "documents.values.gender.female",
+        {
+          defaultValue:
+            "Female",
+        }
+      );
+    }
+
+
+    if (
+      normalizedValue ===
+      "male"
+    ) {
+      return t(
+        "documents.values.gender.male",
+        {
+          defaultValue:
+            "Male",
+        }
+      );
+    }
+  }
+
+
+  return String(
+    value
+  );
+}
+
+// ======================================================
 // Component
 // ======================================================
 
@@ -120,8 +318,25 @@ export default function StorySuggestionsPanel({
 
   onEdit,
 
+  onTutorialEditNameChange =
+    null,
+
+  onTutorialEditOpened =
+  null,
+
+  onTutorialManualTypeChange =
+    null,
+
   onClearError,
 }) {
+  const {
+    active,
+    currentStep,
+    nextStep,
+  } =
+    useOnboarding();
+
+
   const [
     editingCandidateId,
     setEditingCandidateId,
@@ -145,6 +360,13 @@ export default function StorySuggestionsPanel({
     {}
   );
 
+
+  const [
+    showVeryLowConfidence,
+    setShowVeryLowConfidence,
+  ] = useState(
+    false
+  );
 
   const locale =
     normalizeLocale(
@@ -184,13 +406,407 @@ export default function StorySuggestionsPanel({
     useMemo(
       () =>
         candidates.filter(
-          (candidate) =>
+          (
+            candidate
+          ) =>
             candidate.status ===
-            "pending"
+              "pending" &&
+            getConfidenceTier(
+              candidate
+            ) !==
+              "suppressed"
         ).length,
 
       [
         candidates,
+      ]
+    );
+
+
+  const veryLowConfidenceCount =
+    useMemo(
+      () =>
+        candidates.filter(
+          (
+            candidate
+          ) =>
+            getConfidenceTier(
+              candidate
+            ) ===
+            "very-low-confidence"
+        ).length,
+
+      [
+        candidates,
+      ]
+    );
+
+  // ====================================================
+  // Suggestion Display Order
+  //
+  // Priority:
+  //
+  // 1. Confidence tier
+  //
+  //    normal
+  //    low-confidence
+  //    very-low-confidence
+  //
+  // 2. Dependency / action order
+  //
+  //    create entity
+  //    create schema
+  //    field update
+  //    relation
+  //    event
+  //
+  // 3. Higher confidence first
+  //
+  // This prevents a malformed 58% Create Entity candidate
+  // from appearing above a 98% high-quality field update.
+  // ====================================================
+
+  const orderedCandidates =
+    useMemo(
+      () => {
+        const kindPriority = {
+          "create-entity":
+            10,
+
+          "create-schema-field":
+            20,
+
+          "create-select-option":
+            30,
+
+          "field-update":
+            40,
+
+          "relation-update":
+            50,
+
+          "event-history":
+            60,
+        };
+
+
+        return candidates
+          .filter(
+            (
+              candidate
+            ) =>
+              getConfidenceTier(
+                candidate
+              ) !==
+              "suppressed"
+          )
+          .map(
+            (
+              candidate,
+              index
+            ) => ({
+              candidate,
+
+              index,
+            })
+          )
+          .sort(
+            (
+              left,
+              right
+            ) => {
+              // ------------------------------------------
+              // 1. Confidence Tier
+              // ------------------------------------------
+
+              const leftConfidencePriority =
+                getConfidencePriority(
+                  left.candidate
+                );
+
+
+              const rightConfidencePriority =
+                getConfidencePriority(
+                  right.candidate
+                );
+
+
+              if (
+                leftConfidencePriority !==
+                rightConfidencePriority
+              ) {
+                return (
+                  leftConfidencePriority -
+                  rightConfidencePriority
+                );
+              }
+
+
+              // ------------------------------------------
+              // 2. Dependency / Kind Priority
+              // ------------------------------------------
+
+              const leftKindPriority =
+                kindPriority[
+                  left
+                    .candidate
+                    .kind
+                ] ??
+                999;
+
+
+              const rightKindPriority =
+                kindPriority[
+                  right
+                    .candidate
+                    .kind
+                ] ??
+                999;
+
+
+              if (
+                leftKindPriority !==
+                rightKindPriority
+              ) {
+                return (
+                  leftKindPriority -
+                  rightKindPriority
+                );
+              }
+
+
+              // ------------------------------------------
+              // 3. Confidence
+              // ------------------------------------------
+
+              const confidenceDifference =
+                getConfidenceValue(
+                  right.candidate
+                ) -
+                getConfidenceValue(
+                  left.candidate
+                );
+
+
+              if (
+                Math.abs(
+                  confidenceDifference
+                ) >
+                0.001
+              ) {
+                return confidenceDifference;
+              }
+
+
+              // ------------------------------------------
+              // 4. Stable Analyzer Order
+              // ------------------------------------------
+
+              return (
+                left.index -
+                right.index
+              );
+            }
+          )
+          .map(
+            (
+              item
+            ) =>
+              item.candidate
+          );
+      },
+
+      [
+        candidates,
+      ]
+    );
+
+
+  const visibleOrderedCandidates =
+    useMemo(
+      () =>
+        orderedCandidates.filter(
+          (
+            candidate
+          ) =>
+            showVeryLowConfidence ||
+            getConfidenceTier(
+              candidate
+            ) !==
+              "very-low-confidence"
+        ),
+
+      [
+        orderedCandidates,
+
+        showVeryLowConfidence,
+      ]
+    );
+    // ====================================================
+    // Tutorial Targets
+    //
+    // Prefer the first pending Create Entity suggestion.
+    //
+    // This gives the tutorial a stable target for:
+    // - correcting an AI-recognized entity name
+    // - explaining recommended Entity Types
+    // - explaining manual Entity Type selection
+    // - finally applying the corrected suggestion
+    // ====================================================
+
+    const tutorialCreateEntityCandidateId =
+      useMemo(
+        () => {
+          const candidate =
+            orderedCandidates.find(
+              (
+                item
+              ) =>
+                item.status ===
+                  "pending" &&
+                item.kind ===
+                  "create-entity"
+            );
+
+
+          return candidate
+            ? getCandidateId(
+                candidate
+              )
+            : null;
+        },
+        [
+          orderedCandidates,
+        ]
+      );
+
+
+    const tutorialIgnoreCandidateId =
+      useMemo(
+        () => {
+          const candidate =
+            orderedCandidates.find(
+              (
+                item
+              ) =>
+                item.status ===
+                  "pending" &&
+                getCandidateId(
+                  item
+                ) !==
+                  tutorialCreateEntityCandidateId &&
+                item.kind !==
+                  "event-history"
+            );
+
+
+          return candidate
+            ? getCandidateId(
+                candidate
+              )
+            : null;
+        },
+        [
+          orderedCandidates,
+          tutorialCreateEntityCandidateId,
+        ]
+      );
+
+  // ====================================================
+  // Tutorial Apply Target
+  //
+  // Smart Import can render different Apply controls:
+  //
+  // - normal suggestion:
+  //   Apply
+  //
+  // - create-entity:
+  //   Use Recommended Type and Apply
+  //
+  // - create-entity with manual type:
+  //   Use Selected Type and Apply
+  //
+  // The tutorial should highlight only ONE actionable
+  // pending suggestion instead of every Apply button.
+  // ====================================================
+
+  const tutorialApplyCandidateId =
+    useMemo(
+      () => {
+        const candidate =
+          orderedCandidates.find(
+            (
+              item
+            ) => {
+              if (
+                item.status !==
+                "pending"
+              ) {
+                return false;
+              }
+
+
+              /*
+              * Historical events cannot currently be
+              * applied because Timeline is not available.
+              */
+              if (
+                item.kind ===
+                "event-history"
+              ) {
+                return false;
+              }
+
+
+              /*
+              * Normal suggestions always expose the
+              * standard Apply button.
+              */
+              if (
+                item.kind !==
+                "create-entity"
+              ) {
+                return true;
+              }
+
+
+              /*
+              * Create Entity exposes the recommended-type
+              * Apply button whenever Smart Import produced
+              * a likely entity type.
+              */
+              if (
+                item
+                  ?.payload
+                  ?.likelyTypeConcept
+              ) {
+                return true;
+              }
+
+
+              /*
+              * Otherwise, see whether Mimoria already has
+              * an Entity Type that can be selected.
+              */
+              return Boolean(
+                getSelectedEntityTypeId(
+                  item
+                )
+              );
+            }
+          );
+
+
+        return candidate
+          ? getCandidateId(
+              candidate
+            )
+          : null;
+      },
+      [
+        orderedCandidates,
+        entityTypes,
+        entityTypeSelections,
       ]
     );
 
@@ -337,7 +953,59 @@ export default function StorySuggestionsPanel({
 
 
     setEditPayload(
-        payload
+      payload
+    );
+
+
+    /*
+    * During onboarding, do not advance immediately when the
+    * Edit button is clicked.
+    *
+    * Wait until React has actually rendered the edit form.
+    */
+    window.requestAnimationFrame(
+      () => {
+        window.requestAnimationFrame(
+          () => {
+            const editPanel =
+              document.querySelector(
+                '[data-onboarding="smart-import-edit-panel"]'
+              );
+
+
+            const editNameInput =
+              document.querySelector(
+                '[data-onboarding="smart-import-edit-name"]'
+              );
+
+
+            if (
+              !editPanel ||
+              !editNameInput
+            ) {
+              return;
+            }
+
+
+            if (
+              onTutorialEditOpened
+            ) {
+              onTutorialEditOpened();
+
+              return;
+            }
+
+
+            if (
+              active &&
+              currentStep?.id ===
+                "smart-import-edit-suggestion"
+            ) {
+              nextStep();
+            }
+          }
+        );
+      }
     );
     }
 
@@ -562,35 +1230,580 @@ export default function StorySuggestionsPanel({
   }
 
   // ====================================================
+  // Canonical Dependency Helpers
+  // ====================================================
+
+  function getResolvedSubjectEntityId(
+    candidate
+  ) {
+    return (
+      candidate
+        ?.payload
+        ?.subjectEntityId ||
+
+      candidate
+        ?.subjectEntityId ||
+
+      null
+    );
+  }
+
+
+  function getResolvedObjectEntityId(
+    candidate
+  ) {
+    return (
+      candidate
+        ?.payload
+        ?.objectEntityId ||
+
+      candidate
+        ?.objectEntityId ||
+
+      null
+    );
+  }
+
+
+  function getResolvedTargetEntityId(
+    candidate
+  ) {
+    return (
+      candidate
+        ?.payload
+        ?.targetEntityId ||
+
+      null
+    );
+  }
+
+
+  function getCandidateDependencyState(
+    candidate
+  ) {
+    if (
+      !candidate
+    ) {
+      return {
+        ready:
+          false,
+
+        reason:
+          "missing-candidate",
+      };
+    }
+
+
+    // --------------------------------------------------
+    // Create Entity
+    //
+    // No existing Entity dependency.
+    // --------------------------------------------------
+
+    if (
+      candidate.kind ===
+      "create-entity"
+    ) {
+      return {
+        ready:
+          true,
+
+        reason:
+          null,
+      };
+    }
+
+
+    // --------------------------------------------------
+    // Schema changes
+    //
+    // These depend on EntityType/schema state rather than
+    // an Entity instance, so they remain independently
+    // applicable.
+    // --------------------------------------------------
+
+    if (
+      candidate.kind ===
+        "create-schema-field" ||
+      candidate.kind ===
+        "create-select-option"
+    ) {
+      return {
+        ready:
+          true,
+
+        reason:
+          null,
+      };
+    }
+
+
+    // --------------------------------------------------
+    // Field Update
+    //
+    // Must have resolved target Entity.
+    // --------------------------------------------------
+
+    if (
+      candidate.kind ===
+      "field-update"
+    ) {
+      const targetEntityId =
+        getResolvedTargetEntityId(
+          candidate
+        );
+
+
+      return {
+        ready:
+          Boolean(
+            targetEntityId
+          ),
+
+        reason:
+          targetEntityId
+            ? null
+            : "target-entity-missing",
+      };
+    }
+
+
+    // --------------------------------------------------
+    // Relation Update
+    //
+    // Both ends should resolve to existing canonical
+    // entities before the relation can be written.
+    // --------------------------------------------------
+
+    if (
+      candidate.kind ===
+      "relation-update"
+    ) {
+      const subjectEntityId =
+        getResolvedSubjectEntityId(
+          candidate
+        );
+
+
+      const objectEntityId =
+        getResolvedObjectEntityId(
+          candidate
+        );
+
+
+      return {
+        ready:
+          Boolean(
+            subjectEntityId &&
+            objectEntityId
+          ),
+
+        reason:
+          subjectEntityId &&
+          objectEntityId
+            ? null
+            : "relation-entity-missing",
+      };
+    }
+
+
+    // --------------------------------------------------
+    // Timeline is currently unavailable anyway.
+    // --------------------------------------------------
+
+    if (
+      candidate.kind ===
+      "event-history"
+    ) {
+      return {
+        ready:
+          false,
+
+        reason:
+          "timeline-unavailable",
+      };
+    }
+
+
+    return {
+      ready:
+        true,
+
+      reason:
+        null,
+    };
+  }
+
+  // ====================================================
   // Entity Type Helpers
   // ====================================================
 
   function getRecommendedEntityType(
-    candidate
-  ) {
-    const concept =
+  candidate
+) {
+  const concept =
+    String(
       candidate
         ?.payload
-        ?.likelyTypeConcept;
+        ?.likelyTypeConcept ||
+      ""
+    )
+      .trim();
 
 
-    if (
-      !concept
-    ) {
-      return null;
-    }
-
-
-    return (
-      entityTypes.find(
-        (entityType) =>
-          entityType
-            ?.canonicalConcept ===
-          concept
-      ) ||
-      null
-    );
+  if (
+    !concept
+  ) {
+    return null;
   }
+
+
+  // ==================================================
+  // Normalize Semantic Concept
+  //
+  // Examples:
+  //
+  // entityType.character
+  // -> character
+  //
+  // entityType.person
+  // -> person
+  //
+  // Keep the original full concept as well because
+  // canonicalConcept stores the full semantic ID.
+  // ==================================================
+
+  const normalizedConcept =
+    concept
+      .toLowerCase();
+
+
+  const shortConcept =
+    normalizedConcept
+      .replace(
+        /^entitytype\./u,
+        ""
+      );
+
+
+  // ==================================================
+  // Semantic Families
+  //
+  // Some concepts are semantically interchangeable for
+  // the purpose of reusing a user's existing schema.
+  //
+  // Example:
+  //
+  // entityType.person
+  // entityType.character
+  //
+  // can both safely reuse an existing "角色" schema.
+  // ==================================================
+
+  const conceptFamilies = {
+    character: [
+      "entityType.character",
+      "entityType.person",
+    ],
+
+    person: [
+      "entityType.character",
+      "entityType.person",
+    ],
+
+    location: [
+      "entityType.location",
+    ],
+
+    region: [
+      "entityType.region",
+      "entityType.location",
+    ],
+
+    city: [
+      "entityType.city",
+      "entityType.location",
+    ],
+
+    town: [
+      "entityType.town",
+      "entityType.location",
+    ],
+
+    village: [
+      "entityType.village",
+      "entityType.location",
+    ],
+
+    country: [
+      "entityType.country",
+      "entityType.location",
+    ],
+
+    organization: [
+      "entityType.organization",
+    ],
+
+    faction: [
+      "entityType.faction",
+      "entityType.organization",
+    ],
+
+    guild: [
+      "entityType.guild",
+      "entityType.organization",
+    ],
+
+    church: [
+      "entityType.church",
+      "entityType.organization",
+    ],
+
+    item: [
+      "entityType.item",
+    ],
+  };
+
+
+  const compatibleConcepts =
+    new Set(
+      (
+        conceptFamilies[
+          shortConcept
+        ] ||
+        [
+          concept,
+        ]
+      )
+        .map(
+          (value) =>
+            String(
+              value
+            )
+              .trim()
+              .toLowerCase()
+        )
+    );
+
+
+  // ==================================================
+  // 1. Exact / Compatible Canonical Concept
+  //
+  // This is the strongest match.
+  // ==================================================
+
+  const canonicalMatch =
+    entityTypes.find(
+      (
+        entityType
+      ) => {
+        const entityTypeConcept =
+          String(
+            entityType
+              ?.canonicalConcept ||
+            ""
+          )
+            .trim()
+            .toLowerCase();
+
+
+        return (
+          entityTypeConcept &&
+          compatibleConcepts.has(
+            entityTypeConcept
+          )
+        );
+      }
+    );
+
+
+  if (
+    canonicalMatch
+  ) {
+    return canonicalMatch;
+  }
+
+
+  // ==================================================
+  // 2. Legacy User-Created Type Name Fallback
+  //
+  // Older Entity Types may not have canonicalConcept yet.
+  //
+  // Only use explicit semantic aliases here. Do not use
+  // generic fuzzy matching.
+  // ==================================================
+
+  const fallbackNames = {
+    character: [
+      "character",
+      "person",
+      "角色",
+      "人物",
+      "人物角色",
+    ],
+
+    person: [
+      "character",
+      "person",
+      "角色",
+      "人物",
+      "人物角色",
+    ],
+
+    location: [
+      "location",
+      "place",
+      "地点",
+      "位置",
+      "地区",
+      "区域",
+    ],
+
+    region: [
+      "region",
+      "location",
+      "地区",
+      "区域",
+      "地点",
+    ],
+
+    city: [
+      "city",
+      "城市",
+      "城镇",
+    ],
+
+    town: [
+      "town",
+      "城镇",
+      "小镇",
+    ],
+
+    village: [
+      "village",
+      "村庄",
+      "村落",
+    ],
+
+    country: [
+      "country",
+      "国家",
+    ],
+
+    organization: [
+      "organization",
+      "organisation",
+      "组织",
+      "机构",
+      "势力",
+    ],
+
+    faction: [
+      "faction",
+      "组织",
+      "势力",
+    ],
+
+    guild: [
+      "guild",
+      "公会",
+      "协会",
+      "组织",
+    ],
+
+    church: [
+      "church",
+      "教会",
+      "教团",
+      "组织",
+    ],
+
+    item: [
+      "item",
+      "object",
+      "物品",
+      "道具",
+    ],
+  };
+
+
+  const names =
+    fallbackNames[
+      shortConcept
+    ] ||
+    [];
+
+
+  if (
+    names.length ===
+    0
+  ) {
+    return null;
+  }
+
+
+  const aliasSet =
+    new Set(
+      names.map(
+        (
+          name
+        ) =>
+          String(
+            name
+          )
+            .trim()
+            .toLowerCase()
+      )
+    );
+
+
+  const nameMatches =
+    entityTypes.filter(
+      (
+        entityType
+      ) => {
+        /*
+         * Do not reinterpret a schema that already has an
+         * explicitly different semantic concept.
+         */
+        if (
+          entityType
+            ?.canonicalConcept
+        ) {
+          return false;
+        }
+
+
+        const entityTypeName =
+          String(
+            entityType
+              ?.name ||
+            ""
+          )
+            .trim()
+            .toLowerCase();
+
+
+        return aliasSet.has(
+          entityTypeName
+        );
+      }
+    );
+
+
+  /*
+   * Only automatically reuse an unambiguous legacy type.
+   */
+  if (
+    nameMatches.length ===
+    1
+  ) {
+    return nameMatches[0];
+  }
+
+
+  return null;
+}
 
 
   function getSelectedEntityTypeId(
@@ -670,6 +1883,45 @@ export default function StorySuggestionsPanel({
           value,
       })
     );
+
+
+    /*
+    * Tutorial:
+    *
+    * Advance only when the user actually selects
+    * an Entity Type.
+    */
+    if (
+      !value
+    ) {
+      return;
+    }
+
+
+    if (
+      onTutorialManualTypeChange
+    ) {
+      onTutorialManualTypeChange(
+        candidate,
+        value
+      );
+
+      return;
+    }
+
+
+    if (
+      active &&
+      currentStep?.id ===
+        "smart-import-manual-type"
+    ) {
+      window.setTimeout(
+        () => {
+          nextStep();
+        },
+        100
+      );
+    }
   }
 
 
@@ -1193,8 +2445,12 @@ export default function StorySuggestionsPanel({
 
 
         return (
-          <div className="story-suggestion-edit-grid">
+          <div
+            className="story-suggestion-edit-grid"
+            data-onboarding="smart-import-edit-panel"
+          >
             {/* Entity Name */}
+
 
             <label>
               <span className="story-suggestion-label">
@@ -1203,18 +2459,33 @@ export default function StorySuggestionsPanel({
                 )}
               </span>
 
+
               <input
                 type="text"
+                data-onboarding="smart-import-edit-name"
                 value={
                   editPayload.name ??
                   ""
                 }
-                onChange={(event) =>
+                onChange={(event) => {
+                  const nextValue =
+                    event.target.value;
+
+
                   updateEditField(
                     "name",
-                    event.target.value
-                  )
-                }
+                    nextValue
+                  );
+
+
+                  if (
+                    onTutorialEditNameChange
+                  ) {
+                    onTutorialEditNameChange(
+                      nextValue
+                    );
+                  }
+                }}
               />
             </label>
 
@@ -1890,9 +3161,10 @@ export default function StorySuggestionsPanel({
 
             <strong>
               {
-                String(
-                  payload.value ??
-                  ""
+                getDisplayValue(
+                  payload.fieldConcept,
+                  payload.value,
+                  t
                 )
               }
             </strong>
@@ -2045,7 +3317,17 @@ export default function StorySuggestionsPanel({
 
 
             {recommendedConcept && (
-              <div className="story-recommended-type">
+              <div
+                className="story-recommended-type"
+                data-onboarding={
+                  getCandidateId(
+                    candidate
+                  ) ===
+                    tutorialCreateEntityCandidateId
+                    ? "smart-import-recommended-type"
+                    : undefined
+                }
+              >
                 <div className="story-recommended-type-header">
                   <span className="story-suggestion-label">
                     {t(
@@ -2089,6 +3371,14 @@ export default function StorySuggestionsPanel({
                   <button
                     type="button"
                     className="story-suggestion-recommended-apply"
+                    data-onboarding={
+                      getCandidateId(
+                        candidate
+                      ) ===
+                      tutorialApplyCandidateId
+                        ? "smart-import-apply-button"
+                        : undefined
+                    }
                     disabled={
                       actionCandidateId ===
                       getCandidateId(
@@ -2132,6 +3422,14 @@ export default function StorySuggestionsPanel({
 
               <select
                 className="story-suggestion-select"
+                data-onboarding={
+                  getCandidateId(
+                    candidate
+                  ) ===
+                    tutorialCreateEntityCandidateId
+                    ? "smart-import-manual-type-select"
+                    : undefined
+                }
                 value={
                   selectedEntityTypeId
                 }
@@ -2188,6 +3486,14 @@ export default function StorySuggestionsPanel({
                 <button
                   type="button"
                   className="story-suggestion-manual-apply"
+                  data-onboarding={
+                    getCandidateId(
+                      candidate
+                    ) ===
+                    tutorialApplyCandidateId
+                      ? "smart-import-apply-button"
+                      : undefined
+                  }
                   disabled={
                     actionCandidateId ===
                     getCandidateId(
@@ -2365,7 +3671,9 @@ export default function StorySuggestionsPanel({
 
 
       {!analysisError &&
-        candidates.length ===
+        visibleOrderedCandidates.length ===
+          0 &&
+        veryLowConfidenceCount ===
           0 && (
           <div className="story-suggestions-empty">
             {emptyText ||
@@ -2376,10 +3684,46 @@ export default function StorySuggestionsPanel({
         )}
 
 
-      {candidates.length >
-        0 && (
-        <div className="story-suggestions-list">
-          {candidates.map(
+      {(
+        visibleOrderedCandidates.length >
+          0 ||
+        veryLowConfidenceCount >
+          0
+      ) && (
+        <>
+          {veryLowConfidenceCount >
+            0 && (
+            <div className="story-low-confidence-controls">
+              <button
+                type="button"
+                className="story-low-confidence-toggle"
+                onClick={() =>
+                  setShowVeryLowConfidence(
+                    (
+                      current
+                    ) =>
+                      !current
+                  )
+                }
+              >
+                {showVeryLowConfidence
+                  ? t(
+                      "documents.hideVeryLowConfidence"
+                    )
+                  : t(
+                      "documents.showVeryLowConfidence",
+                      {
+                        count:
+                          veryLowConfidenceCount,
+                      }
+                    )}
+              </button>
+            </div>
+          )}
+
+
+          <div className="story-suggestions-list">
+          {visibleOrderedCandidates.map(
             (
               candidate
             ) => {
@@ -2404,6 +3748,14 @@ export default function StorySuggestionsPanel({
                   candidate
                 );
 
+              const dependencyState =
+                getCandidateDependencyState(
+                  candidate
+                );
+
+
+              const applyBlocked =
+                !dependencyState.ready;
 
               const sourceText =
                 candidate
@@ -2419,10 +3771,20 @@ export default function StorySuggestionsPanel({
                     candidate
                       .suggestionId
                   }
+                  data-onboarding={
+                    candidateId ===
+                      tutorialCreateEntityCandidateId
+                      ? "smart-import-error-suggestion"
+                      : undefined
+                  }
                   className={[
                     "story-suggestion-card",
 
                     `status-${candidate.status}`,
+
+                    `confidence-${getConfidenceTier(
+                      candidate
+                    )}`,
 
                     editing
                       ? "is-editing"
@@ -2445,14 +3807,44 @@ export default function StorySuggestionsPanel({
                     </div>
 
 
-                    {candidate
-                      .editedByUser && (
-                      <span className="story-suggestion-edited-badge">
-                        {t(
-                          "documents.suggestionEdited"
-                        )}
-                      </span>
-                    )}
+                    <div className="story-suggestion-card-badges">
+                      {getConfidenceTier(
+                        candidate
+                      ) ===
+                        "low-confidence" && (
+                        <span className="story-confidence-badge low">
+                          ⚠{" "}
+
+                          {t(
+                            "documents.lowConfidence"
+                          )}
+                        </span>
+                      )}
+
+
+                      {getConfidenceTier(
+                        candidate
+                      ) ===
+                        "very-low-confidence" && (
+                        <span className="story-confidence-badge very-low">
+                          ⚠{" "}
+
+                          {t(
+                            "documents.veryLowConfidence"
+                          )}
+                        </span>
+                      )}
+
+
+                      {candidate
+                        .editedByUser && (
+                        <span className="story-suggestion-edited-badge">
+                          {t(
+                            "documents.suggestionEdited"
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
 
@@ -2494,16 +3886,42 @@ export default function StorySuggestionsPanel({
 
                       {
                         Math.round(
-                          (
+                          getConfidenceValue(
                             candidate
-                              .confidence ??
-                            0
                           ) *
                             100
                         )
                       }
 
                       %
+
+
+                      {getConfidenceTier(
+                        candidate
+                      ) ===
+                        "low-confidence" && (
+                        <span className="story-confidence-inline-note">
+                          {" · "}
+
+                          {t(
+                            "documents.lowConfidenceHint"
+                          )}
+                        </span>
+                      )}
+
+
+                      {getConfidenceTier(
+                        candidate
+                      ) ===
+                        "very-low-confidence" && (
+                        <span className="story-confidence-inline-note very-low">
+                          {" · "}
+
+                          {t(
+                            "documents.veryLowConfidenceHint"
+                          )}
+                        </span>
+                      )}
                     </span>
 
 
@@ -2529,6 +3947,19 @@ export default function StorySuggestionsPanel({
                     )}
                   </div>
 
+                  {!resolved &&
+                    applyBlocked &&
+                    candidate.kind !==
+                      "event-history" && (
+                      <div className="story-suggestion-dependency-warning">
+                        {t(
+                          candidate.kind ===
+                            "relation-update"
+                            ? "documents.relationDependencyMissing"
+                            : "documents.entityDependencyMissing"
+                        )}
+                      </div>
+                    )}
 
                   {!resolved && (
                     <div className="story-suggestion-actions">
@@ -2553,6 +3984,12 @@ export default function StorySuggestionsPanel({
                           <button
                             type="button"
                             className="story-suggestion-apply"
+                            data-onboarding={
+                              candidateId ===
+                                tutorialCreateEntityCandidateId
+                                ? "smart-import-save-edit"
+                                : undefined
+                            }
                             disabled={
                               working
                             }
@@ -2576,6 +4013,12 @@ export default function StorySuggestionsPanel({
                           <button
                             type="button"
                             className="story-suggestion-edit"
+                            data-onboarding={
+                              candidateId ===
+                                tutorialCreateEntityCandidateId
+                                ? "smart-import-edit-suggestion"
+                                : undefined
+                            }
                             disabled={
                               working
                             }
@@ -2594,6 +4037,12 @@ export default function StorySuggestionsPanel({
                           <button
                             type="button"
                             className="story-suggestion-ignore"
+                            data-onboarding={
+                              candidateId ===
+                                tutorialIgnoreCandidateId
+                                ? "smart-import-ignore-button"
+                                : undefined
+                            }
                             disabled={
                               working
                             }
@@ -2614,8 +4063,17 @@ export default function StorySuggestionsPanel({
                             <button
                               type="button"
                               className="story-suggestion-apply"
+                              data-onboarding={
+                                getCandidateId(
+                                  candidate
+                                ) ===
+                                tutorialApplyCandidateId
+                                  ? "smart-import-apply-button"
+                                  : undefined
+                              }
                               disabled={
-                                working ||
+                                  working ||
+                                  applyBlocked ||
                                 candidate.kind ===
                                   "event-history"
                               }
@@ -2651,12 +4109,13 @@ export default function StorySuggestionsPanel({
                         </>
                       )}
                     </div>
-                  )}
+                   )}
                 </article>
               );
             }
           )}
-        </div>
+          </div>
+        </>
       )}
     </section>
   );

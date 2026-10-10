@@ -1,17 +1,34 @@
 // ======================================================
 // L3 Unified Story Analysis Pipeline
 //
-// Combines:
+// Mimoria now performs two semantic passes:
 //
-// L1 / L2
-// L3-A entity resolution
-// L3-B schema/value resolution
-// L3-C story suggestion generation
+// Pass 1
+// ------------------------------------------------------
+// L1 lexical analysis
+// L2 context / coreference
+// L3-A initial entity resolution
+//
+// Pass 2
+// ------------------------------------------------------
+// Semantic working memory
+// Semantic entity type reranking
+// Draft entity rebuilding
+//
+// Then:
+//
+// Schema/value resolution
+// Story suggestion generation
 //
 // Still pure analysis.
 // No database writes.
 // ======================================================
 
+const {
+  scoreEventCandidates,
+} = require(
+  "./eventSemanticScoring"
+);
 
 const {
   analyzeStoryEntities,
@@ -19,11 +36,13 @@ const {
   "../index"
 );
 
+
 const {
   resolveFieldCandidateSchemas,
 } = require(
   "./candidateSchemaResolver"
 );
+
 
 const {
   generateStorySuggestions,
@@ -31,6 +50,41 @@ const {
   "./storySuggestionGenerator"
 );
 
+
+const {
+  buildSemanticState,
+  serializeSemanticState,
+} = require(
+  "./semanticState"
+);
+
+
+const {
+  inferPronounAttributeCandidates,
+} = require(
+  "./pronounAttributeResolver"
+);
+
+
+const {
+  refineEntitySuggestions,
+} = require(
+  "./semanticEntityRefiner"
+);
+
+
+const {
+  buildDraftEntities,
+  enrichCandidatesWithDraftEntities,
+} = require(
+  "./draftEntityResolver"
+);
+
+const {
+  scoreRelationCandidates,
+} = require(
+  "./relationSemanticScoring"
+);
 
 // ======================================================
 // Main Pipeline
@@ -54,11 +108,13 @@ function analyzeStoryForSuggestions(
   } = options;
 
 
-  // ----------------------------------------------------
-  // L1 + L2 + L3-A
-  // ----------------------------------------------------
+  // ====================================================
+  // PASS 1
+  //
+  // L1 + L2 + Initial L3 Entity Resolution
+  // ====================================================
 
-  const entityAnalysis =
+  const initialEntityAnalysis =
     analyzeStoryEntities(
       text,
       locale,
@@ -74,24 +130,308 @@ function analyzeStoryForSuggestions(
     );
 
 
-  const allResolvedCandidates =
-    entityAnalysis
+  const initialResolvedCandidates =
+    initialEntityAnalysis
       ?.resolvedCandidates ??
     [];
 
 
+  const initialEntitySuggestions =
+    initialEntityAnalysis
+      ?.entitySuggestions ??
+    [];
+
+
+  // ====================================================
+  // Initial Semantic Attributes
+  //
+  // Context resolution has already converted:
+  //
+  // 她 -> 诺拉
+  //
+  // Therefore we can derive:
+  //
+  // 诺拉 -> field.gender = female
+  // ====================================================
+
+  const initialPronounAttributeCandidates =
+    inferPronounAttributeCandidates({
+      candidates:
+        initialResolvedCandidates,
+    });
+
+
+  // ====================================================
+  // Initial Semantic Working Memory
+  //
+  // This memory is deliberately built BEFORE semantic
+  // reranking.
+  //
+  // It becomes the contextual evidence for Pass 2.
+  // ====================================================
+
+  const initialSemanticCandidates = [
+    ...initialResolvedCandidates,
+
+    ...initialPronounAttributeCandidates,
+  ];
+
+
+  const initialSemanticState =
+    buildSemanticState({
+      candidates:
+        initialSemanticCandidates,
+    });
+
+
+  // ====================================================
+  // PASS 2
+  //
+  // Semantic Entity Type Reranking
+  //
+  // Re-evaluate missing/draft entity types using:
+  //
+  // - first-pass inference
+  // - lexical evidence
+  // - ontology expectations
+  // - existing Canon EntityTypes
+  // - Semantic Working Memory
+  // - remembered fields
+  // - mention frequency
+  // - entity salience
+  //
+  // Example:
+  //
+  // Nora
+  //
+  // First pass:
+  //   Character 0.68
+  //
+  // Semantic memory:
+  //   age
+  //   gender
+  //   occupation
+  //   repeated mentions
+  //
+  // Second pass:
+  //   Character 0.94
+  // ====================================================
+
+  const refinedEntitySuggestions =
+    refineEntitySuggestions({
+      entitySuggestions:
+        initialEntitySuggestions,
+
+      semanticState:
+        initialSemanticState,
+
+      entityTypeConceptMap,
+    });
+
+
+  // ====================================================
+  // Rebuild Draft Entities
+  //
+  // The first-pass Draft Entity may contain an older type.
+  //
+  // Since Pass 2 can improve the type classification,
+  // rebuild drafts from the refined suggestions.
+  // ====================================================
+
+  const refinedDraftEntities =
+    buildDraftEntities(
+      refinedEntitySuggestions
+    );
+
+
+  // ====================================================
+  // Re-attach Refined Drafts
+  //
+  // Existing canonical entities remain unchanged.
+  //
+  // Missing entities now receive their refined draft type.
+  // ====================================================
+
+  const refinedResolvedCandidates =
+    enrichCandidatesWithDraftEntities({
+      candidates:
+        initialResolvedCandidates,
+
+      draftEntities:
+        refinedDraftEntities,
+    });
+
+
+  // ====================================================
+  // Re-run Pronoun Semantic Attributes
+  //
+  // Pronoun inference itself usually will not change.
+  //
+  // However, rebuilding it here ensures the final semantic
+  // candidate set references the refined candidate state.
+  // ====================================================
+
+  const pronounAttributeCandidates =
+    inferPronounAttributeCandidates({
+      candidates:
+        refinedResolvedCandidates,
+    });
+
+
+  // ====================================================
+  // Final Unified Semantic Candidates
+  // ====================================================
+
+  const semanticCandidates = [
+    ...refinedResolvedCandidates,
+
+    ...pronounAttributeCandidates,
+  ];
+
+
+  // ====================================================
+  // Final Semantic State
+  //
+  // This is the analysis-time world representation after
+  // semantic refinement.
+  // ====================================================
+
+  const semanticState =
+    buildSemanticState({
+      candidates:
+        semanticCandidates,
+    });
+
+
+  // ====================================================
+  // Final Entity Analysis
+  //
+  // Preserve everything returned by analyzeStoryEntities,
+  // but replace the parts improved by Pass 2.
+  // ====================================================
+
+  const entityAnalysis = {
+    ...initialEntityAnalysis,
+
+    resolvedCandidates:
+      refinedResolvedCandidates,
+
+    entitySuggestions:
+      refinedEntitySuggestions,
+
+    draftEntities:
+      refinedDraftEntities,
+  };
+
+
+  // ====================================================
+  // Field Candidates
+  // ====================================================
+
   const fieldCandidates =
-    allResolvedCandidates.filter(
-      (candidate) =>
+    semanticCandidates.filter(
+      (
+        candidate
+      ) =>
         candidate
           ?.candidateType ===
         "field-value"
     );
 
 
-  // ----------------------------------------------------
-  // L3-B
-  // ----------------------------------------------------
+  // ====================================================
+  // Relation Candidates
+  // ====================================================
+
+  const rawRelationCandidates =
+    semanticCandidates.filter(
+      (
+        candidate
+      ) =>
+        candidate
+          ?.candidateType ===
+          "relation" ||
+        Boolean(
+          candidate
+            ?.relationConcept
+        )
+    );
+
+
+  const relationCandidates =
+    scoreRelationCandidates({
+      candidates:
+        rawRelationCandidates,
+
+      semanticState,
+    });
+
+
+  // ====================================================
+  // Event Candidates
+  // ====================================================
+
+  const rawEventCandidates =
+    semanticCandidates.filter(
+      (
+        candidate
+      ) =>
+        candidate
+          ?.candidateType ===
+          "event" ||
+        Boolean(
+          candidate
+            ?.eventConcept
+        )
+    );
+
+
+  // ====================================================
+  // Event Argument Quality
+  //
+  // A high-confidence predicate does not guarantee that
+  // subject/object spans were extracted correctly.
+  //
+  // Example:
+  //
+  // 前往
+  //
+  // may confidently mean event.travel,
+  // while:
+  //
+  // 北境采集稀有药材
+  //
+  // is still a malformed object span.
+  // ====================================================
+
+  const eventScoring =
+    scoreEventCandidates({
+      candidates:
+        rawEventCandidates,
+
+      unknownEntities:
+        entityAnalysis
+          ?.unknownEntities ??
+        [],
+    });
+
+
+  const eventCandidates =
+    eventScoring
+      .candidates;
+
+
+  const suppressedEventCandidates =
+    eventScoring
+      .suppressedCandidates;
+
+
+  // ====================================================
+  // Schema / Value Resolution
+  //
+  // This now receives candidates containing refined Draft
+  // Entity types.
+  // ====================================================
 
   const schemaAnalysis =
     resolveFieldCandidateSchemas({
@@ -111,53 +451,23 @@ function analyzeStoryForSuggestions(
     });
 
 
-  /*
-   * analyzeStoryEntities already contains resolved
-   * relation/event candidates.
-   *
-   * Keep field candidates from L3-B because they now
-   * contain schema/value resolution information.
-   */
-  const relationCandidates =
-    allResolvedCandidates.filter(
-      (candidate) =>
-        candidate
-          ?.candidateType ===
-          "relation" ||
-        candidate
-          ?.relationConcept
-    );
-
-
-  const eventCandidates =
-    allResolvedCandidates.filter(
-      (candidate) =>
-        candidate
-          ?.candidateType ===
-          "event" ||
-        candidate
-          ?.eventConcept
-    );
-
-
-  // ----------------------------------------------------
-  // L3-C
-  // ----------------------------------------------------
+  // ====================================================
+  // Story Suggestion Generation
+  // ====================================================
 
   const suggestions =
     generateStorySuggestions({
       fieldCandidates:
         schemaAnalysis
-          .candidates,
+          ?.candidates ??
+        [],
 
       relationCandidates,
 
       eventCandidates,
 
       entitySuggestions:
-        entityAnalysis
-          ?.entitySuggestions ??
-        [],
+        refinedEntitySuggestions,
 
       schemaSuggestions:
         schemaAnalysis
@@ -176,12 +486,35 @@ function analyzeStoryForSuggestions(
     });
 
 
+  // ====================================================
+  // Result
+  //
+  // Only expose JSON-safe Semantic State snapshots.
+  // ====================================================
+
   return {
     text,
 
     locale,
 
     entityAnalysis,
+
+    suppressedEventCandidates,
+
+    semanticStateSnapshot:
+      serializeSemanticState(
+        semanticState
+      ),
+
+    semanticRefinement: {
+      initialState:
+        serializeSemanticState(
+          initialSemanticState
+        ),
+
+      refinedEntityCount:
+        refinedEntitySuggestions.length,
+    },
 
     schemaAnalysis,
 
@@ -200,11 +533,19 @@ function analyzeStoryForSuggestions(
 // ======================================================
 
 function summarizeSuggestions(
-  suggestions
+  suggestions = []
 ) {
+  const normalizedSuggestions =
+    Array.isArray(
+      suggestions
+    )
+      ? suggestions
+      : [];
+
+
   const summary = {
     total:
-      suggestions.length,
+      normalizedSuggestions.length,
 
     ready:
       0,
@@ -215,16 +556,17 @@ function summarizeSuggestions(
     informational:
       0,
 
-    byKind: {},
+    byKind:
+      {},
   };
 
 
   for (
     const suggestion of
-    suggestions
+    normalizedSuggestions
   ) {
     if (
-      suggestion.status ===
+      suggestion?.status ===
       "ready"
     ) {
       summary.ready +=
@@ -233,7 +575,7 @@ function summarizeSuggestions(
 
 
     if (
-      suggestion.status ===
+      suggestion?.status ===
       "needs-user-confirmation"
     ) {
       summary
@@ -243,7 +585,7 @@ function summarizeSuggestions(
 
 
     if (
-      suggestion.status ===
+      suggestion?.status ===
       "informational"
     ) {
       summary
@@ -253,7 +595,7 @@ function summarizeSuggestions(
 
 
     const kind =
-      suggestion.kind ||
+      suggestion?.kind ||
       "unknown";
 
 

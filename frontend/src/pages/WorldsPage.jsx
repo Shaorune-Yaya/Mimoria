@@ -1388,9 +1388,30 @@ function WorldsPage() {
         "bottom",
     },
 
-
     // ==================================================
     // Step 20
+    // Entity Resource Tree
+    // ==================================================
+
+    {
+      id:
+        "tutorial-entity-tree",
+
+      selector:
+        '[data-onboarding="entity-resource-tree"]',
+
+      titleKey:
+        "onboarding.entityTreeTitle",
+
+      descriptionKey:
+        "onboarding.entityTreeDescription",
+
+      placement:
+        "right",
+    },
+
+    // ==================================================
+    // Step 21
     // New Entity
     // ==================================================
 
@@ -1416,7 +1437,7 @@ function WorldsPage() {
 
 
     // ==================================================
-    // Step 21
+    // Step 22
     // Entity Type
     // ==================================================
 
@@ -1442,7 +1463,7 @@ function WorldsPage() {
 
 
     // ==================================================
-    // Step 22
+    // Step 23
     // Entity Name
     // ==================================================
 
@@ -1468,7 +1489,7 @@ function WorldsPage() {
 
 
     // ==================================================
-    // Step 23
+    // Step 24
     // Custom Field
     // ==================================================
 
@@ -1494,7 +1515,7 @@ function WorldsPage() {
 
 
     // ==================================================
-    // Step 24
+    // Step 25
     // Create Entity
     // ==================================================
 
@@ -1521,9 +1542,30 @@ function WorldsPage() {
         "external",
     },
 
+  // ==================================================
+    // Step 26
+    // Created Entity In Tree
+    // ==================================================
+
+    {
+      id:
+        "tutorial-entity-created-in-tree",
+
+      selector:
+        '[data-onboarding="selected-entity-tree-row"]',
+
+      titleKey:
+        "onboarding.entityAddedToTreeTitle",
+
+      descriptionKey:
+        "onboarding.entityAddedToTreeDescription",
+
+      placement:
+        "right",
+    },
 
     // ==================================================
-    // Step 25
+    // Step 27
     // Entity Detail
     // ==================================================
 
@@ -1546,7 +1588,7 @@ function WorldsPage() {
 
 
     // ==================================================
-    // Step 26
+    // Step 28
     // Edit Entity
     // ==================================================
 
@@ -1572,7 +1614,7 @@ function WorldsPage() {
 
 
     // ==================================================
-    // Step 27
+    // Step 29
     // Edit Custom Field
     // ==================================================
 
@@ -1598,7 +1640,7 @@ function WorldsPage() {
 
 
     // ==================================================
-    // Step 28
+    // Step 30
     // Save Entity Edit
     // ==================================================
 
@@ -1625,31 +1667,8 @@ function WorldsPage() {
         "external",
     },
 
-
     // ==================================================
-    // Step 29
-    // Entity Tree
-    // ==================================================
-
-    {
-      id:
-        "tutorial-entity-tree",
-
-      selector:
-        '[data-onboarding="selected-entity-tree-row"]',
-
-      titleKey:
-        "onboarding.entityTreeTitle",
-
-      descriptionKey:
-        "onboarding.entityTreeDescription",
-
-      placement:
-        "right",
-    },
-
-    // ==================================================
-    // Step 30
+    // Step 31
     // Ultrawide Secondary Workspace
     // ==================================================
 
@@ -1675,7 +1694,7 @@ function WorldsPage() {
 
 
     // ==================================================
-    // Step 31
+    // Step 32
     // Workspace Splitter
     // ==================================================
 
@@ -1701,7 +1720,7 @@ function WorldsPage() {
 
 
     // ==================================================
-    // Step 32
+    // Step 33
     // Dock Handle
     // ==================================================
 
@@ -1727,7 +1746,7 @@ function WorldsPage() {
 
 
     // ==================================================
-    // Step 33
+    // Step 34
     // Docking Area
     // ==================================================
 
@@ -1753,7 +1772,7 @@ function WorldsPage() {
 
 
     // ==================================================
-    // Step 34
+    // Step 35
     // Documents
     // ==================================================
 
@@ -1777,6 +1796,629 @@ function WorldsPage() {
         "target-click",
     },
 
+    // ==================================================
+    // Step 36
+    // Documents Overview
+    // ==================================================
+
+    {
+      id:
+        "documents-overview",
+
+      selector:
+        '[data-onboarding="documents-page-header"]',
+
+      titleKey:
+        "onboarding.documentsOverviewTitle",
+
+      descriptionKey:
+        "onboarding.documentsOverviewDescription",
+
+      placement:
+        "bottom",
+    },
+
+
+    // ==================================================
+    // Step 37
+    // Document Tree
+    // ==================================================
+
+    {
+      id:
+        "documents-tree",
+
+      selector:
+        '[data-onboarding="documents-tree"]',
+
+      titleKey:
+        "onboarding.documentsTreeTitle",
+
+      descriptionKey:
+        "onboarding.documentsTreeDescription",
+
+      placement:
+        "right",
+    },
+
+
+    // ==================================================
+    // Step 38
+    // New Document
+    // ==================================================
+
+    {
+      id:
+        "open-create-document",
+
+      selector:
+        '[data-onboarding="new-document-button"]',
+
+      titleKey:
+        "onboarding.createDocumentTitle",
+
+      descriptionKey:
+        "onboarding.createDocumentDescription",
+
+      placement:
+        "bottom",
+
+      advanceOn:
+        "external",
+    },
+
+
+    // ==================================================
+    // Step 39
+    // Document Title
+    // ==================================================
+
+    {
+      id:
+        "document-title",
+
+      selector:
+        '[data-onboarding="tutorial-document-title"]',
+
+      focusSelector:
+        '[data-onboarding="create-document-panel"]',
+
+      titleKey:
+        "onboarding.documentTitleTitle",
+
+      descriptionKey:
+        "onboarding.documentTitleDescription",
+
+      placement:
+        "right",
+    },
+
+
+    // ==================================================
+    // Step 40
+    // Confirm Document
+    // ==================================================
+
+    {
+      id:
+        "confirm-create-document",
+
+      selector:
+        '[data-onboarding="confirm-create-document"]',
+
+      focusSelector:
+        '[data-onboarding="create-document-panel"]',
+
+      titleKey:
+        "onboarding.confirmDocumentTitle",
+
+      descriptionKey:
+        "onboarding.confirmDocumentDescription",
+
+      placement:
+        "right",
+
+      advanceOn:
+        "external",
+    },
+
+
+    // ==================================================
+    // Step 41
+    // Created Document In Tree
+    // ==================================================
+
+    {
+      id:
+        "tutorial-document-created",
+
+      selector:
+        '[data-onboarding="tutorial-document-tree-row"]',
+
+      titleKey:
+        "onboarding.documentCreatedTitle",
+
+      descriptionKey:
+        "onboarding.documentCreatedDescription",
+
+      placement:
+        "right",
+    },
+
+
+    // ==================================================
+    // Step 42
+    // Document Editor
+    // ==================================================
+
+    {
+      id:
+        "document-editor-overview",
+
+      selector:
+        '[data-onboarding="document-editor"]',
+
+      titleKey:
+        "onboarding.documentEditorTitle",
+
+      descriptionKey:
+        "onboarding.documentEditorDescription",
+
+      placement:
+        "left",
+    },
+
+
+    // ==================================================
+    // Step 43
+    // Formatting Toolbar
+    // ==================================================
+
+    {
+      id:
+        "document-editor-toolbar",
+
+      selector:
+        '[data-onboarding="document-editor-toolbar"]',
+
+      titleKey:
+        "onboarding.documentToolbarTitle",
+
+      descriptionKey:
+        "onboarding.documentToolbarDescription",
+
+      placement:
+        "bottom",
+    },
+
+
+    // ==================================================
+    // Step 44
+    // Write Content
+    // ==================================================
+
+    {
+      id:
+        "document-editor-content",
+
+      selector:
+        '[data-onboarding="document-editor-content"]',
+
+      titleKey:
+        "onboarding.documentContentTitle",
+
+      descriptionKey:
+        "onboarding.documentContentDescription",
+
+      placement:
+        "right",
+
+      interactionMode:
+        "passthrough",
+    },
+
+
+    // ==================================================
+    // Step 45
+    // Auto Save
+    // ==================================================
+
+    {
+      id:
+        "document-auto-save",
+
+      selector:
+        '[data-onboarding="document-save-status"]',
+
+      titleKey:
+        "onboarding.documentAutoSaveTitle",
+
+      descriptionKey:
+        "onboarding.documentAutoSaveDescription",
+
+      placement:
+        "top",
+    },
+
+    // ==================================================
+    // Step 46
+    // Smart Import Navigation
+    // ==================================================
+
+    {
+      id:
+        "smart-import-nav",
+
+      selector:
+        '[data-onboarding="smart-import-nav"]',
+
+      titleKey:
+        "onboarding.smartImportNavTitle",
+
+      descriptionKey:
+        "onboarding.smartImportNavDescription",
+
+      placement:
+        "right",
+
+      advanceOn:
+        "target-click",
+    },
+
+    // ==================================================
+    // Step 47
+    // Smart Import Overview
+    // ==================================================
+
+    {
+      id:
+        "smart-import-overview",
+
+      selector:
+        '[data-onboarding="smart-import-page"]',
+
+      titleKey:
+        "onboarding.smartImportOverviewTitle",
+
+      descriptionKey:
+        "onboarding.smartImportOverviewDescription",
+
+      placement:
+        "left",
+    },
+
+    // ==================================================
+    // Step 48
+    // Smart Import Usage
+    // ==================================================
+
+    {
+      id:
+        "smart-import-usage",
+
+      selector:
+        '[data-onboarding="smart-import-introduction"]',
+
+      titleKey:
+        "onboarding.smartImportUsageTitle",
+
+      descriptionKey:
+        "onboarding.smartImportUsageDescription",
+
+      placement:
+        "bottom",
+    },
+
+    // ==================================================
+    // Step 49
+    // Smart Import Input
+    // ==================================================
+
+    {
+      id:
+        "smart-import-input",
+
+      selector:
+        '[data-onboarding="smart-import-input"]',
+
+      titleKey:
+        "onboarding.smartImportInputTitle",
+
+      descriptionKey:
+        "onboarding.smartImportInputDescription",
+
+      placement:
+        "right",
+    },
+
+    // ==================================================
+    // Step 50
+    // Analyze
+    // ==================================================
+
+    {
+      id:
+        "smart-import-analyze",
+
+      selector:
+        '[data-onboarding="smart-import-analyze-button"]',
+
+      titleKey:
+        "onboarding.smartImportAnalyzeTitle",
+
+      descriptionKey:
+        "onboarding.smartImportAnalyzeDescription",
+
+      placement:
+        "left",
+
+      advanceOn:
+        "external",
+    },
+
+    // ==================================================
+    // Step 51
+    // Analysis Summary
+    // ==================================================
+
+    {
+      id:
+        "smart-import-analysis-summary",
+
+      selector:
+        '[data-onboarding="smart-import-analysis-summary"]',
+
+      titleKey:
+        "onboarding.smartImportSummaryTitle",
+
+      descriptionKey:
+        "onboarding.smartImportSummaryDescription",
+
+      placement:
+        "bottom",
+    },
+
+    // ==================================================
+    // Step 52
+    // Suggestions
+    // ==================================================
+
+    {
+      id:
+        "smart-import-suggestions",
+
+      selector:
+        '[data-onboarding="smart-import-suggestions"]',
+
+      titleKey:
+        "onboarding.smartImportSuggestionsTitle",
+
+      descriptionKey:
+        "onboarding.smartImportSuggestionsDescription",
+
+      placement:
+        "left",
+    },
+
+    // ==================================================
+    // Step 53
+    // AI Recognition Error
+    // ==================================================
+
+    {
+      id:
+        "smart-import-error-suggestion",
+
+      selector:
+        '[data-onboarding="smart-import-error-suggestion"]',
+
+      titleKey:
+        "onboarding.smartImportErrorTitle",
+
+      descriptionKey:
+        "onboarding.smartImportErrorDescription",
+
+      placement:
+        "left",
+    },
+
+
+    // ==================================================
+    // Step 54
+    // Edit Suggestion
+    // ==================================================
+
+    {
+      id:
+        "smart-import-edit-suggestion",
+
+      selector:
+        '[data-onboarding="smart-import-edit-suggestion"]',
+
+      titleKey:
+        "onboarding.smartImportEditTitle",
+
+      descriptionKey:
+        "onboarding.smartImportEditDescription",
+
+      placement:
+        "left",
+
+      /*
+      * StorySuggestionsPanel advances only after the
+      * real editing form has mounted.
+      */
+      advanceOn:
+        "external",
+    },
+
+
+    // ==================================================
+    // Step 55
+    // Correct Entity Name
+    // ==================================================
+
+    {
+      id:
+        "smart-import-edit-name",
+
+      selector:
+        '[data-onboarding="smart-import-edit-name"]',
+
+      focusSelector:
+        '[data-onboarding="smart-import-edit-panel"]',
+
+      titleKey:
+        "onboarding.smartImportEditNameTitle",
+
+      descriptionKey:
+        "onboarding.smartImportEditNameDescription",
+
+      placement:
+        "left",
+
+      interactionMode:
+        "passthrough",
+
+      advanceOn:
+        "external",
+    },
+
+
+    // ==================================================
+    // Step 56
+    // Save Edited Suggestion
+    // ==================================================
+
+    {
+      id:
+        "smart-import-save-edit",
+
+      selector:
+        '[data-onboarding="smart-import-save-edit"]',
+
+      focusSelector:
+        '[data-onboarding="smart-import-error-suggestion"]',
+
+      titleKey:
+        "onboarding.smartImportSaveEditTitle",
+
+      descriptionKey:
+        "onboarding.smartImportSaveEditDescription",
+
+      placement:
+        "left",
+
+      advanceOn:
+        "external",
+    },
+
+
+    // ==================================================
+    // Step 57
+    // Ignore Suggestion
+    // ==================================================
+
+    {
+      id:
+        "smart-import-ignore",
+
+      selector:
+        '[data-onboarding="smart-import-ignore-button"]',
+
+      focusSelector:
+        '[data-onboarding="smart-import-suggestions"]',
+
+      titleKey:
+        "onboarding.smartImportIgnoreTitle",
+
+      descriptionKey:
+        "onboarding.smartImportIgnoreDescription",
+
+      placement:
+        "left",
+
+      advanceOn:
+        "external",
+    },
+
+
+    // ==================================================
+    // Step 58
+    // Recommended Entity Type
+    // ==================================================
+
+    {
+      id:
+        "smart-import-recommended-type",
+
+      selector:
+        '[data-onboarding="smart-import-recommended-type"]',
+
+      titleKey:
+        "onboarding.smartImportRecommendedTypeTitle",
+
+      descriptionKey:
+        "onboarding.smartImportRecommendedTypeDescription",
+
+      placement:
+        "left",
+    },
+
+
+    // ==================================================
+    // Step 59
+    // Manual Type Selection
+    // ==================================================
+
+    {
+      id:
+        "smart-import-manual-type",
+
+      selector:
+        '[data-onboarding="smart-import-manual-type-select"]',
+
+      titleKey:
+        "onboarding.smartImportManualTypeTitle",
+
+      descriptionKey:
+        "onboarding.smartImportManualTypeDescription",
+
+      placement:
+        "left",
+
+      interactionMode:
+        "passthrough",
+
+      advanceOn:
+        "external",
+    },
+
+
+    // ==================================================
+    // Step 60
+    // Apply Suggestion
+    // ==================================================
+
+    {
+      id:
+        "smart-import-apply",
+
+      selector:
+        '[data-onboarding="smart-import-apply-button"]',
+
+      titleKey:
+        "onboarding.smartImportApplyTitle",
+
+      descriptionKey:
+        "onboarding.smartImportApplyDescription",
+
+      placement:
+        "left",
+
+      advanceOn:
+        "external",
+    },
   ]);
 }
 

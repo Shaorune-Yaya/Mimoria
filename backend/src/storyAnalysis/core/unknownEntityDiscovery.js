@@ -6,6 +6,15 @@ const {
 );
 
 
+const {
+  scoreUnknownEntityCandidate,
+  combineEntityConfidence,
+  getQualityDisposition,
+} = require(
+  "../l2/candidateQualityScoring"
+);
+
+
 const CHINESE_BOUNDARY_PATTERN =
   /[\s，。！？；：、,.!?;:"“”'‘’（）()\[\]【】<>《》]/u;
 
@@ -420,6 +429,188 @@ function findChineseCandidateEnd({
   return end;
 }
 
+function cleanChineseEntityCandidateSpan({
+  text,
+  start,
+  end,
+}) {
+  let nextStart =
+    start;
+
+
+  let value =
+    text
+      .slice(
+        nextStart,
+        end
+      )
+      .trim();
+
+
+  /*
+   * Remove grammar that can be swallowed while scanning
+   * left from a suffix-based EntityType clue.
+   *
+   * Examples:
+   *
+   * 一名来自北境
+   * -> 北境
+   *
+   * 来自北境
+   * -> 北境
+   *
+   * 位于银港
+   * -> 银港
+   *
+   * We remove grammar only at the beginning of the span.
+   * Entity suffixes themselves are preserved.
+   */
+  const prefixMatch =
+    value.match(
+      /^(?:(?:一名|一位|一个|一座)\s*)?(?:来自|源自|源于|出身于|位于|坐落于|坐落在|地处|隶属于|隶属|属于|归属于|归属|加入|任职于|就职于|供职于|居住在|住在|定居于|出生于|出生在|生于)+/u
+    );
+
+
+  if (
+    prefixMatch?.[0]
+  ) {
+    const rawPrefix =
+      prefixMatch[0];
+
+
+    const offsetInOriginal =
+      text
+        .slice(
+          start,
+          end
+        )
+        .indexOf(
+          rawPrefix
+        );
+
+
+    if (
+      offsetInOriginal >=
+      0
+    ) {
+      nextStart =
+        start +
+        offsetInOriginal +
+        rawPrefix.length;
+    }
+
+
+    value =
+      text
+        .slice(
+          nextStart,
+          end
+        )
+        .trim();
+  }
+
+
+  return {
+    start:
+      nextStart,
+
+    end,
+
+    name:
+      value,
+  };
+}
+
+// ======================================================
+// Chinese Entity Type Evidence Validation
+//
+// Entity-type lexicon hits inside a proper name must not
+// automatically determine the entity's type.
+//
+// Example:
+//
+// 河谷城
+//
+// "河" may match entityType.river, but it occurs inside the
+// proper name.
+//
+// "城" occurs at the end and is therefore much stronger
+// evidence for entityType.city.
+//
+// For Chinese proper names we currently require entity-type
+// lexical evidence to describe either:
+//
+// - the whole extracted name
+// - or the suffix of the extracted name
+//
+// This prevents internal fragments such as:
+//
+// 河谷城 -> river
+// 星海公司 -> planet
+// 山岚学院 -> mountain
+//
+// while keeping:
+//
+// 黑石城 -> city
+// 银月公会 -> guild
+// 赤霞山 -> mountain
+// ======================================================
+
+function isReliableChineseEntityTypeEvidence({
+  name,
+  match,
+}) {
+  const normalizedName =
+    normalizeForComparison(
+      name,
+      "zh-CN"
+    );
+
+
+  const normalizedExpression =
+    normalizeForComparison(
+      match?.expression,
+      "zh-CN"
+    );
+
+
+  if (
+    !normalizedName ||
+    !normalizedExpression
+  ) {
+    return false;
+  }
+
+
+  // Exact names remain valid.
+  if (
+    normalizedName ===
+    normalizedExpression
+  ) {
+    return true;
+  }
+
+
+  // Chinese entity-type clues are primarily suffix based.
+  //
+  // Examples:
+  //
+  // 河谷城 -> 城
+  // 银月公会 -> 公会
+  // 黑石港 -> 港
+  //
+  // An internal lexical fragment is not enough.
+  if (
+    normalizedName.endsWith(
+      normalizedExpression
+    )
+  ) {
+    return true;
+  }
+
+
+  return false;
+}
 
 function extractChineseCandidates({
   text,
@@ -445,11 +636,27 @@ function extractChineseCandidates({
     }
 
 
+    /*
+    * Chinese role/title expressions describe an entity,
+    * but are normally NOT the entity name itself.
+    *
+    * Example:
+    *
+    * 诺拉是一名炼金术师
+    *
+    * "炼金术师"
+    * -> field.occupation
+    *
+    * It must not independently become:
+    *
+    * create entity "炼金术师"
+    *
+    * The subject Entity is discovered through the structured
+    * field/relation candidates instead.
+    */
     const usefulEvidence =
       concept.kind ===
-        "entity-type" ||
-      concept.kind ===
-        "role-signal";
+      "entity-type";
 
 
     if (
@@ -459,9 +666,10 @@ function extractChineseCandidates({
     }
 
 
-    const start =
+    const initialStart =
       findChineseCandidateStart({
         text,
+
         evidenceStart:
           match.start,
       });
@@ -470,18 +678,29 @@ function extractChineseCandidates({
     const end =
       findChineseCandidateEnd({
         text,
+
         evidenceEnd:
           match.end,
       });
 
 
+    const cleanedSpan =
+      cleanChineseEntityCandidateSpan({
+        text,
+
+        start:
+          initialStart,
+
+        end,
+      });
+
+
+    const start =
+      cleanedSpan.start;
+
+
     const name =
-      text
-        .slice(
-          start,
-          end
-        )
-        .trim();
+      cleanedSpan.name;
 
 
     if (
@@ -490,6 +709,34 @@ function extractChineseCandidates({
         lexicon,
         locale:
           "zh-CN",
+      })
+    ) {
+      continue;
+    }
+
+
+    /*
+    * A lexicon term appearing somewhere inside a Chinese
+    * proper name is not enough to classify the whole entity.
+    *
+    * Example:
+    *
+    * 河谷城
+    *
+    * 河 -> entityType.river
+    *
+    * This must NOT make the whole entity a River.
+    *
+    * 城 -> entityType.city
+    *
+    * This occurs at the name boundary and remains valid.
+    */
+    if (
+      concept.kind ===
+        "entity-type" &&
+      !isReliableChineseEntityTypeEvidence({
+        name,
+        match,
       })
     ) {
       continue;
@@ -510,19 +757,6 @@ function extractChineseCandidates({
       likelyType =
         match.conceptId;
     }
-
-
-    if (
-      concept.kind ===
-      "role-signal"
-    ) {
-      likelyType =
-        "entityType.character";
-
-      roleConceptId =
-        match.conceptId;
-    }
-
 
     let confidence =
       match.confidence;
@@ -1198,31 +1432,109 @@ function discoverUnknownEntities({
   }
 
 
-  return mergeCandidateEvidence(
+  const mergedCandidates =
+  mergeCandidateEvidence(
     candidates
-  )
-    .sort(
-      (
-        a,
-        b
-      ) => {
-        if (
-          a.start !==
-          b.start
-        ) {
-          return (
-            a.start -
-            b.start
-          );
-        }
+  );
 
 
+const qualityScoredCandidates =
+  mergedCandidates.map(
+    (
+      candidate
+    ) => {
+      /*
+       * Preserve the old lexical confidence.
+       *
+       * It is useful evidence, but it is no longer treated
+       * as the final confidence of the Entity mention.
+       */
+      const lexicalConfidence =
+        candidate
+          ?.confidence ??
+        0.5;
+
+
+      const spanQuality =
+        scoreUnknownEntityCandidate({
+          candidate,
+
+          text,
+
+          semanticMatches:
+            matches,
+
+          locale:
+            lexicon.locale,
+        });
+
+
+      const confidence =
+        combineEntityConfidence(
+          lexicalConfidence,
+
+          spanQuality.score
+        );
+
+
+      return {
+        ...candidate,
+
+
+        // -----------------------------------------------
+        // Confidence decomposition
+        // -----------------------------------------------
+
+        lexicalConfidence,
+
+        spanConfidence:
+          spanQuality.score,
+
+        confidence,
+
+
+        // -----------------------------------------------
+        // Debug / future UI information
+        // -----------------------------------------------
+
+        spanQuality:
+          spanQuality.quality,
+
+        spanQualityEvidence:
+          spanQuality.evidence,
+
+        qualityDisposition:
+          getQualityDisposition(
+            confidence
+          ),
+      };
+    }
+  );
+
+
+return qualityScoredCandidates
+  .sort(
+    (
+      a,
+      b
+    ) => {
+      if (
+        a.start !==
+        b.start
+      ) {
         return (
-          b.confidence -
-          a.confidence
+          a.start -
+          b.start
         );
       }
-    );
+
+
+      return (
+        b.confidence -
+        a.confidence
+      );
+    }
+  );
 }
 
 

@@ -854,3 +854,347 @@ span {
     width: 100%;
   }
 }
+/* ======================================================
+   Suggestion Confidence Presentation
+   ====================================================== */
+
+
+/* ------------------------------------------------------
+   Badge Container
+   ------------------------------------------------------ */
+
+.smart-import-page
+.story-suggestion-card-badges {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 6px;
+
+  flex-wrap: wrap;
+}
+
+
+/* ------------------------------------------------------
+   Confidence Badge
+   ------------------------------------------------------ */
+
+.smart-import-page
+.story-confidence-badge {
+  display: inline-flex;
+  align-items: center;
+
+  min-height: 22px;
+
+  padding:
+    2px 7px;
+
+  border-radius:
+    999px;
+
+  font-size:
+    10px;
+
+  font-weight:
+    600;
+
+  white-space:
+    nowrap;
+}
+
+
+/* ------------------------------------------------------
+   Low Confidence
+   55% - 72%
+   ------------------------------------------------------ */
+
+.smart-import-page
+.story-confidence-badge.low {
+  background:
+    rgba(
+      166,
+      119,
+      45,
+      0.16
+    );
+
+  color:
+    #d7b577;
+
+  border:
+    1px solid
+    rgba(
+      185,
+      137,
+      61,
+      0.38
+    );
+}
+
+
+.smart-import-page
+.story-suggestion-card.status-pending.confidence-low-confidence {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(
+        119,
+        83,
+        35,
+        0.13
+      ),
+      rgba(
+        21,
+        26,
+        32,
+        1
+      )
+      42%
+    );
+
+  border-color:
+    rgba(
+      166,
+      119,
+      50,
+      0.52
+    );
+
+  box-shadow:
+    inset
+    3px 0 0
+    rgba(
+      190,
+      139,
+      61,
+      0.72
+    );
+}
+
+
+.smart-import-page
+.story-suggestion-card.status-pending.confidence-low-confidence:hover {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(
+        132,
+        91,
+        37,
+        0.18
+      ),
+      rgba(
+        24,
+        30,
+        37,
+        1
+      )
+      42%
+    );
+
+  border-color:
+    rgba(
+      185,
+      137,
+      61,
+      0.65
+    );
+}
+
+
+/* ------------------------------------------------------
+   Very Low Confidence
+   38% - 55%
+   ------------------------------------------------------ */
+
+.smart-import-page
+.story-confidence-badge.very-low {
+  background:
+    rgba(
+      142,
+      66,
+      58,
+      0.17
+    );
+
+  color:
+    #d79a91;
+
+  border:
+    1px solid
+    rgba(
+      170,
+      78,
+      69,
+      0.42
+    );
+}
+
+
+.smart-import-page
+.story-suggestion-card.status-pending.confidence-very-low-confidence {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(
+        104,
+        50,
+        46,
+        0.14
+      ),
+      rgba(
+        21,
+        26,
+        32,
+        1
+      )
+      44%
+    );
+
+  border-color:
+    rgba(
+      145,
+      70,
+      63,
+      0.54
+    );
+
+  box-shadow:
+    inset
+    3px 0 0
+    rgba(
+      167,
+      76,
+      68,
+      0.72
+    );
+}
+
+
+.smart-import-page
+.story-suggestion-card.status-pending.confidence-very-low-confidence:hover {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(
+        119,
+        55,
+        50,
+        0.19
+      ),
+      rgba(
+        24,
+        30,
+        37,
+        1
+      )
+      44%
+    );
+
+  border-color:
+    rgba(
+      167,
+      76,
+      68,
+      0.66
+    );
+}
+
+
+/* ------------------------------------------------------
+   Inline Confidence Explanation
+   ------------------------------------------------------ */
+
+.smart-import-page
+.story-confidence-inline-note {
+  color:
+    #b79a66;
+}
+
+
+.smart-import-page
+.story-confidence-inline-note.very-low {
+  color:
+    #bd817a;
+}
+
+
+/* ------------------------------------------------------
+   Very Low Confidence Toggle
+   ------------------------------------------------------ */
+
+.smart-import-page
+.story-low-confidence-controls {
+  display: flex;
+  justify-content: flex-end;
+
+  margin:
+    4px 0 10px;
+}
+
+
+.smart-import-page
+.story-low-confidence-toggle {
+  min-height:
+    31px;
+
+  padding:
+    5px 10px;
+
+  background:
+    rgba(
+      113,
+      58,
+      53,
+      0.08
+    );
+
+  color:
+    #a98681;
+
+  border:
+    1px solid
+    rgba(
+      132,
+      72,
+      66,
+      0.34
+    );
+
+  border-radius:
+    6px;
+
+  cursor:
+    pointer;
+
+  font-size:
+    10px;
+
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
+}
+
+
+.smart-import-page
+.story-low-confidence-toggle:hover {
+  background:
+    rgba(
+      126,
+      65,
+      59,
+      0.15
+    );
+
+  color:
+    #c5a19b;
+
+  border-color:
+    rgba(
+      157,
+      82,
+      74,
+      0.5
+    );
+}

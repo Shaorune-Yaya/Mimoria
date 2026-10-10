@@ -16,6 +16,11 @@ const {
   "./typeCompatibility"
 );
 
+const {
+  scoreEntityTypeCandidates,
+} = require(
+  "./semanticScoring"
+);
 
 // ======================================================
 // Helpers
@@ -455,88 +460,43 @@ function inferEntityType({
   expectedTypeConcepts = [],
 
   unknownEntities = [],
+
+  existingEntityTypeConcepts = [],
 }) {
   const evidence =
     findUnknownEntityEvidence({
       hint,
+
       unknownEntities,
     });
 
 
-  /*
-   * No lexical type evidence.
-   *
-   * Example:
-   * 黑石港 currently has no L1 unknown candidate.
-   *
-   * Fall back safely to semantic expectation:
-   * location.
-   */
-  if (
-    evidence.length ===
-    0
-  ) {
-    return {
-      status:
-        "semantic-only",
-
-      likelyTypeConcept:
-        chooseBroadExpectedType(
-          expectedTypeConcepts
-        ),
-
-      confidence:
-        0.6,
+  const scoring =
+    scoreEntityTypeCandidates({
+      expectedTypeConcepts,
 
       unknownEvidence:
-        [],
+        evidence,
 
-      expectedTypeConcepts:
-        unique(
-          expectedTypeConcepts
-        ),
-    };
-  }
+      existingEntityTypeConcepts,
+    });
 
 
   /*
-   * Select the strongest evidence that is compatible
-   * with event/relation semantics.
-   *
-   * This also allows an alternativeTypes entry to beat
-   * an incompatible primary prediction.
+   * Nothing gave us a usable type.
    */
-  const compatibleEvidence =
-    evidence.filter(
-      (item) =>
-        isCompatibleWithExpected(
-          item.typeConcept,
-          expectedTypeConcepts
-        )
-    );
-
-
   if (
-    compatibleEvidence.length >
-    0
+    !scoring.bestConcept
   ) {
-    const best =
-      compatibleEvidence[0];
-
-
     return {
       status:
-        "intersected",
+        "unresolved",
 
       likelyTypeConcept:
-        best.typeConcept,
+        null,
 
       confidence:
-        Math.min(
-          1,
-          best.confidence +
-            0.08
-        ),
+        0,
 
       unknownEvidence:
         evidence,
@@ -546,29 +506,70 @@ function inferEntityType({
           expectedTypeConcepts
         ),
 
-      matchedUnknownEvidence:
-        best,
+      semanticScoring:
+        scoring,
     };
   }
 
 
   /*
-   * We found lexical evidence, but none of it agrees
-   * with semantic expectations.
+   * Competing interpretations are too close.
    *
-   * Do not trust either side blindly.
+   * We still expose the best guess, but downstream code
+   * can decide not to auto-create anything.
    */
+  if (
+    scoring.ambiguous
+  ) {
+    return {
+      status:
+        "ambiguous-scored",
+
+      likelyTypeConcept:
+        scoring.bestConcept,
+
+      confidence:
+        scoring.confidence,
+
+      unknownEvidence:
+        evidence,
+
+      expectedTypeConcepts:
+        unique(
+          expectedTypeConcepts
+        ),
+
+      semanticScoring:
+        scoring,
+
+      conflictingTypeConcepts:
+        scoring.ranked
+          .slice(
+            1,
+            4
+          )
+          .map(
+            (
+              item
+            ) =>
+              item.conceptId
+          ),
+    };
+  }
+
+
   return {
     status:
-      "type-conflict",
+      evidence.length >
+        0
+        ? "semantic-scored"
+        : "semantic-only",
 
     likelyTypeConcept:
-      chooseBroadExpectedType(
-        expectedTypeConcepts
-      ),
+      scoring.bestConcept,
 
     confidence:
-      0.5,
+      scoring.confidence,
 
     unknownEvidence:
       evidence,
@@ -578,13 +579,28 @@ function inferEntityType({
         expectedTypeConcepts
       ),
 
+    semanticScoring:
+      scoring,
+
     conflictingTypeConcepts:
-      unique(
-        evidence.map(
-          (item) =>
-            item.typeConcept
+      scoring.ranked
+        .slice(
+          1,
+          4
         )
-      ),
+        .filter(
+          (
+            item
+          ) =>
+            item.score >
+            0
+        )
+        .map(
+          (
+            item
+          ) =>
+            item.conceptId
+        ),
   };
 }
 

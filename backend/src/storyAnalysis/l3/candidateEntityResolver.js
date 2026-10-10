@@ -24,6 +24,75 @@ const {
   "./draftEntityResolver"
 );
 
+const {
+  getConcept,
+} = require(
+  "../concepts/registry"
+);
+
+const {
+  scoreEntityHintQuality,
+  combineEntityConfidence,
+  getQualityDisposition,
+} = require(
+  "../l2/candidateQualityScoring"
+);
+
+// ======================================================
+// Existing Entity Type Concepts
+// ======================================================
+
+function getExistingEntityTypeConcepts(
+  entityTypeConceptMap
+) {
+  if (
+    !entityTypeConceptMap
+  ) {
+    return [];
+  }
+
+
+  /*
+   * Current Mimoria callers may represent this mapping
+   * either as:
+   *
+   * Map
+   *
+   * or:
+   *
+   * plain object
+   *
+   * We support both.
+   */
+  if (
+    entityTypeConceptMap instanceof
+    Map
+  ) {
+    return [
+      ...new Set(
+        Array.from(
+          entityTypeConceptMap
+            .values()
+        )
+          .filter(
+            Boolean
+          )
+      ),
+    ];
+  }
+
+
+  return [
+    ...new Set(
+      Object.values(
+        entityTypeConceptMap
+      )
+        .filter(
+          Boolean
+        )
+    ),
+  ];
+}
 
 // ======================================================
 // Entity Suggestion
@@ -31,13 +100,23 @@ const {
 
 function makeEntitySuggestion({
   hint,
+
   role,
+
   candidate,
 
   expectedTypeConcepts,
 
   unknownEntities,
+
+  entityTypeConceptMap,
 }) {
+  // ====================================================
+  // Type Meaning
+  //
+  // What kind of entity could this be?
+  // ====================================================
+
   const typeInference =
     inferEntityType({
       hint,
@@ -45,7 +124,94 @@ function makeEntitySuggestion({
       expectedTypeConcepts,
 
       unknownEntities,
+
+      existingEntityTypeConcepts:
+        getExistingEntityTypeConcepts(
+          entityTypeConceptMap
+        ),
     });
+
+
+  // ====================================================
+  // Span / Mention Quality
+  //
+  // Is this text span itself likely to be a real entity?
+  // ====================================================
+
+  const spanQuality =
+    scoreEntityHintQuality({
+      hint,
+
+      role,
+
+      sourceCandidate:
+        candidate,
+
+      unknownEntities,
+    });
+
+
+  // ====================================================
+  // Semantic Confidence
+  //
+  // Keep source semantic structure and type inference
+  // separate from span quality.
+  // ====================================================
+
+  const sourceConfidence =
+    Math.max(
+      0,
+
+      Math.min(
+        1,
+
+        candidate
+          ?.confidence ??
+        0.7
+      )
+    );
+
+
+  const typeConfidence =
+    Math.max(
+      0,
+
+      Math.min(
+        1,
+
+        typeInference
+          ?.confidence ??
+        0
+      )
+    );
+
+
+  const semanticConfidence =
+    Math.max(
+      sourceConfidence,
+
+      typeConfidence
+    );
+
+
+  // ====================================================
+  // Final Confidence
+  //
+  // A bad span cannot be rescued by a strong type guess.
+  // ====================================================
+
+  const confidence =
+    combineEntityConfidence(
+      semanticConfidence,
+
+      spanQuality.score
+    );
+
+
+  const qualityDisposition =
+    getQualityDisposition(
+      confidence
+    );
 
 
   return {
@@ -65,6 +231,11 @@ function makeEntitySuggestion({
     status:
       "suggested",
 
+
+    // ==================================================
+    // Source
+    // ==================================================
+
     sourceCandidateType:
       candidate
         ?.candidateType ||
@@ -79,20 +250,31 @@ function makeEntitySuggestion({
         ?.fieldConcept ||
       null,
 
-    confidence:
-      Math.min(
-        0.95,
 
-        Math.max(
-          candidate
-            ?.confidence ??
-          0.7,
+    // ==================================================
+    // Confidence Breakdown
+    // ==================================================
 
-          typeInference
-            .confidence ||
-          0
-        )
-      ),
+    confidence,
+
+    spanConfidence:
+      spanQuality.score,
+
+    semanticConfidence,
+
+    typeConfidence,
+
+    sourceConfidence,
+
+    qualityDisposition,
+
+    qualityEvidence:
+      spanQuality.evidence,
+
+
+    // ==================================================
+    // Type Inference
+    // ==================================================
 
     expectedTypeConcepts:
       expectedTypeConcepts ||
@@ -207,6 +389,8 @@ function resolveSide({
         expectedTypeConcepts,
 
         unknownEntities,
+
+        entityTypeConceptMap,
       })
     );
   }
@@ -313,6 +497,372 @@ function resolveOneCandidate({
   return result;
 }
 
+// ======================================================
+// Semantic Entity Promotion
+//
+// Some ordinary field values represent reusable world
+// concepts.
+//
+// Example:
+//
+// Alice is an Alchemist.
+//
+// field.occupation = "Alchemist"
+//
+// The field may remain text for backward compatibility,
+// while Smart Import may ALSO suggest:
+//
+// Entity:
+// Alchemist
+//
+// EntityType:
+// Profession
+//
+// Whether promotion is allowed comes from registry.js.
+// ======================================================
+
+function normalizePromotableValue(
+  value
+) {
+  if (
+    value ===
+      null ||
+    value ===
+      undefined
+  ) {
+    return null;
+  }
+
+
+  if (
+    typeof value !==
+    "string"
+  ) {
+    return null;
+  }
+
+
+  const normalized =
+    value
+      .normalize(
+        "NFKC"
+      )
+      .trim()
+      .replace(
+        /\s+/gu,
+        " "
+      );
+
+
+  if (
+    !normalized
+  ) {
+    return null;
+  }
+
+
+  /*
+   * Do not promote entire paragraphs or descriptions.
+   */
+  if (
+    normalized.length >
+      80
+  ) {
+    return null;
+  }
+
+
+  /*
+   * Obvious prose fragments are bad reusable entities.
+   */
+  if (
+    /[。！？!?；;\n\r]/u.test(
+      normalized
+    )
+  ) {
+    return null;
+  }
+
+
+  return normalized;
+}
+
+
+// ======================================================
+// Read Promotion Metadata
+// ======================================================
+
+function getFieldPromotionConfig(
+  candidate
+) {
+  const fieldConcept =
+    candidate
+      ?.fieldConcept ||
+    null;
+
+
+  if (
+    !fieldConcept
+  ) {
+    return null;
+  }
+
+
+  const definition =
+    getConcept(
+      fieldConcept
+    );
+
+
+  const targetTypeConcept =
+    definition
+      ?.promoteValueToEntityType ||
+    null;
+
+
+  if (
+    !targetTypeConcept
+  ) {
+    return null;
+  }
+
+
+  return {
+    fieldConcept,
+
+    targetTypeConcept,
+
+    confidence:
+      Math.max(
+        0,
+
+        Math.min(
+          1,
+
+          definition
+            ?.promotionConfidence ??
+          0.75
+        )
+      ),
+  };
+}
+
+
+// ======================================================
+// Promote One Field Value
+// ======================================================
+
+function buildPromotedEntitySuggestion({
+  candidate,
+
+  entities,
+
+  entityTypeConceptMap,
+
+  unknownEntities,
+}) {
+  const config =
+    getFieldPromotionConfig(
+      candidate
+    );
+
+
+  if (
+    !config
+  ) {
+    return null;
+  }
+
+
+  const value =
+    normalizePromotableValue(
+      candidate
+        ?.normalizedValue ??
+      candidate
+        ?.value
+    );
+
+
+  if (
+    !value
+  ) {
+    return null;
+  }
+
+
+  const expectedTypeConcepts = [
+    config
+      .targetTypeConcept,
+  ];
+
+
+  /*
+   * First try Canon.
+   *
+   * If "Alchemist" already exists as Profession,
+   * nothing should be suggested.
+   */
+  const existingResolution =
+    resolveEntityHint(
+      value,
+
+      entities,
+
+      {
+        expectedTypeConcepts,
+
+        entityTypeConceptMap,
+      }
+    );
+
+
+  if (
+    existingResolution
+      .status ===
+    "resolved"
+  ) {
+    return null;
+  }
+
+
+  /*
+   * Ambiguous:
+   *
+   * Do not create another entity automatically.
+   * The existing ambiguity must be resolved elsewhere.
+   */
+  if (
+    existingResolution
+      .status ===
+    "ambiguous"
+  ) {
+    return null;
+  }
+
+
+  const promotionCandidate = {
+    ...candidate,
+
+    confidence:
+      Math.min(
+        0.95,
+
+        Math.max(
+          candidate
+            ?.confidence ??
+          0.7,
+
+          config.confidence
+        )
+      ),
+
+    promotedFromField:
+      true,
+
+    promotionFieldConcept:
+      config
+        .fieldConcept,
+
+    promotionTargetTypeConcept:
+      config
+        .targetTypeConcept,
+  };
+
+
+  const suggestion =
+    makeEntitySuggestion({
+      hint:
+        value,
+
+      role:
+        "field-value",
+
+      candidate:
+        promotionCandidate,
+
+      expectedTypeConcepts,
+
+      unknownEntities,
+
+      entityTypeConceptMap,
+    });
+
+
+  return {
+    ...suggestion,
+
+    promotion: {
+      fieldConcept:
+        config
+          .fieldConcept,
+
+      targetTypeConcept:
+        config
+          .targetTypeConcept,
+
+      sourceSubject:
+        candidate
+          ?.subjectHint ||
+        null,
+    },
+  };
+}
+
+
+// ======================================================
+// Promote Field Values
+// ======================================================
+
+function discoverPromotedEntitySuggestions({
+  candidates = [],
+
+  entities = [],
+
+  entityTypeConceptMap = {},
+
+  unknownEntities = [],
+}) {
+  const results =
+    [];
+
+
+  for (
+    const candidate of
+    candidates
+  ) {
+    if (
+      candidate
+        ?.candidateType !==
+      "field-value"
+    ) {
+      continue;
+    }
+
+
+    const suggestion =
+      buildPromotedEntitySuggestion({
+        candidate,
+
+        entities,
+
+        entityTypeConceptMap,
+
+        unknownEntities,
+      });
+
+
+    if (
+      suggestion
+    ) {
+      results.push(
+        suggestion
+      );
+    }
+  }
+
+
+  return results;
+}
 
 // ======================================================
 // Suggestion Merge
@@ -473,6 +1023,10 @@ function deduplicateEntitySuggestions(
       );
 
 
+    // ==================================================
+    // First Mention
+    // ==================================================
+
     if (
       !existing
     ) {
@@ -480,6 +1034,9 @@ function deduplicateEntitySuggestions(
         key,
         {
           ...suggestion,
+
+          occurrenceCount:
+            1,
 
           roles: [
             suggestion.role,
@@ -508,6 +1065,26 @@ function deduplicateEntitySuggestions(
 
       continue;
     }
+
+
+    // ==================================================
+    // Repeated Mention
+    //
+    // Repetition is contextual evidence.
+    //
+    // A malformed one-off fragment should remain weak.
+    //
+    // A real entity repeatedly appearing in independent
+    // facts becomes more trustworthy.
+    // ==================================================
+
+    existing.occurrenceCount =
+      (
+        existing
+          .occurrenceCount ||
+        1
+      ) +
+      1;
 
 
     if (
@@ -559,6 +1136,70 @@ function deduplicateEntitySuggestions(
     ];
 
 
+    /*
+     * Preserve the strongest independently observed span.
+     */
+    if (
+      (
+        suggestion
+          .spanConfidence ||
+        0
+      ) >
+      (
+        existing
+          .spanConfidence ||
+        0
+      )
+    ) {
+      existing.spanConfidence =
+        suggestion
+          .spanConfidence;
+
+
+      existing.qualityEvidence =
+        suggestion
+          .qualityEvidence ||
+        existing
+          .qualityEvidence;
+    }
+
+
+    existing.semanticConfidence =
+      Math.max(
+        existing
+          .semanticConfidence ||
+        0,
+
+        suggestion
+          .semanticConfidence ||
+        0
+      );
+
+
+    existing.typeConfidence =
+      Math.max(
+        existing
+          .typeConfidence ||
+        0,
+
+        suggestion
+          .typeConfidence ||
+        0
+      );
+
+
+    existing.sourceConfidence =
+      Math.max(
+        existing
+          .sourceConfidence ||
+        0,
+
+        suggestion
+          .sourceConfidence ||
+        0
+      );
+
+
     existing.confidence =
       Math.max(
         existing
@@ -578,9 +1219,69 @@ function deduplicateEntitySuggestions(
   }
 
 
-  return Array.from(
-    map.values()
-  );
+  // ====================================================
+  // Repetition Calibration
+  // ====================================================
+
+  const merged =
+    Array.from(
+      map.values()
+    );
+
+
+  for (
+    const suggestion of
+    merged
+  ) {
+    const occurrenceCount =
+      suggestion
+        .occurrenceCount ||
+      1;
+
+
+    /*
+     * Repeated mentions can recover a moderately uncertain
+     * span.
+     *
+     * But repetition must NOT rescue something already
+     * extremely weak.
+     */
+    if (
+      occurrenceCount >
+        1 &&
+      suggestion.confidence >=
+        0.32
+    ) {
+      const repetitionBonus =
+        Math.min(
+          0.12,
+
+          (
+            occurrenceCount -
+            1
+          ) *
+          0.05
+        );
+
+
+      suggestion.confidence =
+        Math.min(
+          0.95,
+
+          suggestion.confidence +
+          repetitionBonus
+        );
+    }
+
+
+    suggestion.qualityDisposition =
+      getQualityDisposition(
+        suggestion.confidence
+      );
+  }
+
+
+  return merged;
 }
 
 
@@ -601,12 +1302,12 @@ function resolveCandidateEntities({
     [];
 
 
-  // ----------------------------------------------------
+  // ====================================================
   // Pass 1
   //
-  // Resolve all references against real Canon entities.
-  // Missing references produce entity suggestions.
-  // ----------------------------------------------------
+  // Resolve normal subject/object references against
+  // Canon.
+  // ====================================================
 
   const initiallyResolvedCandidates =
     candidates.map(
@@ -626,30 +1327,88 @@ function resolveCandidateEntities({
     );
 
 
-  // ----------------------------------------------------
+  // ====================================================
   // Pass 2
   //
-  // Merge repeated references to the same missing entity.
-  // ----------------------------------------------------
+  // Semantic Entity Promotion
+  //
+  // Example:
+  //
+  // field.occupation = Alchemist
+  //
+  // Registry says:
+  //
+  // promoteValueToEntityType =
+  // entityType.profession
+  //
+  // Therefore "Alchemist" may become a reusable entity.
+  // ====================================================
 
-  const entitySuggestions =
+  const promotedEntitySuggestions =
+    discoverPromotedEntitySuggestions({
+      candidates:
+        initiallyResolvedCandidates,
+
+      entities,
+
+      entityTypeConceptMap,
+
+      unknownEntities,
+    });
+
+
+  rawEntitySuggestions.push(
+    ...promotedEntitySuggestions
+  );
+
+
+  // ====================================================
+  // Pass 3
+  //
+  // Merge repeated references to the same missing entity.
+  // ====================================================
+
+  const mergedEntitySuggestions =
     deduplicateEntitySuggestions(
       rawEntitySuggestions
     );
 
 
-  // ----------------------------------------------------
-  // Pass 3
+  // ======================================================
+  // Candidate Quality Gate
   //
-  // Convert missing entities into temporary draft
-  // entities so subsequent L3 passes can continue
-  // reasoning about them.
+  // Suppressed suggestions are preserved for diagnostics,
+  // but they do NOT:
   //
-  // Important:
+  // - create Draft Entities
+  // - enter Semantic State as fake entities
+  // - reach normal Smart Import suggestions
   //
-  // No MongoDB write happens here.
-  // No fake ObjectId is generated.
-  // ----------------------------------------------------
+  // Low-confidence candidates remain available for now.
+  // We will fold them in the UI in the next step.
+  // ======================================================
+
+  const suppressedEntitySuggestions =
+    mergedEntitySuggestions.filter(
+      (
+        suggestion
+      ) =>
+        suggestion
+          .qualityDisposition ===
+        "suppressed"
+    );
+
+
+  const entitySuggestions =
+    mergedEntitySuggestions.filter(
+      (
+        suggestion
+      ) =>
+        suggestion
+          .qualityDisposition !==
+        "suppressed"
+    );
+
 
   const draftEntities =
     buildDraftEntities(
@@ -657,20 +1416,12 @@ function resolveCandidateEntities({
     );
 
 
-  // ----------------------------------------------------
-  // Pass 4
+  // ====================================================
+  // Pass 5
   //
-  // Attach draft identity back onto every candidate.
-  //
-  // Example:
-  //
-  // {
-  //   subjectHint: "Alice",
-  //   subjectEntityId: null,
-  //   subjectDraftEntityKey: "alice",
-  //   subjectTypeConcept: "entityType.character"
-  // }
-  // ----------------------------------------------------
+  // Attach Draft identities back onto candidate subjects
+  // and objects.
+  // ====================================================
 
   const resolvedCandidates =
     enrichCandidatesWithDraftEntities({
@@ -682,13 +1433,15 @@ function resolveCandidateEntities({
 
 
   return {
-    candidates:
-      resolvedCandidates,
+  candidates:
+    resolvedCandidates,
 
-    entitySuggestions,
+  entitySuggestions,
 
-    draftEntities,
-  };
+  suppressedEntitySuggestions,
+
+  draftEntities,
+};
 }
 
 
@@ -702,4 +1455,12 @@ module.exports = {
   resolveCandidateEntities,
 
   deduplicateEntitySuggestions,
+
+  normalizePromotableValue,
+
+  getFieldPromotionConfig,
+
+  buildPromotedEntitySuggestion,
+
+  discoverPromotedEntitySuggestions,
 };

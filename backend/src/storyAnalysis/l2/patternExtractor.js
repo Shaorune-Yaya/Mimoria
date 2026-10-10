@@ -293,6 +293,660 @@ function deduplicateCandidates(
     );
 }
 
+// ======================================================
+// Relation Candidate
+// ======================================================
+
+function makeRelationCandidate({
+  subjectHint,
+
+  relationConcept,
+
+  objectHint,
+
+  sourceText,
+
+  start,
+
+  end,
+
+  confidence,
+
+  extractor,
+
+  evidence = [],
+
+  metadata = {},
+}) {
+  if (
+    !relationConcept ||
+    !objectHint
+  ) {
+    return null;
+  }
+
+
+  return {
+    candidateType:
+      "relation",
+
+    subjectHint:
+      subjectHint ||
+      null,
+
+    relationConcept,
+
+    objectHint,
+
+    sourceText,
+
+    start,
+
+    end,
+
+    confidence,
+
+    extractor,
+
+    evidence,
+
+    metadata,
+  };
+}
+
+
+// ======================================================
+// Relation Object Cleaning
+// ======================================================
+
+function cleanChineseRelationObject(
+  value
+) {
+  let result =
+    String(
+      value || ""
+    )
+      .trim();
+
+
+  result =
+    result.replace(
+      /^(?:于|在|向|往|至|到|为|是|一个|一座|一个名为|名为)+/u,
+      ""
+    );
+
+
+  /*
+   * Stop before another grammatical unit.
+   *
+   * 来自北境的炼金术师
+   * -> 北境
+   *
+   * 隶属于银月协会，目前...
+   * -> 银月协会
+   */
+  result =
+    result.split(
+      /(?:的(?=[\p{Script=Han}A-Za-z0-9·_-]{2,})|，|。|！|？|；|、|并且|并|而且|同时|但是|但|目前|现在|后来|随后|最终)/u
+    )[0];
+
+
+  result =
+    result
+      .replace(
+        /(?:的|了)$/u,
+        ""
+      )
+      .trim();
+
+
+  return (
+    result ||
+    null
+  );
+}
+
+
+function cleanEnglishRelationObject(
+  value
+) {
+  let result =
+    String(
+      value || ""
+    )
+      .trim();
+
+
+  result =
+    result.replace(
+      /^(?:to|in|at|from|for|with|the|a|an)\s+/iu,
+      ""
+    );
+
+
+  result =
+    result.split(
+      /[,.;!?]|\s+(?:and|but|while|although|however|currently|later|then)\s+/iu
+    )[0];
+
+
+  return (
+    result.trim() ||
+    null
+  );
+}
+
+
+// ======================================================
+// Relation Object Extraction
+// ======================================================
+function isHardRelationObjectBoundary(
+  match,
+  relationMatch
+) {
+  if (
+    !match ||
+    match.start <
+      relationMatch.end
+  ) {
+    return false;
+  }
+
+
+  const kind =
+    match.concept
+      ?.kind;
+
+
+  // ----------------------------------------------------
+  // Another relation / event definitely starts a new
+  // semantic unit.
+  // ----------------------------------------------------
+
+  if (
+    kind ===
+      "relation" ||
+    kind ===
+      "event"
+  ) {
+    return true;
+  }
+
+
+  // ----------------------------------------------------
+  // A role expression commonly starts the next predicate.
+  //
+  // Example:
+  //
+  // 来自北境的炼金术师
+  //
+  // "炼金术师" should stop the location object.
+  // ----------------------------------------------------
+
+  if (
+    kind ===
+    "role-signal"
+  ) {
+    return true;
+  }
+
+
+  // ----------------------------------------------------
+  // IMPORTANT:
+  //
+  // EntityType suffix evidence is usually part of the
+  // entity name itself.
+  //
+  // 北境
+  //   境 -> entityType.region
+  //
+  // 银月协会
+  //     协会 -> entityType.organization / guild
+  //
+  // Therefore a suffix MUST NOT terminate the object span.
+  // ----------------------------------------------------
+
+  if (
+    kind ===
+    "entity-type"
+  ) {
+    return (
+      match.evidenceType !==
+      "suffix"
+    );
+  }
+
+
+  return false;
+}
+
+function extractRelationObjectHint({
+  clause,
+
+  relationMatch,
+
+  clauseMatches,
+
+  locale,
+}) {
+  const relativeEnd =
+    relationMatch.end -
+    clause.start;
+
+
+  if (
+    relativeEnd <
+      0 ||
+    relativeEnd >
+      clause.text.length
+  ) {
+    return null;
+  }
+
+
+  let absoluteLimit =
+    clause.end;
+
+
+  /*
+   * Lexicon-aware boundary.
+   *
+   * If another semantic expression begins after this
+   * relation, prefer stopping there rather than blindly
+   * consuming the rest of the sentence.
+   *
+   * Example:
+   *
+   * 来自 北境 的 炼金术师
+   *
+   * "炼金术师" is a role signal.
+   */
+  const followingStructuralMatch =
+    clauseMatches
+      .filter(
+        (match) =>
+          isHardRelationObjectBoundary(
+            match,
+            relationMatch
+          )
+      )
+      .sort(
+        (
+          a,
+          b
+        ) =>
+          a.start -
+          b.start
+      )[0];
+
+
+    if (
+      followingStructuralMatch &&
+      followingStructuralMatch.start >
+        relationMatch.end
+    ) {
+      absoluteLimit =
+        Math.min(
+          absoluteLimit,
+          followingStructuralMatch.start
+        );
+    }
+
+
+  const relativeLimit =
+    Math.max(
+      relativeEnd,
+
+      absoluteLimit -
+        clause.start
+    );
+
+
+  let raw =
+    clause.text.slice(
+      relativeEnd,
+      relativeLimit
+    );
+
+
+  /*
+   * If lexicon boundary made the value too aggressive,
+   * retain the text up to punctuation.
+   */
+  if (
+    !raw.trim()
+  ) {
+    raw =
+      clause.text.slice(
+        relativeEnd
+      );
+  }
+
+
+  if (
+    isChineseLocale(
+      locale
+    )
+  ) {
+    return cleanChineseRelationObject(
+      raw
+    );
+  }
+
+
+  if (
+    isEnglishLocale(
+      locale
+    )
+  ) {
+    return cleanEnglishRelationObject(
+      raw
+    );
+  }
+
+
+  return (
+    raw.trim() ||
+    null
+  );
+}
+
+
+// ======================================================
+// Lexicon-driven Semantic Relations
+//
+// IMPORTANT:
+//
+// We do NOT hard-code "来自 = relation.from".
+//
+// The lexicon already maps expressions to canonical
+// concepts. This layer only converts that semantic lexical
+// evidence into a structured subject-relation-object fact.
+// ======================================================
+
+function extractSemanticRelations({
+  clause,
+
+  clauseMatches,
+
+  locale,
+}) {
+  const results =
+    [];
+
+
+  const relationMatches =
+    clauseMatches.filter(
+      (match) =>
+        match.concept
+          ?.kind ===
+        "relation"
+    );
+
+
+  for (
+    const match of
+    relationMatches
+  ) {
+    const relationConcept =
+      match.conceptId ||
+      null;
+
+
+    if (
+      !relationConcept
+    ) {
+      continue;
+    }
+
+
+    const subjectHint =
+      resolveSubjectHint({
+        locale,
+
+        clause,
+
+        clauseMatches,
+
+        triggerStart:
+          match.start,
+      });
+
+
+    const objectHint =
+      extractRelationObjectHint({
+        clause,
+
+        relationMatch:
+          match,
+
+        clauseMatches,
+
+        locale,
+      });
+
+
+    if (
+      !objectHint
+    ) {
+      continue;
+    }
+
+
+    const candidate =
+      makeRelationCandidate({
+        subjectHint,
+
+        relationConcept,
+
+        objectHint,
+
+        sourceText:
+          clause.text,
+
+        start:
+          match.start,
+
+        end:
+          Math.min(
+            clause.end,
+            match.end +
+              objectHint.length
+          ),
+
+        confidence:
+          Math.min(
+            0.98,
+
+            (
+              match.confidence ??
+              0.75
+            ) +
+              0.06
+          ),
+
+        extractor:
+          "pattern.semantic-relation",
+
+        evidence: [
+          match,
+        ],
+
+        metadata: {
+          lexiconDriven:
+            true,
+
+          expression:
+            match.expression ||
+            null,
+        },
+      });
+
+
+    if (
+      candidate
+    ) {
+      results.push(
+        candidate
+      );
+    }
+  }
+
+
+  return results;
+}
+
+// ======================================================
+// Relation -> Preferred Field Representation
+//
+// Mimoria prefers reusing / extending an existing schema
+// before exposing a graph relation when the same fact can
+// naturally live on the subject Entity.
+//
+// Examples:
+//
+// 来自北境
+// -> field.hometown = 北境
+//
+// 隶属于银月协会
+// -> field.affiliation = 银月协会
+//
+// 居住在银港
+// -> field.residence = 银港
+//
+// The original relation candidate is still preserved
+// internally. StorySuggestionGenerator decides later
+// whether the relation needs to be shown to the user.
+// ======================================================
+
+const RELATION_FIELD_PREFERENCES = {
+  "relation.from":
+    "field.hometown",
+
+  "relation.origin":
+    "field.hometown",
+
+  "relation.member_of":
+    "field.affiliation",
+
+  "relation.works_for":
+    "field.affiliation",
+
+  "relation.affiliated_with":
+    "field.affiliation",
+
+  "relation.lives_in":
+    "field.residence",
+
+  "relation.resides_in":
+    "field.residence",
+};
+
+
+function createFieldCandidateFromRelation(
+  relationCandidate
+) {
+  if (
+    !relationCandidate
+  ) {
+    return null;
+  }
+
+
+  const fieldConcept =
+    RELATION_FIELD_PREFERENCES[
+      relationCandidate
+        .relationConcept
+    ];
+
+
+  if (
+    !fieldConcept ||
+    !relationCandidate
+      .subjectHint ||
+    !relationCandidate
+      .objectHint
+  ) {
+    return null;
+  }
+
+
+  return makeFieldCandidate({
+    subjectHint:
+      relationCandidate
+        .subjectHint,
+
+    fieldConcept,
+
+    value:
+      relationCandidate
+        .objectHint,
+
+    normalizedValue:
+      relationCandidate
+        .objectHint,
+
+    sourceText:
+      relationCandidate
+        .sourceText,
+
+    start:
+      relationCandidate
+        .start,
+
+    end:
+      relationCandidate
+        .end,
+
+    confidence:
+      Math.max(
+        0,
+        (
+          relationCandidate
+            .confidence ??
+          0.75
+        ) -
+          0.02
+      ),
+
+    extractor:
+      "pattern.relation-preferred-field",
+
+    evidence:
+      relationCandidate
+        .evidence ||
+      [],
+
+    metadata: {
+      derivedFromRelation:
+        true,
+
+      relationConcept:
+        relationCandidate
+          .relationConcept,
+
+      representationPreference:
+        "field-first",
+
+      relationObjectHint:
+        relationCandidate
+          .objectHint,
+    },
+  });
+}
+
+
+function createPreferredFieldCandidatesFromRelations(
+  relationCandidates = []
+) {
+  return relationCandidates
+    .map(
+      createFieldCandidateFromRelation
+    )
+    .filter(
+      Boolean
+    );
+}
 
 // ======================================================
 // Subject Hints
@@ -317,7 +971,14 @@ function cleanChineseSubject(
 
   result =
     result.replace(
-      /(后来|最终|最后|现在|目前)$/u,
+      /^(后来|随后|然后|最终|最后|现在|目前)+/u,
+      ""
+    );
+
+
+  result =
+    result.replace(
+      /(后来|随后|然后|最终|最后|现在|目前)$/u,
       ""
     );
 
@@ -412,7 +1073,7 @@ function resolveChineseSubjectHint({
 
     after =
       after.split(
-        /(?:是|为|在|于|从|向|往|前往|拥有|使用|安装|接受|出生|来自|位于|加入|离开|后来|随后|最终|最后)/u
+        /(?:是|为|在|于|从|向|往|前往|拥有|使用|安装|接受|出生|来自|位于|加入|离开|搬到|搬至|搬往|搬入|搬出|搬离|搬迁|迁往|迁至|迁入|迁出|迁居|移动到|移动至|后来|随后|最终|最后)/u
       )[0];
 
 
@@ -434,7 +1095,7 @@ function resolveChineseSubjectHint({
 
   let fallback =
     before.split(
-      /(?:是|为|在|于|从|向|往|前往|拥有|使用|安装|接受|出生|来自|位于|加入|离开)/u
+      /(?:是|为|在|于|从|向|往|前往|拥有|使用|安装|接受|出生|来自|位于|加入|离开|搬到|搬至|搬往|搬入|搬出|搬离|搬迁|迁往|迁至|迁入|迁出|迁居|移动到|移动至)/u
     )[0];
 
 
@@ -1825,6 +2486,26 @@ function extractPatternCandidates({
         clause
       );
 
+    const semanticRelations =
+      extractSemanticRelations({
+        clause,
+
+        clauseMatches,
+
+        locale,
+      });
+
+
+    results.push(
+      ...semanticRelations
+    );
+
+
+    results.push(
+      ...createPreferredFieldCandidatesFromRelations(
+        semanticRelations
+      )
+    );
 
     results.push(
       ...extractAge({

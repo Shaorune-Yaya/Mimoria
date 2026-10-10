@@ -274,7 +274,599 @@ async function getOrCreateScratchDocument(
 
   return document;
 }
+function normalizeEntityName(
+  value
+) {
+  return String(
+    value || ""
+  )
+    .trim()
+    .toLowerCase()
+    .replace(
+      /\s+/gu,
+      " "
+    );
+}
 
+
+function buildEntityNameVariants(
+  value
+) {
+  const original =
+    String(
+      value || ""
+    )
+      .trim();
+
+
+  if (
+    !original
+  ) {
+    return [];
+  }
+
+
+  const variants =
+    new Set([
+      original,
+    ]);
+
+
+  /*
+   * Chinese temporal words that an analyzer may
+   * accidentally attach to the preceding entity name.
+   *
+   * IMPORTANT:
+   * These are only alternative lookup candidates.
+   * We never mutate the name unless an existing Canon
+   * entity actually matches the shortened variant.
+   */
+  const chineseSuffixes = [
+    "今年",
+    "目前",
+    "现在",
+    "当前",
+    "现年",
+  ];
+
+
+  for (
+    const suffix of
+    chineseSuffixes
+  ) {
+    if (
+      original.endsWith(
+        suffix
+      ) &&
+      original.length >
+        suffix.length
+    ) {
+      variants.add(
+        original.slice(
+          0,
+          -suffix.length
+        )
+          .trim()
+      );
+    }
+  }
+
+
+  return [
+    ...variants,
+  ]
+    .filter(
+      Boolean
+    );
+}
+
+
+function findExistingEntityByName(
+  entities,
+  rawName
+) {
+  const variants =
+    buildEntityNameVariants(
+      rawName
+    );
+
+
+  if (
+    variants.length ===
+    0
+  ) {
+    return null;
+  }
+
+
+  /*
+   * Exact original name has highest priority.
+   */
+  for (
+    const variant of
+    variants
+  ) {
+    const normalizedVariant =
+      normalizeEntityName(
+        variant
+      );
+
+
+    const matches =
+      entities.filter(
+        (
+          entity
+        ) =>
+          normalizeEntityName(
+            entity?.name
+          ) ===
+          normalizedVariant
+      );
+
+
+    /*
+     * Only auto-resolve an unambiguous match.
+     */
+    if (
+      matches.length ===
+      1
+    ) {
+      return matches[0];
+    }
+  }
+
+
+  return null;
+}
+// ======================================================
+// Materialize Accepted Entity Dependencies
+// ======================================================
+
+async function materializeAcceptedEntityDependencies({
+  candidate,
+  appliedResult,
+}) {
+  if (
+    !candidate ||
+    candidate.kind !==
+      "create-entity" ||
+    !appliedResult?.entityId
+  ) {
+    return [];
+  }
+
+
+  const entity =
+    await Entity.findOne({
+      _id:
+        appliedResult.entityId,
+
+      worldId:
+        candidate.worldId,
+    });
+
+
+  if (
+    !entity
+  ) {
+    return [];
+  }
+
+
+  const sourcePayload =
+    candidate.payload ||
+    {};
+
+
+  const draftEntityKey =
+    String(
+      sourcePayload
+        .draftEntityKey ||
+      appliedResult
+        .draftEntityKey ||
+      ""
+    )
+      .normalize(
+        "NFKC"
+      )
+      .trim()
+      .toLowerCase();
+
+
+  const sourceName =
+    normalizeEntityName(
+      sourcePayload.name ||
+      appliedResult.name ||
+      entity.name
+    );
+
+
+  const siblings =
+    await StorySyncCandidate.find({
+      _id: {
+        $ne:
+          candidate._id,
+      },
+
+      worldId:
+        candidate.worldId,
+
+      documentId:
+        candidate.documentId,
+
+      status:
+        "pending",
+    });
+
+
+  const changedCandidates =
+    [];
+
+
+  function normalizedDraftKey(
+    value
+  ) {
+    return String(
+      value ||
+      ""
+    )
+      .normalize(
+        "NFKC"
+      )
+      .trim()
+      .toLowerCase();
+  }
+
+
+  function matchesDraft({
+    candidateDraftKey,
+    candidateName,
+  }) {
+    const normalizedCandidateDraftKey =
+      normalizedDraftKey(
+        candidateDraftKey
+      );
+
+
+    /*
+     * Strongest match:
+     * both suggestions reference the same analysis-time
+     * draft entity.
+     */
+    if (
+      draftEntityKey &&
+      normalizedCandidateDraftKey &&
+      normalizedCandidateDraftKey ===
+        draftEntityKey
+    ) {
+      return true;
+    }
+
+
+    /*
+     * If either side has a draft key but they differ,
+     * do NOT fall back to the name.
+     *
+     * The draft key exists specifically to disambiguate
+     * same-name entities.
+     */
+    if (
+      draftEntityKey ||
+      normalizedCandidateDraftKey
+    ) {
+      return false;
+    }
+
+
+    /*
+     * Legacy candidates may not have draft keys.
+     *
+     * In that case only allow an exact normalized name
+     * match.
+     */
+    const normalizedCandidateName =
+      normalizeEntityName(
+        candidateName
+      );
+
+
+    return Boolean(
+      sourceName &&
+      normalizedCandidateName &&
+      sourceName ===
+        normalizedCandidateName
+    );
+  }
+
+
+  for (
+    const sibling of
+    siblings
+  ) {
+    const payload = {
+      ...(
+        sibling.payload ||
+        {}
+      ),
+    };
+
+
+    let changed =
+      false;
+
+
+    // ==================================================
+    // Field Update
+    // ==================================================
+
+    if (
+      sibling.kind ===
+      "field-update"
+    ) {
+      const dependencyMatches =
+        matchesDraft({
+          candidateDraftKey:
+            payload
+              .targetDraftEntityKey,
+
+          candidateName:
+            payload
+              .targetEntityName,
+        });
+
+
+      if (
+        dependencyMatches
+      ) {
+        const nextEntityId =
+          String(
+            entity._id
+          );
+
+
+        if (
+          String(
+            payload
+              .targetEntityId ||
+            ""
+          ) !==
+          nextEntityId
+        ) {
+          payload.targetEntityId =
+            nextEntityId;
+
+          changed =
+            true;
+        }
+
+
+        if (
+          payload
+            .targetEntityName !==
+          entity.name
+        ) {
+          payload.targetEntityName =
+            entity.name;
+
+          changed =
+            true;
+        }
+      }
+    }
+
+
+    // ==================================================
+    // Relation Update
+    // ==================================================
+
+    if (
+      sibling.kind ===
+      "relation-update"
+    ) {
+      const subjectMatches =
+        matchesDraft({
+          candidateDraftKey:
+            payload
+              .subjectDraftEntityKey,
+
+          candidateName:
+            payload
+              .subjectName,
+        });
+
+
+      const objectMatches =
+        matchesDraft({
+          candidateDraftKey:
+            payload
+              .objectDraftEntityKey,
+
+          candidateName:
+            payload
+              .objectName,
+        });
+
+
+      if (
+        subjectMatches
+      ) {
+        const nextEntityId =
+          String(
+            entity._id
+          );
+
+
+        if (
+          String(
+            payload
+              .subjectEntityId ||
+            ""
+          ) !==
+          nextEntityId
+        ) {
+          payload.subjectEntityId =
+            nextEntityId;
+
+          changed =
+            true;
+        }
+
+
+        if (
+          payload.subjectName !==
+          entity.name
+        ) {
+          payload.subjectName =
+            entity.name;
+
+          changed =
+            true;
+        }
+      }
+
+
+      if (
+        objectMatches
+      ) {
+        const nextEntityId =
+          String(
+            entity._id
+          );
+
+
+        if (
+          String(
+            payload
+              .objectEntityId ||
+            ""
+          ) !==
+          nextEntityId
+        ) {
+          payload.objectEntityId =
+            nextEntityId;
+
+          changed =
+            true;
+        }
+
+
+        if (
+          payload.objectName !==
+          entity.name
+        ) {
+          payload.objectName =
+            entity.name;
+
+          changed =
+            true;
+        }
+      }
+    }
+
+
+    // ==================================================
+    // Historical Event
+    //
+    // Timeline is not implemented yet, but keeping these
+    // references synchronized now prevents another
+    // migration later.
+    // ==================================================
+
+    if (
+      sibling.kind ===
+      "event-history"
+    ) {
+      const subjectMatches =
+        matchesDraft({
+          candidateDraftKey:
+            payload
+              .subjectDraftEntityKey,
+
+          candidateName:
+            payload
+              .subjectName,
+        });
+
+
+      const objectMatches =
+        matchesDraft({
+          candidateDraftKey:
+            payload
+              .objectDraftEntityKey,
+
+          candidateName:
+            payload
+              .objectName,
+        });
+
+
+      if (
+        subjectMatches
+      ) {
+        payload.subjectEntityId =
+          String(
+            entity._id
+          );
+
+        payload.subjectName =
+          entity.name;
+
+        changed =
+          true;
+      }
+
+
+      if (
+        objectMatches
+      ) {
+        payload.objectEntityId =
+          String(
+            entity._id
+          );
+
+        payload.objectName =
+          entity.name;
+
+        changed =
+          true;
+      }
+    }
+
+
+    if (
+      !changed
+    ) {
+      continue;
+    }
+
+
+    /*
+     * This is NOT a user edit.
+     *
+     * Do not call recordUserEdit(), otherwise Mimoria
+     * would incorrectly display "Edited" simply because a
+     * dependency was materialized automatically.
+     */
+    sibling.payload =
+      payload;
+
+
+    sibling.markModified(
+      "payload"
+    );
+
+
+    await sibling.save();
+
+
+    changedCandidates.push(
+      sibling
+    );
+  }
+
+
+  return changedCandidates;
+}
 // ======================================================
 // General Helpers
 // ======================================================
@@ -757,6 +1349,101 @@ function getEntityStoredValue(
 // Entity Type Semantic Map
 // ======================================================
 
+function normalizeEntityTypeName(
+  value
+) {
+  return String(
+    value || ""
+  )
+    .trim()
+    .toLowerCase();
+}
+
+
+function inferEntityTypeConcept(
+  entityType
+) {
+  if (
+    entityType
+      ?.canonicalConcept
+  ) {
+    return String(
+      entityType
+        .canonicalConcept
+    )
+      .trim();
+  }
+
+
+  const name =
+    normalizeEntityTypeName(
+      entityType?.name
+    );
+
+
+  const aliases = {
+    "entityType.character": [
+      "character",
+      "person",
+      "角色",
+      "人物",
+      "人物角色",
+    ],
+
+    "entityType.location": [
+      "location",
+      "place",
+      "地点",
+      "位置",
+      "场所",
+    ],
+
+    "entityType.organization": [
+      "organization",
+      "organisation",
+      "faction",
+      "组织",
+      "机构",
+      "势力",
+    ],
+
+    "entityType.item": [
+      "item",
+      "object",
+      "物品",
+      "道具",
+    ],
+  };
+
+
+  for (
+    const [
+      concept,
+      names,
+    ] of Object.entries(
+      aliases
+    )
+  ) {
+    if (
+      names.some(
+        (
+          alias
+        ) =>
+          normalizeEntityTypeName(
+            alias
+          ) ===
+          name
+      )
+    ) {
+      return concept;
+    }
+  }
+
+
+  return null;
+}
+
+
 function buildEntityTypeConceptMap(
   entityTypes = []
 ) {
@@ -768,9 +1455,14 @@ function buildEntityTypeConceptMap(
     const entityType of
     entityTypes
   ) {
+    const concept =
+      inferEntityTypeConcept(
+        entityType
+      );
+
+
     if (
-      !entityType
-        ?.canonicalConcept
+      !concept
     ) {
       continue;
     }
@@ -781,8 +1473,7 @@ function buildEntityTypeConceptMap(
         entityType._id
       )
     ] =
-      entityType
-        .canonicalConcept;
+      concept;
   }
 
 
@@ -1034,12 +1725,12 @@ function enrichRecordsWithCanonicalState({
       record.kind ===
       "field-update"
     ) {
-      const payload =
+      let payload =
         record.payload ||
         {};
 
 
-      const entity =
+      let entity =
         entityMap.get(
           String(
             payload
@@ -1047,6 +1738,58 @@ function enrichRecordsWithCanonicalState({
             ""
           )
         );
+
+
+      // ------------------------------------------------
+      // Fallback:
+      // Resolve the target Entity by name when the
+      // analyzer did not provide a usable Entity ID.
+      // ------------------------------------------------
+
+      if (
+        !entity &&
+        payload.targetEntityName
+      ) {
+        entity =
+          findExistingEntityByName(
+            entities,
+            payload.targetEntityName
+          );
+      }
+
+
+      // ------------------------------------------------
+      // Canonicalize Resolved Entity
+      //
+      // Important:
+      // Update BOTH:
+      //
+      // - local payload
+      // - record.payload
+      //
+      // so all logic below reads the corrected Entity ID
+      // and canonical Entity name.
+      // ------------------------------------------------
+
+      if (
+        entity
+      ) {
+        payload = {
+          ...payload,
+
+          targetEntityId:
+            String(
+              entity._id
+            ),
+
+          targetEntityName:
+            entity.name,
+        };
+
+
+        record.payload =
+          payload;
+      }
 
 
       if (
@@ -1061,15 +1804,15 @@ function enrichRecordsWithCanonicalState({
 
 
         /*
-         * Canon already matches the story.
-         *
-         * Example:
-         *
-         * story = age 24
-         * Canon = age 24
-         *
-         * There is nothing to ask the user.
-         */
+        * Canon already matches the story.
+        *
+        * Example:
+        *
+        * story = age 24
+        * Canon = age 24
+        *
+        * There is nothing to ask the user.
+        */
         if (
           valuesEqual(
             currentValue,
@@ -1146,7 +1889,6 @@ function enrichRecordsWithCanonicalState({
       continue;
     }
 
-
     // ==================================================
     // relation-update
     // ==================================================
@@ -1155,7 +1897,7 @@ function enrichRecordsWithCanonicalState({
       record.kind ===
       "relation-update"
     ) {
-      const payload =
+      let payload =
         record.payload ||
         {};
 
@@ -1261,7 +2003,7 @@ function enrichRecordsWithCanonicalState({
       record.kind ===
       "create-schema-field"
     ) {
-      const payload =
+      let payload =
         record.payload ||
         {};
 
@@ -1389,7 +2131,7 @@ function enrichRecordsWithCanonicalState({
       record.kind ===
       "create-select-option"
     ) {
-      const payload =
+      let payload =
         record.payload ||
         {};
 
@@ -1503,20 +2245,69 @@ function enrichRecordsWithCanonicalState({
       record.kind ===
       "create-entity"
     ) {
+      let payload =
+        record.payload ||
+        {};
+
+
+      const existingEntity =
+        findExistingEntityByName(
+          entities,
+          payload.name
+        );
+
+
+      /*
+      * L3 may occasionally extract:
+      *
+      * "艾琳今年23岁"
+      *
+      * as:
+      *
+      * name = "艾琳今年"
+      *
+      * Before creating another Entity, always compare against
+      * the current Canon.
+      */
+      if (
+        existingEntity
+      ) {
+        record.payload = {
+          ...payload,
+
+          name:
+            existingEntity.name,
+
+          existingEntityId:
+            String(
+              existingEntity._id
+            ),
+        };
+
+
+        satisfied.push({
+          record,
+
+          reason:
+            "entity-already-exists",
+        });
+
+
+        continue;
+      }
+
+
       record.baseline = {
         type:
           "entity-missing",
 
         name:
-          record
-            .payload
-            ?.name ??
+          payload.name ??
           null,
 
         likelyTypeConcept:
-          record
-            .payload
-            ?.likelyTypeConcept ??
+          payload
+            .likelyTypeConcept ??
           null,
       };
 
@@ -2063,6 +2854,359 @@ function assertEditablePatch(
   }
 }
 
+// ======================================================
+// Cascade Draft Entity Rename
+// ======================================================
+
+async function cascadeDraftEntityRename({
+  candidate,
+  oldName,
+  newName,
+}) {
+  if (
+    !candidate ||
+    candidate.kind !==
+      "create-entity"
+  ) {
+    return [];
+  }
+
+
+  const normalizedOldName =
+    String(
+      oldName ||
+      ""
+    )
+      .trim();
+
+
+  const normalizedNewName =
+    String(
+      newName ||
+      ""
+    )
+      .trim();
+
+
+  if (
+    !normalizedOldName ||
+    !normalizedNewName ||
+    normalizedOldName ===
+      normalizedNewName
+  ) {
+    return [];
+  }
+
+
+  const draftEntityKey =
+    String(
+      candidate
+        ?.payload
+        ?.draftEntityKey ||
+      candidate
+        ?.source
+        ?.draftEntityKey ||
+      ""
+    )
+      .trim();
+
+
+  /*
+   * Only operate inside the same analysis document/world.
+   *
+   * Do not accidentally rename suggestions from another
+   * Smart Import run.
+   */
+  const siblingCandidates =
+    await StorySyncCandidate.find({
+      _id: {
+        $ne:
+          candidate._id,
+      },
+
+      worldId:
+        candidate.worldId,
+
+      documentId:
+        candidate.documentId,
+
+      status:
+        "pending",
+    });
+
+
+  const changedCandidates =
+    [];
+
+
+  for (
+    const sibling of
+    siblingCandidates
+  ) {
+    const payload = {
+      ...(
+        sibling.payload ||
+        {}
+      ),
+    };
+
+
+    let changed =
+      false;
+
+
+    // ==================================================
+    // Field Update
+    // ==================================================
+
+    if (
+      sibling.kind ===
+      "field-update"
+    ) {
+      const sameDraft =
+        Boolean(
+          draftEntityKey &&
+          String(
+            payload
+              .targetDraftEntityKey ||
+            sibling
+              ?.source
+              ?.subjectDraftEntityKey ||
+            ""
+          )
+            .trim() ===
+            draftEntityKey
+        );
+
+
+      const sameLegacyName =
+        !draftEntityKey &&
+        String(
+          payload
+            .targetEntityName ||
+          ""
+        )
+          .trim() ===
+          normalizedOldName;
+
+
+      if (
+        sameDraft ||
+        sameLegacyName
+      ) {
+        payload.targetEntityName =
+          normalizedNewName;
+
+        changed =
+          true;
+      }
+    }
+
+
+    // ==================================================
+    // Relation Update
+    // ==================================================
+
+    if (
+      sibling.kind ===
+      "relation-update"
+    ) {
+      const subjectUsesDraft =
+        Boolean(
+          draftEntityKey &&
+          String(
+            payload
+              .subjectDraftEntityKey ||
+            sibling
+              ?.source
+              ?.subjectDraftEntityKey ||
+            ""
+          )
+            .trim() ===
+            draftEntityKey
+        );
+
+
+      const objectUsesDraft =
+        Boolean(
+          draftEntityKey &&
+          String(
+            payload
+              .objectDraftEntityKey ||
+            sibling
+              ?.source
+              ?.objectDraftEntityKey ||
+            ""
+          )
+            .trim() ===
+            draftEntityKey
+        );
+
+
+      const subjectLegacyMatch =
+        !draftEntityKey &&
+        String(
+          payload
+            .subjectName ||
+          ""
+        )
+          .trim() ===
+          normalizedOldName;
+
+
+      const objectLegacyMatch =
+        !draftEntityKey &&
+        String(
+          payload
+            .objectName ||
+          ""
+        )
+          .trim() ===
+          normalizedOldName;
+
+
+      if (
+        subjectUsesDraft ||
+        subjectLegacyMatch
+      ) {
+        payload.subjectName =
+          normalizedNewName;
+
+        changed =
+          true;
+      }
+
+
+      if (
+        objectUsesDraft ||
+        objectLegacyMatch
+      ) {
+        payload.objectName =
+          normalizedNewName;
+
+        changed =
+          true;
+      }
+    }
+
+
+    // ==================================================
+    // Historical Event
+    // ==================================================
+
+    if (
+      sibling.kind ===
+      "event-history"
+    ) {
+      const subjectUsesDraft =
+        Boolean(
+          draftEntityKey &&
+          String(
+            payload
+              .subjectDraftEntityKey ||
+            sibling
+              ?.source
+              ?.subjectDraftEntityKey ||
+            ""
+          )
+            .trim() ===
+            draftEntityKey
+        );
+
+
+      const objectUsesDraft =
+        Boolean(
+          draftEntityKey &&
+          String(
+            payload
+              .objectDraftEntityKey ||
+            sibling
+              ?.source
+              ?.objectDraftEntityKey ||
+            ""
+          )
+            .trim() ===
+            draftEntityKey
+        );
+
+
+      const subjectLegacyMatch =
+        !draftEntityKey &&
+        String(
+          payload
+            .subjectName ||
+          ""
+        )
+          .trim() ===
+          normalizedOldName;
+
+
+      const objectLegacyMatch =
+        !draftEntityKey &&
+        String(
+          payload
+            .objectName ||
+          ""
+        )
+          .trim() ===
+          normalizedOldName;
+
+
+      if (
+        subjectUsesDraft ||
+        subjectLegacyMatch
+      ) {
+        payload.subjectName =
+          normalizedNewName;
+
+        changed =
+          true;
+      }
+
+
+      if (
+        objectUsesDraft ||
+        objectLegacyMatch
+      ) {
+        payload.objectName =
+          normalizedNewName;
+
+        changed =
+          true;
+      }
+    }
+
+
+    if (
+      !changed
+    ) {
+      continue;
+    }
+
+
+    /*
+     * This rename is the consequence of one explicit user
+     * correction.
+     *
+     * Keep it in edit history as well, rather than silently
+     * mutating sibling payloads.
+     */
+    sibling.recordUserEdit(
+      payload
+    );
+
+
+    await sibling.save();
+
+
+    changedCandidates.push(
+      sibling
+    );
+  }
+
+
+  return changedCandidates;
+}
 
 // ======================================================
 // Build Edited Payload
@@ -3639,6 +4783,13 @@ router.patch(
         req.body
           ?.payload;
 
+      const previousPayload =
+        clonePlain(
+          candidate.payload ||
+          {}
+        );
+
+
       const nextPayload =
         await buildEditedPayload({
           candidate,
@@ -3646,16 +4797,82 @@ router.patch(
           payloadPatch,
         });
 
+
       candidate.recordUserEdit(
         nextPayload
       );
 
+
       await candidate.save();
+
+
+      let updatedRelatedCandidates =
+        [];
+
+
+      /*
+      * If the user corrected the name of a draft Entity,
+      * propagate that corrected presentation name to every
+      * pending suggestion that references the same draft.
+      */
+      if (
+        candidate.kind ===
+          "create-entity" &&
+        Object.prototype
+          .hasOwnProperty
+          .call(
+            payloadPatch ||
+            {},
+            "name"
+          )
+      ) {
+        const previousName =
+          String(
+            previousPayload
+              ?.name ||
+            ""
+          )
+            .trim();
+
+
+        const nextName =
+          String(
+            nextPayload
+              ?.name ||
+            ""
+          )
+            .trim();
+
+
+        if (
+          previousName &&
+          nextName &&
+          previousName !==
+            nextName
+        ) {
+          updatedRelatedCandidates =
+            await cascadeDraftEntityRename({
+              candidate,
+
+              oldName:
+                previousName,
+
+              newName:
+                nextName,
+            });
+        }
+      }
+
 
       return res.json({
         candidate:
           candidateToDto(
             candidate
+          ),
+
+        relatedCandidates:
+          updatedRelatedCandidates.map(
+            candidateToDto
           ),
       });
     } catch (
@@ -3932,6 +5149,41 @@ router.post(
             candidate._id,
         });
 
+
+      let updatedRelatedCandidates =
+        [];
+
+
+      /*
+      * A newly materialized Entity can unlock:
+      *
+      * - field updates
+      * - relations
+      * - future timeline events
+      *
+      * Push the real Entity ID into those pending sibling
+      * candidates immediately so the frontend dependency
+      * state updates without requiring another analysis.
+      */
+      if (
+        result.candidate?.kind ===
+          "create-entity" &&
+        result.candidate?.status ===
+          "accepted" &&
+        result.appliedResult
+          ?.entityId
+      ) {
+        updatedRelatedCandidates =
+          await materializeAcceptedEntityDependencies({
+            candidate:
+              result.candidate,
+
+            appliedResult:
+              result.appliedResult,
+          });
+      }
+
+
       return res.json({
         candidate:
           candidateToDto(
@@ -3986,6 +5238,11 @@ router.post(
                   true,
               }
             : null,
+
+            relatedCandidates:
+              updatedRelatedCandidates.map(
+                candidateToDto
+              ),
       });
     } catch (
       error

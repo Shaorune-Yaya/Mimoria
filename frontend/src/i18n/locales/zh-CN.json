@@ -269,6 +269,14 @@
     "createInside": "在当前节点内创建"
   },
   "documents": {
+    "values": {
+  "gender": {
+    "female": "女性",
+    "male": "男性"
+  }
+  },
+    "entityDependencyMissing": "请先创建或接收相关实体，再应用此建议。",
+    "relationDependencyMissing": "请先确保关系两端的实体都已存在，再应用此关系。",
     "recommendedFields": "推荐字段",
     "recommendedFieldsHelp": "这些字段只会在创建新的推荐实体类型时一起创建。使用已有实体类型时不会修改已有字段。",
     "addRecommendedField": "+ 添加字段",
@@ -363,6 +371,12 @@
     "moveFailed": "移动文档项目失败。",
 
     "confidence": "置信度",
+    "lowConfidence": "低置信度",
+    "veryLowConfidence": "很低置信度",
+    "lowConfidenceHint": "建议人工确认",
+    "veryLowConfidenceHint": "系统对此解析把握很低",
+    "showVeryLowConfidence": "显示低可信建议（{{count}}）",
+    "hideVeryLowConfidence": "隐藏低可信建议",
 
     "storySuggestionsTitle": "设定建议",
     "storySuggestionsDescription": "检查识别结果，确认后再写入当前世界的设定。",
@@ -497,12 +511,15 @@
       "event_arrive": "抵达",
       "event_depart": "离开",
       "event_birth": "出生",
-      "event_death": "死亡"
+      "event_death": "死亡",
+      "entityType_profession": "职业",
+      "entityType_occupation": "职业"
     }
   },
   "smartImport": {
     "title": "智能录入",
-    "description": "粘贴人物简介、地点设定、组织资料或其他结构化世界观等大段信息。Mimoria 会把识别出的内容转换为建议，只有在你确认后才会修改。",
+    "description": "粘贴角色档案、人物介绍、地点说明、组织设定等直接描述事实的设定资料。Mimoria 会将识别出的信息整理成建议，由你确认后再写入世界。",
+    "inputHint": "智能导入更适合档案式、人物介绍式和设定集文本。目前不建议用于包含大量日常行为、对白或连续剧情的小说正文。",
     "loading": "正在加载智能录入……",
     "loadFailed": "无法加载智能录入。",
     "entityTypesLoadFailed": "无法加载实体类型。",
@@ -627,8 +644,6 @@
     "saveEntityEditTitle": "保存修改",
     "saveEntityEditDescription": "点击“保存修改”。之后的任何编辑也会使用相同的方式保存。",
 
-    "entityTreeTitle": "实体资源树",
-    "entityTreeDescription": "创建的实体会出现在左侧资源树中。之后你可以创建文件夹、重新整理层级，并通过拖拽组织大量资料。",
     "secondaryWorkspaceTitle": "这是第二工作区",
     "secondaryWorkspaceDescription": "在宽屏模式，Mimoria 可以同时显示两个工作区。这样你可以一边查看实体，一边打开文档、实体类型或其他资料。",
 
@@ -642,6 +657,88 @@
     "dockingAreaDescription": "把可停靠的工作区拖到第二工作区，就可以在右侧打开它。之后也可以通过第二工作区顶部的选择器切换内容。",
 
     "documentsNextTitle": "接下来认识文档",
-    "documentsNextDescription": "文档用于编写剧情、章节、世界历史和其他长篇内容。点击左侧高亮的“文档”继续。"
-  }
+    "documentsNextDescription": "文档用于编写剧情、章节、世界历史和其他长篇内容。点击左侧高亮的“文档”继续。",
+    "tutorialDocumentTitle": "世界概览",
+
+    "documentsOverviewTitle": "认识文档工作区",
+    "documentsOverviewDescription": "文档适合记录较长的世界观说明、故事草稿和其他自由文本内容。",
+
+    "documentsTreeTitle": "文档资源树",
+    "documentsTreeDescription": "左侧是文档资源树。你可以使用文件夹整理文档，也可以拖动它们调整顺序和层级。",
+
+    "createDocumentTitle": "创建你的第一篇文档",
+    "createDocumentDescription": "点击“新建文档”，我们来创建一篇简单的教程文档。",
+
+    "documentTitleTitle": "给文档起一个标题",
+    "documentTitleDescription": "标题用于在文档资源树中识别这篇文档。教程已经为你准备好了一个示例标题。",
+
+    "confirmDocumentTitle": "创建文档",
+    "confirmDocumentDescription": "点击高亮的“创建”按钮，完成这篇文档的创建。",
+
+    "documentCreatedTitle": "文档已经加入资源树",
+    "documentCreatedDescription": "刚才创建的文档现在出现在左侧资源树中。之后可以通过这里快速打开和整理文档。",
+
+    "documentEditorTitle": "文档编辑器",
+    "documentEditorDescription": "这里是 Mimoria 的文本编辑区域。你可以使用它编写设定、故事、笔记和其他长篇内容。",
+
+    "documentToolbarTitle": "文本编辑工具栏",
+    "documentToolbarDescription": "工具栏提供粗体、斜体、标题、列表、引用以及撤销和重做等常用格式。",
+
+    "documentContentTitle": "试着写点内容",
+    "documentContentDescription": "点击编辑区域并输入一些文字。完成后点击“下一步”继续。",
+
+    "documentAutoSaveTitle": "自动保存",
+    "documentAutoSaveDescription": "Mimoria 会在你停止输入后自动保存文档。这里可以查看当前的保存状态。",
+    "entityAddedToTreeTitle": "实体已加入资源树",
+    "entityAddedToTreeDescription": "刚刚创建的“艾琳”已经出现在左侧资源树中。以后创建的实体也会自动加入这里。",
+
+    "entityTreeTitle": "实体资源树",
+    "entityTreeDescription": "左侧是实体资源树。你可以创建文件夹、拖动实体调整顺序和层级，并用它快速整理整个世界中的资料。",
+    "smartImportNavTitle": "试试智能导入",
+    "smartImportNavDescription": "最后，我们来看看 Mimoria 如何把已有的设定文本整理成结构化建议。点击高亮的“智能导入”继续。",
+
+    "smartImportOverviewTitle": "智能导入",
+    "smartImportOverviewDescription": "智能导入可以从已有的设定文本中识别角色、地点、组织和字段信息，并整理成可审核的建议。",
+
+    "smartImportUsageTitle": "使用设定资料，而不是剧情正文",
+    "smartImportUsageDescription": "智能导入更适合角色档案、人物自我介绍、地点说明、组织设定等直接描述事实的内容。它目前不适合包含大量日常行为、对白或连续剧情的小说式正文，因为其中的事实往往依赖上下文。",
+
+    "smartImportInputTitle": "粘贴设定文本",
+    "smartImportInputDescription": "这里可以输入已有的设定资料。教程已经准备了一段简短的角色设定作为示例。",
+
+    "smartImportExampleText": "艾琳今年23岁，是一名来自北境的炼金术师。她性格安静谨慎，目前属于银月协会。",
+
+    "smartImportAnalyzeTitle": "分析设定内容",
+    "smartImportAnalyzeDescription": "点击分析。Mimoria 会尝试把文本中的设定事实拆分成结构化建议，但不会立即修改你的世界。",
+
+    "smartImportSummaryTitle": "分析完成",
+    "smartImportSummaryDescription": "这里会显示本次分析得到的待处理建议数量，以及已经和现有设定匹配的信息。",
+
+    "smartImportSuggestionsTitle": "检查识别结果",
+    "smartImportSuggestionsDescription": "识别结果会先作为建议显示。你可以检查实体、字段和值是否正确，再决定是否应用。",
+
+    "smartImportApplyTitle": "由你决定是否写入世界",
+    "smartImportApplyDescription": "只有点击“应用”后，这条建议才会真正写入世界数据库。如果结果不正确，也可以修改或忽略。",
+    "smartImportErrorTitle": "这里有一个识别错误",
+    "smartImportErrorDescription": "智能识别并不一定完全正确。例如这里把“艾琳今年23岁”中的一部分错误识别成了实体名称。自然语言可能存在歧义，因此 Mimoria 会先生成建议，而不是直接修改你的资料库。",
+
+    "smartImportEditTitle": "编辑识别结果",
+    "smartImportEditDescription": "如果 AI 提取出的名称、字段或关系不正确，可以在应用前直接修改。点击“编辑建议”继续。",
+
+    "smartImportEditNameTitle": "修正实体名称",
+    "smartImportEditNameDescription": "这里的“艾琳今年”识别错了。请把它改成“艾琳”，然后点击下一步。",
+
+    "smartImportSaveEditTitle": "保存修正",
+    "smartImportSaveEditDescription": "保存后，这条建议会使用你修正后的内容，但仍然不会直接写入世界资料。",
+
+    "smartImportIgnoreTitle": "不需要的建议可以忽略",
+    "smartImportIgnoreDescription": "如果某条识别结果完全不需要，可以点击“忽略建议”。忽略不会修改你当前世界中的任何资料。",
+
+    "smartImportRecommendedTypeTitle": "推荐实体类型",
+    "smartImportRecommendedTypeDescription": "Mimoria 会根据识别结果推荐实体类型，并尽量匹配你已经创建的类型。例如这里会优先复用已有的“角色”类型。",
+
+    "smartImportManualTypeTitle": "也可以手动选择类型",
+    "smartImportManualTypeDescription": "如果 AI 推荐的类型不符合你的世界设定，也可以从这里手动选择其他已有实体类型。",
+    "smartImportCorrectEntityName": "艾琳"
+      }
 }

@@ -94,7 +94,184 @@ function normalizeLocale(
 
 // ======================================================
 // Existing Type
+//
+// Prefer explicit canonicalConcept.
+//
+// For older / manually-created Entity Types that do not
+// yet have canonicalConcept, fall back to well-known human
+// names.
+//
+// Example:
+//
+// 角色
+// 人物
+// Character
+//
+// can all satisfy:
+//
+// entityType.character
 // ======================================================
+
+function normalizeEntityTypeName(
+  value
+) {
+  return String(
+    value || ""
+  )
+    .trim()
+    .toLowerCase();
+}
+
+
+function getCompatibleEntityTypeConcepts(
+  canonicalConcept
+) {
+  const concept =
+    String(
+      canonicalConcept ||
+      ""
+    )
+      .trim();
+
+
+  const families = {
+    "entityType.character": [
+      "entityType.character",
+      "entityType.person",
+    ],
+
+    "entityType.person": [
+      "entityType.character",
+      "entityType.person",
+    ],
+
+    "entityType.location": [
+      "entityType.location",
+    ],
+
+    "entityType.region": [
+      "entityType.region",
+      "entityType.location",
+    ],
+
+    "entityType.organization": [
+      "entityType.organization",
+    ],
+
+    "entityType.faction": [
+      "entityType.faction",
+      "entityType.organization",
+    ],
+
+    "entityType.guild": [
+      "entityType.guild",
+      "entityType.organization",
+    ],
+
+    "entityType.church": [
+      "entityType.church",
+      "entityType.organization",
+    ],
+
+    "entityType.item": [
+      "entityType.item",
+    ],
+  };
+
+
+  return (
+    families[
+      concept
+    ] ||
+    [
+      concept,
+    ]
+  );
+}
+
+
+function getEntityTypeAliases(
+  canonicalConcept
+) {
+  const aliasMap = {
+    "entityType.character": [
+      "character",
+      "person",
+      "角色",
+      "人物",
+      "人物角色",
+    ],
+
+    "entityType.person": [
+      "character",
+      "person",
+      "角色",
+      "人物",
+      "人物角色",
+    ],
+
+    "entityType.location": [
+      "location",
+      "place",
+      "地点",
+      "位置",
+      "地区",
+      "区域",
+    ],
+
+    "entityType.region": [
+      "region",
+      "location",
+      "地区",
+      "区域",
+      "地点",
+    ],
+
+    "entityType.organization": [
+      "organization",
+      "organisation",
+      "组织",
+      "机构",
+      "势力",
+    ],
+
+    "entityType.faction": [
+      "faction",
+      "组织",
+      "势力",
+    ],
+
+    "entityType.guild": [
+      "guild",
+      "公会",
+      "协会",
+      "组织",
+    ],
+
+    "entityType.church": [
+      "church",
+      "教会",
+      "教团",
+      "组织",
+    ],
+
+    "entityType.item": [
+      "item",
+      "object",
+      "物品",
+      "道具",
+    ],
+  };
+
+
+  return (
+    aliasMap[
+      canonicalConcept
+    ] ||
+    []
+  );
+}
+
 
 async function findRecommendedEntityType({
   worldId,
@@ -109,11 +286,124 @@ async function findRecommendedEntityType({
   }
 
 
-  return EntityType.findOne({
-    worldId,
+  // ==================================================
+  // 1. Strongest Match:
+  // Existing canonicalConcept
+  // ==================================================
 
-    canonicalConcept,
-  });
+  const compatibleConcepts =
+    getCompatibleEntityTypeConcepts(
+      canonicalConcept
+    );
+
+
+  const canonicalMatch =
+    await EntityType.findOne({
+      worldId,
+
+      canonicalConcept: {
+        $in:
+          compatibleConcepts,
+      },
+    });
+
+
+  if (
+    canonicalMatch
+  ) {
+    return canonicalMatch;
+  }
+
+
+  // ==================================================
+  // 2. Legacy / User-created Type Name Fallback
+  //
+  // Do not use arbitrary fuzzy matching.
+  //
+  // Only reuse names that we explicitly know represent
+  // the requested semantic concept.
+  // ==================================================
+
+  const aliases =
+    getEntityTypeAliases(
+      canonicalConcept
+    );
+
+
+  if (
+    aliases.length ===
+    0
+  ) {
+    return null;
+  }
+
+
+  const entityTypes =
+    await EntityType.find({
+      worldId,
+
+      canonicalConcept:
+        null,
+    });
+
+
+  const aliasSet =
+    new Set(
+      aliases.map(
+        normalizeEntityTypeName
+      )
+    );
+
+
+  const matches =
+    entityTypes.filter(
+      (
+        entityType
+      ) =>
+        aliasSet.has(
+          normalizeEntityTypeName(
+            entityType.name
+          )
+        )
+    );
+
+
+  /*
+   * Only auto-bind an unambiguous legacy Entity Type.
+   */
+  if (
+    matches.length !==
+    1
+  ) {
+    return null;
+  }
+
+
+  const matchedType =
+    matches[0];
+
+
+  // ==================================================
+  // Upgrade Legacy Type
+  //
+  // Once Mimoria knows that this user-created type is
+  // semantically character/location/etc., persist that
+  // knowledge so future analysis no longer needs to guess.
+  // ==================================================
+
+  matchedType.canonicalConcept =
+    canonicalConcept;
+
+
+  await matchedType.save();
+
+
+  await bumpWorldCanonVersion(
+    worldId
+  );
+
+
+  return matchedType;
 }
 
 

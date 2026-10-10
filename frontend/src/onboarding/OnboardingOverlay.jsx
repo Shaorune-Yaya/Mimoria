@@ -648,6 +648,121 @@ export default function OnboardingOverlay() {
 
 
   // ====================================================
+  // Auto Scroll Tutorial Target Into View
+  //
+  // Some tutorial targets can exist correctly in the DOM
+  // but be outside the visible viewport.
+  //
+  // Smart Import is a good example:
+  // suggestion cards can appear far below the input area.
+  //
+  // When a new tutorial step begins, automatically scroll
+  // the real highlighted element into a comfortable visible
+  // position before the coach mark is positioned.
+  // ====================================================
+
+  useEffect(
+    () => {
+      if (
+        !active ||
+        !currentStep?.selector
+      ) {
+        return;
+      }
+
+
+      /*
+      * Do not continuously scroll while the target tracker
+      * is refreshing.
+      *
+      * We only want one automatic alignment when entering
+      * the tutorial step.
+      */
+      const timeoutId =
+        window.setTimeout(
+          () => {
+            const nextTarget =
+              findTarget(
+                currentStep.selector
+              );
+
+
+            if (
+              !nextTarget?.element
+            ) {
+              return;
+            }
+
+
+            const element =
+              nextTarget.element;
+
+
+            const rect =
+              element
+                .getBoundingClientRect();
+
+
+            /*
+            * Keep some breathing room for:
+            *
+            * - the top onboarding controls
+            * - the coach mark
+            * - large highlighted cards
+            */
+            const safeTop =
+              120;
+
+
+            const safeBottom =
+              window.innerHeight -
+              180;
+
+
+            const alreadyComfortablyVisible =
+              rect.top >=
+                safeTop &&
+              rect.bottom <=
+                safeBottom;
+
+
+            if (
+              alreadyComfortablyVisible
+            ) {
+              return;
+            }
+
+
+            element.scrollIntoView({
+              behavior:
+                "smooth",
+
+              block:
+                "center",
+
+              inline:
+                "nearest",
+            });
+          },
+          120
+        );
+
+
+      return () => {
+        window.clearTimeout(
+          timeoutId
+        );
+      };
+    },
+    [
+      active,
+      currentStep?.id,
+      currentStep?.selector,
+      location.pathname,
+    ]
+  );
+
+  // ====================================================
   // Measure Real Coachmark
   //
   // Do not rely on estimated height.

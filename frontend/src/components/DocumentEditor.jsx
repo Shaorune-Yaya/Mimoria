@@ -1278,13 +1278,19 @@ function DocumentEditor({
   // ====================================================
 
   return (
-    <div className="document-editor">
+      <div
+        className="document-editor"
+        data-onboarding="document-editor"
+      >
 
       {/* ==================================================
           Toolbar
           ================================================== */}
 
-      <div className="document-editor-toolbar">
+      <div
+        className="document-editor-toolbar"
+        data-onboarding="document-editor-toolbar"
+      >
 
         <div className="document-editor-toolbar-group">
 
@@ -1576,6 +1582,7 @@ function DocumentEditor({
 
       <div
         className="document-editor-scroll"
+        data-onboarding="document-editor-content"
         onBlurCapture={(
           event
         ) => {
@@ -1624,7 +1631,10 @@ function DocumentEditor({
           Save Status
           ================================================== */}
 
-      <footer className="document-editor-statusbar">
+      <footer
+        className="document-editor-statusbar"
+        data-onboarding="document-save-status"
+      >
 
         <div
           className={[

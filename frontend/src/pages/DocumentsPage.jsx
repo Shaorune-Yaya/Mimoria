@@ -30,6 +30,10 @@ import EmbeddedWorkspaceLayout from "../components/EmbeddedWorkspaceLayout";
 import DocumentEditor from "../components/DocumentEditor";
 
 import {
+  useOnboarding,
+} from "../onboarding/OnboardingContext";
+
+import {
   API_URL,
 } from "../config/api";
 
@@ -210,6 +214,11 @@ function DocumentTreeRow({
         }
         className={
           rowClassName
+        }
+        data-onboarding={
+          isSelected
+            ? "tutorial-document-tree-row"
+            : undefined
         }
         style={
           style
@@ -528,6 +537,13 @@ function DocumentsPage({
     t,
   } =
     useTranslation();
+
+  const {
+    currentStep,
+
+    nextStep,
+  } =
+    useOnboarding();
 
 
   const menuRef =
@@ -1540,8 +1556,17 @@ function DocumentsPage({
     );
 
 
+    const isTutorialStep =
+      currentStep?.id ===
+      "open-create-document";
+
+
     setDocumentTitle(
-      ""
+      isTutorialStep
+        ? t(
+            "onboarding.tutorialDocumentTitle"
+          )
+        : ""
     );
 
 
@@ -1595,6 +1620,90 @@ function DocumentsPage({
   }
 
 
+  // ====================================================
+  // Tutorial: Create Document Form Mounted
+  //
+  // Step 37 only completes after the actual document
+  // creation form has appeared.
+  // ====================================================
+
+  useEffect(
+    () => {
+      if (
+        !showCreateDocument ||
+        currentStep?.id !==
+          "open-create-document"
+      ) {
+        return;
+      }
+
+
+      let cancelled =
+        false;
+
+
+      let frameId =
+        null;
+
+
+      function waitForDocumentTitle() {
+        if (
+          cancelled
+        ) {
+          return;
+        }
+
+
+        const input =
+          document.querySelector(
+            '[data-onboarding="tutorial-document-title"]'
+          );
+
+
+        if (
+          input
+        ) {
+          nextStep();
+
+          return;
+        }
+
+
+        frameId =
+          window.requestAnimationFrame(
+            waitForDocumentTitle
+          );
+      }
+
+
+      frameId =
+        window.requestAnimationFrame(
+          waitForDocumentTitle
+        );
+
+
+      return () => {
+        cancelled =
+          true;
+
+
+        if (
+          frameId !==
+          null
+        ) {
+          window.cancelAnimationFrame(
+            frameId
+          );
+        }
+      };
+    },
+    [
+      showCreateDocument,
+      currentStep?.id,
+      nextStep,
+    ]
+  );
+
   function closeCreateDocument() {
     setShowCreateDocument(
       false
@@ -1620,6 +1729,11 @@ function DocumentsPage({
 
     const title =
       documentTitle.trim();
+
+
+    const isTutorialCreate =
+      currentStep?.id ===
+      "confirm-create-document";
 
 
     if (
@@ -1688,6 +1802,13 @@ function DocumentsPage({
       await refreshTree(
         newDocument._id
       );
+
+
+      if (
+        isTutorialCreate
+      ) {
+        nextStep();
+      }
     } catch (
       createError
     ) {
@@ -2351,7 +2472,10 @@ function DocumentsPage({
         handleDragCancel
       }
     >
-      <aside className="entity-tree-sidebar documents-tree-sidebar">
+      <aside
+        className="entity-tree-sidebar documents-tree-sidebar"
+        data-onboarding="documents-tree"
+      >
         <div className="entity-tree-header">
           <span>
             {t(
@@ -2676,7 +2800,10 @@ function DocumentsPage({
           !embedded
         }
       >
-        <div className="documents-page-header">
+        <div
+          className="documents-page-header"
+          data-onboarding="documents-page-header"
+        >
           <div>
             <h1>
               {showCreateDocument
@@ -2712,6 +2839,7 @@ function DocumentsPage({
               <button
                 type="button"
                 className="create-button"
+                data-onboarding="new-document-button"
                 onClick={() =>
                   openCreateDocument(
                     null
@@ -2741,7 +2869,10 @@ function DocumentsPage({
 
 
         {showCreateDocument && (
-          <div className="create-panel documents-create-panel">
+          <div
+            className="create-panel documents-create-panel"
+            data-onboarding="create-document-panel"
+          >
             <form
               onSubmit={
                 createDocument
@@ -2761,6 +2892,7 @@ function DocumentsPage({
               <input
                 autoFocus
                 type="text"
+                data-onboarding="tutorial-document-title"
                 value={
                   documentTitle
                 }
@@ -2804,6 +2936,7 @@ function DocumentsPage({
                 <button
                   type="submit"
                   className="save-button"
+                  data-onboarding="confirm-create-document"
                   disabled={
                     !documentTitle.trim()
                   }
@@ -2820,7 +2953,10 @@ function DocumentsPage({
 
         {!showCreateDocument &&
           selectedDocument && (
-            <div className="document-preview">
+            <div
+              className="document-preview"
+              data-onboarding="document-editor-area"
+            >
               <DocumentEditor
                 key={
                   selectedDocument._id

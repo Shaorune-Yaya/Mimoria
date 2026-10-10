@@ -22,7 +22,7 @@ const PRESENTATION = {
         "Character",
 
       "zh-CN":
-        "人物",
+        "角色",
     },
   },
 
@@ -36,10 +36,36 @@ const PRESENTATION = {
         "Person",
 
       "zh-CN":
-        "人物",
+        "角色",
     },
   },
 
+  "entityType.profession": {
+    icon:
+      "💼",
+
+    labels: {
+      en:
+        "Profession",
+
+      "zh-CN":
+        "职业",
+    },
+  },
+
+
+  "entityType.occupation": {
+    icon:
+      "💼",
+
+    labels: {
+      en:
+        "Occupation",
+
+      "zh-CN":
+        "职业",
+    },
+  },
 
   "entityType.family": {
     icon:
@@ -573,6 +599,126 @@ const PRESENTATION = {
   },
 };
 
+// ======================================================
+// Localized Fallback Labels
+//
+// The lexicon contains more semantic EntityType concepts
+// than the curated PRESENTATION table.
+//
+// Known concepts must still remain localized even when a
+// dedicated presentation entry has not yet been added.
+//
+// This prevents internal semantic IDs such as:
+//
+// entityType.river
+//
+// from appearing to Chinese users as:
+//
+// River
+// ======================================================
+
+const FALLBACK_LABELS = {
+  "zh-CN": {
+    "entityType.race":
+      "种族",
+
+    "entityType.species":
+      "物种",
+
+    "entityType.creature":
+      "生物",
+
+    "entityType.monster":
+      "怪物",
+
+    "entityType.deity":
+      "神祇",
+
+    "entityType.spirit":
+      "灵体",
+
+    "entityType.province":
+      "省份",
+
+    "entityType.continent":
+      "大陆",
+
+    "entityType.world":
+      "世界",
+
+    "entityType.dimension":
+      "位面",
+
+    "entityType.island":
+      "岛屿",
+
+    "entityType.mountain":
+      "山脉",
+
+    "entityType.forest":
+      "森林",
+
+    "entityType.river":
+      "河流",
+
+    "entityType.lake":
+      "湖泊",
+
+    "entityType.ocean":
+      "海洋",
+
+    "entityType.desert":
+      "沙漠",
+
+    "entityType.building":
+      "建筑",
+
+    "entityType.ruin":
+      "遗迹",
+
+    "entityType.dungeon":
+      "地下城",
+
+    "entityType.relic":
+      "遗物",
+
+    "entityType.event":
+      "事件",
+
+    "entityType.war":
+      "战争",
+
+    "entityType.battle":
+      "战役",
+
+    "entityType.disaster":
+      "灾难",
+
+    "entityType.era":
+      "时代",
+
+    "entityType.language":
+      "语言",
+
+    "entityType.culture":
+      "文化",
+
+    "entityType.technology":
+      "技术",
+
+    "entityType.magic":
+      "魔法",
+
+    "entityType.spell":
+      "法术",
+
+    "entityType.ability":
+      "能力",
+
+    "entityType.skill":
+      "技能",
+  },
+};
 
 // ======================================================
 // Helpers
@@ -603,8 +749,30 @@ function normalizeLocale(
 
 
 function fallbackLabel(
-  conceptId
+  conceptId,
+  locale = "en"
 ) {
+  const normalizedLocale =
+    normalizeLocale(
+      locale
+    );
+
+
+  const localizedLabel =
+    FALLBACK_LABELS[
+      normalizedLocale
+    ]?.[
+      conceptId
+    ];
+
+
+  if (
+    localizedLabel
+  ) {
+    return localizedLabel;
+  }
+
+
   const raw =
     String(
       conceptId || ""
@@ -618,7 +786,10 @@ function fallbackLabel(
   if (
     !raw
   ) {
-    return "Entity Type";
+    return normalizedLocale ===
+      "zh-CN"
+      ? "实体类型"
+      : "Entity Type";
   }
 
 
@@ -662,7 +833,8 @@ function getEntityTypePresentation(
 
       label:
         fallbackLabel(
-          conceptId
+          conceptId,
+          normalizedLocale
         ),
     };
   }
@@ -685,7 +857,8 @@ function getEntityTypePresentation(
         .labels
         ?.en ||
       fallbackLabel(
-        conceptId
+        conceptId,
+        normalizedLocale
       ),
   };
 }

@@ -12,6 +12,23 @@
 // This is deterministic discourse resolution.
 // ======================================================
 
+const {
+  isGrammaticalFragment,
+} = require(
+  "./candidateQualityScoring"
+);
+
+const {
+  createMention,
+
+  createMentionMemory,
+
+  rememberMention,
+
+  rankPronounAntecedents,
+} = require(
+  "./mentionScoring"
+);
 
 const ENGLISH_PRONOUNS =
   new Set([
@@ -144,6 +161,66 @@ function isPronoun(
   );
 }
 
+// ======================================================
+// Subject Mention Validation
+//
+// A grammatical fragment must not become a discourse
+// entity.
+//
+// Examples:
+//
+// 经常前往北境
+// ↑
+//
+// "经常" is an adverb, not the subject.
+//
+// 现在住在河谷城
+//
+// "现在" is temporal context, not an Entity.
+//
+// The resolver should treat these as "missing subject"
+// and inherit the real discourse subject instead.
+// ======================================================
+
+function isValidExplicitSubject(
+  value,
+  locale
+) {
+  if (
+    !value
+  ) {
+    return false;
+  }
+
+
+  /*
+   * Pronouns are valid grammatical subjects.
+   *
+   * They will be resolved separately.
+   */
+  if (
+    isPronoun(
+      value,
+      locale
+    )
+  ) {
+    return true;
+  }
+
+
+  if (
+    isGrammaticalFragment({
+      value,
+
+      locale,
+    })
+  ) {
+    return false;
+  }
+
+
+  return true;
+}
 
 // ======================================================
 // Clause Lookup
@@ -153,8 +230,29 @@ function getClauseForCandidate(
   candidate,
   clauses
 ) {
-  return clauses.find(
-    (clause) =>
+  return (
+    clauses.find(
+      (
+        clause
+      ) =>
+        candidate.start >=
+          clause.start &&
+        candidate.start <=
+          clause.end
+    ) ||
+    null
+  );
+}
+
+
+function getClauseIndexForCandidate(
+  candidate,
+  clauses
+) {
+  return clauses.findIndex(
+    (
+      clause
+    ) =>
       candidate.start >=
         clause.start &&
       candidate.start <=
@@ -173,14 +271,22 @@ function resolveCandidateContexts({
   locale,
 }) {
   const sorted =
-    [...candidates]
+    [
+      ...candidates,
+    ]
       .sort(
         (
           a,
           b
         ) =>
-          a.start -
-          b.start
+          (
+            a.start ??
+            0
+          ) -
+          (
+            b.start ??
+            0
+          )
       );
 
 
@@ -194,6 +300,10 @@ function resolveCandidateContexts({
 
   let clauseSubject =
     null;
+
+
+  const memory =
+    createMentionMemory();
 
 
   const results =
@@ -211,6 +321,13 @@ function resolveCandidateContexts({
       );
 
 
+    const clauseIndex =
+      getClauseIndexForCandidate(
+        candidate,
+        clauses
+      );
+
+
     if (
       clause !==
       currentClause
@@ -223,19 +340,46 @@ function resolveCandidateContexts({
     }
 
 
-    let subject =
+    // ==================================================
+    // Preserve Original Grammatical Subject
+    // ==================================================
+
+    const originalSubject =
       normalizeSubject(
         candidate.subjectHint,
         locale
       );
 
 
-    /*
-     * Explicit non-pronoun subject.
-     */
+    const originalSubjectWasPronoun =
+      Boolean(
+        originalSubject &&
+        isPronoun(
+          originalSubject,
+          locale
+        )
+      );
+
+
+    let subject =
+      originalSubject;
+
+
+    let pronounResolution =
+      null;
+
+
+    // ==================================================
+    // Explicit Named Subject
+    // ==================================================
+
     if (
       subject &&
       !isPronoun(
+        subject,
+        locale
+      ) &&
+      isValidExplicitSubject(
         subject,
         locale
       )
@@ -247,16 +391,19 @@ function resolveCandidateContexts({
         subject;
     }
 
-
     /*
-     * Pronoun:
-     *
-     * Her body type...
-     * 她的主色...
-     */
+    * Grammatical material was accidentally extracted as a
+    * subject.
+    *
+    * Example:
+    *
+    * 经常前往北境
+    *
+    * "经常" must not replace the current discourse subject.
+    */
     else if (
       subject &&
-      isPronoun(
+      !isValidExplicitSubject(
         subject,
         locale
       )
@@ -264,18 +411,82 @@ function resolveCandidateContexts({
       subject =
         clauseSubject ||
         discourseSubject ||
-        subject;
+        null;
+    }
+
+    // ==================================================
+    // Pronoun
+    //
+    // New:
+    //
+    // candidate-ranking resolver first.
+    //
+    // Old:
+    //
+    // clauseSubject / discourseSubject remains as safe
+    // fallback when mention memory has insufficient
+    // evidence.
+    // ==================================================
+
+    else if (
+      subject &&
+      isPronoun(
+        subject,
+        locale
+      )
+    ) {
+      pronounResolution =
+        rankPronounAntecedents({
+          memory,
+
+          currentStart:
+            candidate.start ??
+            null,
+
+          currentClauseIndex:
+            clauseIndex >=
+              0
+              ? clauseIndex
+              : null,
+
+          discourseSubject,
+        });
+
+
+      if (
+        pronounResolution
+          .status ===
+        "resolved"
+      ) {
+        subject =
+          pronounResolution
+            .antecedent;
+      } else {
+        /*
+         * Do NOT aggressively guess when ranking says the
+         * antecedent is ambiguous.
+         *
+         * If there is a clear clause-local subject we can
+         * still use it.
+         */
+        subject =
+          clauseSubject ||
+          (
+            pronounResolution
+              .status ===
+              "unresolved"
+              ? discourseSubject
+              : null
+          ) ||
+          subject;
+      }
     }
 
 
-    /*
-     * No subject at all:
-     *
-     * Alice is 24...
-     * ...was born in New York
-     *
-     * second extractor can inherit Alice.
-     */
+    // ==================================================
+    // Missing Subject
+    // ==================================================
+
     else {
       subject =
         clauseSubject ||
@@ -284,6 +495,10 @@ function resolveCandidateContexts({
     }
 
 
+    // ==================================================
+    // Update Discourse Subject
+    // ==================================================
+
     if (
       subject &&
       !isPronoun(
@@ -294,20 +509,44 @@ function resolveCandidateContexts({
       clauseSubject =
         subject;
 
+
       discourseSubject =
         subject;
     }
 
 
-    results.push({
+    // ==================================================
+    // Object Mention
+    // ==================================================
+
+    const object =
+      normalizeSubject(
+        candidate.objectHint,
+        locale
+      );
+
+
+    // ==================================================
+    // Build Resolved Candidate
+    // ==================================================
+
+    const resolvedCandidate = {
       ...candidate,
 
       subjectHint:
         subject,
 
       context: {
-        ...(candidate.context ||
-          {}),
+        ...(
+          candidate.context ||
+          {}
+        ),
+
+        clauseIndex:
+          clauseIndex >=
+            0
+            ? clauseIndex
+            : null,
 
         subjectInherited:
           candidate.subjectHint !==
@@ -315,8 +554,147 @@ function resolveCandidateContexts({
 
         discourseSubject:
           discourseSubject,
+
+        originalSubject,
+
+        originalSubjectWasPronoun,
+
+        resolvedPronoun:
+          originalSubjectWasPronoun
+            ? originalSubject
+            : null,
+
+        pronounResolution:
+          originalSubjectWasPronoun
+            ? pronounResolution
+            : null,
+
+        pronounResolutionStatus:
+          originalSubjectWasPronoun
+            ? (
+                pronounResolution
+                  ?.status ||
+                "unresolved"
+              )
+            : null,
+
+        pronounResolutionConfidence:
+          originalSubjectWasPronoun
+            ? (
+                pronounResolution
+                  ?.confidence ||
+                0
+              )
+            : null,
+
+        pronounResolutionMargin:
+          originalSubjectWasPronoun
+            ? (
+                pronounResolution
+                  ?.margin ||
+                0
+              )
+            : null,
       },
-    });
+    };
+
+
+    results.push(
+      resolvedCandidate
+    );
+
+
+    // ==================================================
+    // Update Mention Memory AFTER Resolution
+    //
+    // Important:
+    //
+    // We must not put the current pronoun into memory
+    // before trying to resolve that pronoun.
+    // ==================================================
+
+    if (
+      subject &&
+      !isPronoun(
+        subject,
+        locale
+      )
+    ) {
+      const mention =
+        createMention({
+          name:
+            subject,
+
+          start:
+            candidate.start ??
+            null,
+
+          end:
+            candidate.end ??
+            null,
+
+          clauseIndex:
+            clauseIndex >=
+              0
+              ? clauseIndex
+              : null,
+
+          role:
+            "subject",
+
+          source:
+            candidate.candidateType ||
+            null,
+        });
+
+
+      rememberMention(
+        memory,
+        mention
+      );
+    }
+
+
+    if (
+      object &&
+      !isPronoun(
+        object,
+        locale
+      )
+    ) {
+      const mention =
+        createMention({
+          name:
+            object,
+
+          start:
+            candidate.start ??
+            null,
+
+          end:
+            candidate.end ??
+            null,
+
+          clauseIndex:
+            clauseIndex >=
+              0
+              ? clauseIndex
+              : null,
+
+          role:
+            "object",
+
+          source:
+            candidate.candidateType ||
+            null,
+        });
+
+
+      rememberMention(
+        memory,
+        mention
+      );
+    }
   }
 
 

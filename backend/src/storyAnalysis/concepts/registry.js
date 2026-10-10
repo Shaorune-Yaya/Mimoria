@@ -675,7 +675,29 @@ const CONCEPTS = {
 
   "field.occupation": {
     kind: "field",
-    valueType: "text",
+
+    valueType:
+      "text",
+
+    /*
+    * Semantic Entity Promotion
+    *
+    * The field itself may remain ordinary text so existing
+    * user schemas stay compatible.
+    *
+    * However, when Smart Import sees:
+    *
+    * Alice is an alchemist.
+    *
+    * it may additionally understand:
+    *
+    * "Alchemist" is a reusable Profession entity.
+    */
+    promoteValueToEntityType:
+      "entityType.profession",
+
+    promotionConfidence:
+      0.88,
   },
 
   "field.rank": {

@@ -12,6 +12,10 @@ import {
   useParams,
 } from "react-router-dom";
 
+import {
+  useOnboarding,
+} from "../onboarding/OnboardingContext";
+
 import WorldLayout from "../components/WorldLayout";
 import EmbeddedWorkspaceLayout from "../components/EmbeddedWorkspaceLayout";
 import StorySuggestionsPanel from "../components/StorySuggestionsPanel";
@@ -70,6 +74,15 @@ export default function SmartImportPage({
     i18n,
   } =
     useTranslation();
+
+  const {
+    active,
+
+    currentStep,
+
+    nextStep,
+  } =
+    useOnboarding();
 
 
   const [
@@ -368,6 +381,47 @@ export default function SmartImportPage({
     }
   }
 
+  // ====================================================
+  // Tutorial: Prepare Smart Import Example
+  //
+  // When the tutorial reaches the input step, provide a
+  // short setting-style example automatically.
+  //
+  // This intentionally uses profile / reference-style text,
+  // not narrative prose.
+  // ====================================================
+
+  useEffect(
+    () => {
+      if (
+        !active ||
+        currentStep?.id !==
+          "smart-import-input"
+      ) {
+        return;
+      }
+
+
+      if (
+        text.trim()
+      ) {
+        return;
+      }
+
+
+      setText(
+        t(
+          "onboarding.smartImportExampleText"
+        )
+      );
+    },
+    [
+      active,
+      currentStep?.id,
+      text,
+      t,
+    ]
+  );
 
   // ====================================================
   // Analyze
@@ -497,6 +551,19 @@ export default function SmartImportPage({
       setAnalysisState(
         "complete"
       );
+
+
+      if (
+        currentStep?.id ===
+        "smart-import-analyze"
+      ) {
+        window.setTimeout(
+          () => {
+            nextStep();
+          },
+          80
+        );
+      }
     } catch (
       error
     ) {
@@ -530,38 +597,121 @@ export default function SmartImportPage({
   // ====================================================
 
   function replaceCandidate(
-    nextCandidate
+  nextCandidate
+) {
+  const nextId =
+    getCandidateId(
+      nextCandidate
+    );
+
+
+  if (
+    !nextId
   ) {
-    const nextId =
-      getCandidateId(
-        nextCandidate
-      );
+    return;
+  }
 
 
-    if (
-      !nextId
-    ) {
-      return;
-    }
+  setCandidates(
+    (
+      current
+    ) =>
+      current.map(
+        (
+          candidate
+        ) =>
+          getCandidateId(
+            candidate
+          ) ===
+          nextId
+            ? nextCandidate
+            : candidate
+      )
+  );
+}
 
 
-    setCandidates(
-      (
-        current
-      ) =>
-        current.map(
+// ====================================================
+// Replace Multiple Candidates
+//
+// Used when one edit also updates related Smart Import
+// suggestions, such as renaming one draft Entity and
+// synchronizing all field/relation suggestions that
+// reference the same draft.
+// ====================================================
+
+function replaceCandidates(
+  nextCandidates
+) {
+  const normalizedCandidates =
+    Array.isArray(
+      nextCandidates
+    )
+      ? nextCandidates.filter(
+          Boolean
+        )
+      : [];
+
+
+  if (
+    normalizedCandidates.length ===
+    0
+  ) {
+    return;
+  }
+
+
+  const nextCandidateMap =
+    new Map(
+      normalizedCandidates
+        .map(
           (
             candidate
-          ) =>
+          ) => [
             getCandidateId(
               candidate
-            ) ===
-            nextId
-              ? nextCandidate
-              : candidate
+            ),
+
+            candidate,
+          ]
+        )
+        .filter(
+          (
+            [
+              candidateId,
+            ]
+          ) =>
+            Boolean(
+              candidateId
+            )
         )
     );
-  }
+
+
+  setCandidates(
+    (
+      current
+    ) =>
+      current.map(
+        (
+          candidate
+        ) => {
+          const candidateId =
+            getCandidateId(
+              candidate
+            );
+
+
+          return (
+            nextCandidateMap.get(
+              candidateId
+            ) ||
+            candidate
+          );
+        }
+      )
+  );
+}
 
 
   // ====================================================
@@ -643,24 +793,50 @@ export default function SmartImportPage({
       }
 
 
+      replaceCandidates([
+        data.candidate,
+
+        ...(
+          Array.isArray(
+            data.relatedCandidates
+          )
+            ? data.relatedCandidates
+            : []
+        ),
+      ]);
+
+
+      /*
+      * Applying a suggestion can create or modify an
+      * EntityType, so refresh the type list used by the
+      * create-entity controls.
+      */
+      await refreshEntityTypes();
+
+
+      /*
+      * During onboarding, do not advance merely because the
+      * user clicked Apply.
+      *
+      * Advance only after the real Smart Import API action
+      * has successfully completed.
+      */
       if (
-        data.candidate
+        active &&
+        currentStep?.id ===
+          "smart-import-apply"
       ) {
-        replaceCandidate(
-          data.candidate
+        window.setTimeout(
+          () => {
+            nextStep();
+          },
+          100
         );
       }
 
 
-      /*
-       * Applying a suggestion can create or modify an
-       * EntityType, so refresh the type list used by the
-       * create-entity controls.
-       */
-      await refreshEntityTypes();
-
-
       return true;
+
     } catch (
       error
     ) {
@@ -769,12 +945,28 @@ export default function SmartImportPage({
         );
       }
 
+      replaceCandidates([
+        data.candidate,
+
+        ...(
+          Array.isArray(
+            data.relatedCandidates
+          )
+            ? data.relatedCandidates
+            : []
+        ),
+      ]);
 
       if (
-        data.candidate
+        active &&
+        currentStep?.id ===
+          "smart-import-save-edit"
       ) {
-        replaceCandidate(
-          data.candidate
+        window.setTimeout(
+          () => {
+            nextStep();
+          },
+          100
         );
       }
 
@@ -877,11 +1069,39 @@ export default function SmartImportPage({
       }
 
 
+      replaceCandidates([
+        data.candidate,
+
+        ...(
+          Array.isArray(
+            data.relatedCandidates
+          )
+            ? data.relatedCandidates
+            : []
+        ),
+      ]);
+
+
+      /*
+      * Tutorial:
+      *
+      * Do not advance just because the user clicked the
+      * Ignore button.
+      *
+      * Only advance after the actual Smart Import API
+      * confirms that the suggestion was successfully
+      * ignored.
+      */
       if (
-        data.candidate
+        active &&
+        currentStep?.id ===
+          "smart-import-ignore"
       ) {
-        replaceCandidate(
-          data.candidate
+        window.setTimeout(
+          () => {
+            nextStep();
+          },
+          100
         );
       }
 
@@ -1053,6 +1273,7 @@ export default function SmartImportPage({
     >
       <div
         className="smart-import-page"
+        data-onboarding="smart-import-page"
         style={{
           width:
             "100%",
@@ -1071,6 +1292,7 @@ export default function SmartImportPage({
         }}
       >
         <div
+          data-onboarding="smart-import-introduction"
           style={{
             marginBottom:
               "22px",
@@ -1091,26 +1313,65 @@ export default function SmartImportPage({
             )}
           </h1>
 
-          <p
-            style={{
-              margin:
-                0,
+          <>
+            <p
+              style={{
+                margin:
+                  0,
 
-              opacity:
-                0.75,
+                opacity:
+                  0.75,
 
-              lineHeight:
-                1.6,
-            }}
-          >
-            {t(
-              "smartImport.description",
-              {
-                defaultValue:
-                  "Paste character profiles, locations, organizations, or other structured world notes. Mimoria will turn recognized information into suggestions that you review before anything changes.",
-              }
-            )}
-          </p>
+                lineHeight:
+                  1.6,
+              }}
+            >
+              {t(
+                "smartImport.description",
+                {
+                  defaultValue:
+                    "Paste character profiles, locations, organizations, or other structured world notes. Mimoria will turn recognized information into suggestions that you review before anything changes.",
+                }
+              )}
+            </p>
+
+
+            <div
+              style={{
+                marginTop:
+                  "10px",
+
+                padding:
+                  "10px 12px",
+
+                border:
+                  "1px solid var(--color-border)",
+
+                borderRadius:
+                  "8px",
+
+                background:
+                  "rgba(255,255,255,0.025)",
+
+                color:
+                  "var(--color-text-dim)",
+
+                fontSize:
+                  "12px",
+
+                lineHeight:
+                  1.6,
+              }}
+            >
+              {t(
+                "smartImport.inputHint",
+                {
+                  defaultValue:
+                    "Smart Import works best with profile-style and setting-reference text. Dialogue-heavy scenes, everyday interactions, and continuous narrative prose are not currently recommended.",
+                }
+              )}
+            </div>
+          </>
         </div>
 
 
@@ -1162,6 +1423,7 @@ export default function SmartImportPage({
 
 
             <textarea
+              data-onboarding="smart-import-input"
               value={
                 text
               }
@@ -1296,6 +1558,7 @@ export default function SmartImportPage({
               <button
                 type="button"
                 className="create-button"
+                data-onboarding="smart-import-analyze-button"
                 disabled={
                   analysisState ===
                     "analyzing" ||
@@ -1329,6 +1592,7 @@ export default function SmartImportPage({
 
         {analysisMeta && (
           <div
+            data-onboarding="smart-import-analysis-summary"
             style={{
               display:
                 "flex",
@@ -1378,70 +1642,169 @@ export default function SmartImportPage({
         )}
 
 
-        <StorySuggestionsPanel
-          candidates={
-            candidates
-          }
-          entityTypes={
-            entityTypes
-          }
-          analysisState={
-            analysisState
-          }
-          analysisError={
-            analysisError
-          }
-          actionCandidateId={
-            actionCandidateId
-          }
-          language={
-            i18n.language
-          }
-          t={
-            t
-          }
-          title={t(
-            "smartImport.suggestionsTitle",
-            {
-              defaultValue:
-                "Import Suggestions",
+        <div
+          data-onboarding="smart-import-suggestions"
+        >
+          <StorySuggestionsPanel
+            candidates={
+              candidates
             }
-          )}
-          description={t(
-            "smartImport.suggestionsDescription",
-            {
-              defaultValue:
-                "Review each recognized change before applying it to this world's Canon.",
+
+            entityTypes={
+              entityTypes
             }
-          )}
-          emptyText={t(
-            "smartImport.suggestionsEmpty",
-            {
-              defaultValue:
-                "No new structured changes were found.",
+
+            analysisState={
+              analysisState
             }
-          )}
-          getConceptLabel={
-            getConceptLabel
-          }
-          getSuggestionKindLabel={
-            getSuggestionKindLabel
-          }
-          onApply={
-            applySuggestion
-          }
-          onIgnore={
-            ignoreSuggestion
-          }
-          onEdit={
-            editSuggestion
-          }
-          onClearError={() =>
-            setAnalysisError(
-              ""
-            )
-          }
-        />
+
+            analysisError={
+              analysisError
+            }
+
+            actionCandidateId={
+              actionCandidateId
+            }
+
+            language={
+              i18n.language
+            }
+
+            t={
+              t
+            }
+
+            title={t(
+              "smartImport.suggestionsTitle",
+              {
+                defaultValue:
+                  "Import Suggestions",
+              }
+            )}
+
+            description={t(
+              "smartImport.suggestionsDescription",
+              {
+                defaultValue:
+                  "Review each recognized change before applying it to this world's Canon.",
+              }
+            )}
+
+            emptyText={t(
+              "smartImport.suggestionsEmpty",
+              {
+                defaultValue:
+                  "No new structured changes were found.",
+              }
+            )}
+
+            getConceptLabel={
+              getConceptLabel
+            }
+
+            getSuggestionKindLabel={
+              getSuggestionKindLabel
+            }
+
+            onApply={
+              applySuggestion
+            }
+
+            onIgnore={
+              ignoreSuggestion
+            }
+
+            onEdit={
+              editSuggestion
+            }
+            
+            onTutorialEditOpened={() => {
+              if (
+                !active ||
+                currentStep?.id !==
+                  "smart-import-edit-suggestion"
+              ) {
+                return;
+              }
+
+
+              nextStep();
+            }}
+
+            onTutorialEditNameChange={(
+              nextValue
+            ) => {
+              if (
+                !active ||
+                currentStep?.id !==
+                  "smart-import-edit-name"
+              ) {
+                return;
+              }
+
+
+              const normalizedValue =
+                String(
+                  nextValue ||
+                  ""
+                )
+                  .trim();
+
+
+              const expectedName =
+                t(
+                  "onboarding.smartImportCorrectEntityName"
+                );
+
+
+              if (
+                normalizedValue ===
+                expectedName
+              ) {
+                window.setTimeout(
+                  () => {
+                    nextStep();
+                  },
+                  120
+                );
+              }
+            }}
+
+            onTutorialManualTypeChange={(
+              candidate,
+              entityTypeId
+            ) => {
+              if (
+                !active ||
+                currentStep?.id !==
+                  "smart-import-manual-type"
+              ) {
+                return;
+              }
+
+
+              if (
+                !entityTypeId
+              ) {
+                return;
+              }
+
+
+              window.setTimeout(
+                () => {
+                  nextStep();
+                },
+                100
+              );
+            }}
+
+            onClearError={() =>
+              setAnalysisError(
+                ""
+              )
+            }
+          />
+        </div>
       </div>
     </LayoutComponent>
   );

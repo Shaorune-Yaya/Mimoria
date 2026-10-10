@@ -5,6 +5,19 @@ const {
 );
 
 
+const {
+  PRESENTATION,
+} = require(
+  "../concepts/entityTypePresentation"
+);
+
+
+const zhEntityTypeLexicon =
+  require(
+    "../lexicons/zh-CN/entityTypes.json"
+  );
+
+
 // ======================================================
 // Normalization
 // ======================================================
@@ -46,6 +59,195 @@ function getEntityTypeId(
     : null;
 }
 
+// ======================================================
+// EntityType Semantic Name Matching
+//
+// Existing user-created EntityTypes do not necessarily
+// have canonicalConcept yet.
+//
+// Example:
+//
+// name:
+//   "角色"
+//
+// canonicalConcept:
+//   null
+//
+// We should still understand:
+//
+// "角色"
+// -> entityType.character
+//
+// Canonical bindings always win. Human-name matching is
+// only a fallback.
+// ======================================================
+
+function normalizeEntityTypeName(
+  value
+) {
+  return String(
+    value ||
+    ""
+  )
+    .normalize(
+      "NFKC"
+    )
+    .trim()
+    .toLowerCase()
+    .replace(
+      /\s+/gu,
+      ""
+    );
+}
+
+
+function getLexiconAliasValues(
+  entry
+) {
+  if (
+    !entry
+  ) {
+    return [];
+  }
+
+
+  const aliases =
+    entry.aliases ||
+    {};
+
+
+  return [
+    ...(
+      aliases.strong ||
+      []
+    ),
+
+    ...(
+      aliases.normal ||
+      []
+    ),
+
+    ...(
+      aliases.weak ||
+      []
+    ),
+  ]
+    .map(
+      normalizeEntityTypeName
+    )
+    .filter(
+      Boolean
+    );
+}
+
+
+function inferEntityTypeConceptFromName(
+  entityType
+) {
+  const normalizedName =
+    normalizeEntityTypeName(
+      entityType?.name
+    );
+
+
+  if (
+    !normalizedName
+  ) {
+    return null;
+  }
+
+
+  // ====================================================
+  // 1. Presentation labels
+  //
+  // Examples:
+  //
+  // Character
+  // 人物
+  // Organization
+  // 组织
+  // ====================================================
+
+  for (
+    const [
+      conceptId,
+      presentation,
+    ] of Object.entries(
+      PRESENTATION ||
+      {}
+    )
+  ) {
+    const labels =
+      Object.values(
+        presentation
+          ?.labels ||
+        {}
+      )
+        .map(
+          normalizeEntityTypeName
+        )
+        .filter(
+          Boolean
+        );
+
+
+    if (
+      labels.includes(
+        normalizedName
+      )
+    ) {
+      return conceptId;
+    }
+  }
+
+
+  // ====================================================
+  // 2. EntityType lexicon aliases
+  //
+  // Examples:
+  //
+  // 角色
+  // 人物
+  // 角色档案
+  //
+  // -> entityType.character
+  // ====================================================
+
+  const entries =
+    Array.isArray(
+      zhEntityTypeLexicon
+        ?.entries
+    )
+      ? zhEntityTypeLexicon
+          .entries
+      : [];
+
+
+  for (
+    const entry of
+    entries
+  ) {
+    const aliases =
+      getLexiconAliasValues(
+        entry
+      );
+
+
+    if (
+      aliases.includes(
+        normalizedName
+      )
+    ) {
+      return (
+        entry.conceptId ||
+        null
+      );
+    }
+  }
+
+
+  return null;
+}
 
 function getEntityTypeConcept({
   entityType,
@@ -56,6 +258,10 @@ function getEntityTypeConcept({
       entityType
     );
 
+
+  // ====================================================
+  // 1. Explicit external semantic map
+  // ====================================================
 
   if (
     entityTypeId &&
@@ -69,10 +275,28 @@ function getEntityTypeConcept({
   }
 
 
-  return (
+  // ====================================================
+  // 2. Canonical binding stored on EntityType
+  // ====================================================
+
+  if (
     entityType
-      ?.canonicalConcept ||
-    null
+      ?.canonicalConcept
+  ) {
+    return entityType
+      .canonicalConcept;
+  }
+
+
+  // ====================================================
+  // 3. Human-readable EntityType name fallback
+  //
+  // Important for older / user-created schemas which were
+  // created before canonicalConcept existed.
+  // ====================================================
+
+  return inferEntityTypeConceptFromName(
+    entityType
   );
 }
 

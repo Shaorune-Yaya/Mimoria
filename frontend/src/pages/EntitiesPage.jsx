@@ -2643,9 +2643,13 @@ function EntitiesPage({
     closeContextMenu();
 
 
-    if (type) {
+    if (
+      type
+    ) {
       type.fields.forEach(
-        (field) => {
+        (
+          field
+        ) => {
           if (
             field.type ===
             "entity-reference"
@@ -2673,6 +2677,112 @@ function EntitiesPage({
     }
   }
 
+  // ====================================================
+  // Tutorial: Wait For Edit Form
+  //
+  // Do not advance from Step 26 until the real edit panel
+  // and the tutorial custom field have actually mounted.
+  //
+  // This avoids a race where React has changed tutorial
+  // state to Step 27 before the edit form is visible.
+  // ====================================================
+
+  useEffect(
+    () => {
+      if (
+        !isEditingEntity ||
+        currentStep?.id !==
+          "open-edit-tutorial-entity"
+      ) {
+        return;
+      }
+
+
+      let cancelled =
+        false;
+
+
+      let frameId =
+        null;
+
+
+      let attempts =
+        0;
+
+
+      function waitForTutorialEditForm() {
+        if (
+          cancelled
+        ) {
+          return;
+        }
+
+
+        const panel =
+          document.querySelector(
+            '[data-onboarding="tutorial-entity-edit-panel"]'
+          );
+
+
+        const field =
+          document.querySelector(
+            '[data-onboarding="tutorial-entity-edit-field"]'
+          );
+
+
+        if (
+          panel &&
+          field
+        ) {
+          nextStep();
+
+          return;
+        }
+
+
+        attempts +=
+          1;
+
+
+        if (
+          attempts <
+          120
+        ) {
+          frameId =
+            window.requestAnimationFrame(
+              waitForTutorialEditForm
+            );
+        }
+      }
+
+
+      frameId =
+        window.requestAnimationFrame(
+          waitForTutorialEditForm
+        );
+
+
+      return () => {
+        cancelled =
+          true;
+
+
+        if (
+          frameId !==
+          null
+        ) {
+          window.cancelAnimationFrame(
+            frameId
+          );
+        }
+      };
+    },
+    [
+      isEditingEntity,
+      currentStep?.id,
+      nextStep,
+    ]
+  );
 
   function cancelEditEntity() {
     setIsEditingEntity(
@@ -3213,6 +3323,7 @@ function EntitiesPage({
         explorerSidebarRef
       }
       className="entity-tree-sidebar"
+      data-onboarding="entity-resource-tree"
       onScroll={
         handleExplorerScroll
       }
